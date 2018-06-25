@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 
 namespace Gomoku
 {
@@ -12,46 +9,74 @@ namespace Gomoku
         public readonly int Height;
         public readonly int Width;
         public readonly Tile[,] Tiles;
-        public readonly List<Piece> Pieces;
+        public readonly List<Player> Players;
         private int _turn;
+        private bool _isGameOver;
+
+        public static readonly int WINPIECES = 5;
+
         public int Turn
         {
             get => _turn;
             set
             {
-                _turn = Turn;
-                TurnChanged?.Invoke(this, new TurnChangedEventArgs(_turn, Pieces[_turn]));
+                _turn = value;
+                TurnChanged?.Invoke(this, new TurnChangedEventArgs(_turn, GetCurrentPlayer()));
+            }
+        }
+
+        public bool IsGameOver
+        {
+            get => _isGameOver;
+            private set
+            {
+                _isGameOver = value;
+                if (value == true)
+                {
+                    MessageBox.Show(GetCurrentPlayer().Name + " wins!");
+                }
             }
         }
 
         public event TurnChangedEventHandler TurnChanged;
 
-        public Board(int height, int width, IList<Piece> pieces)
+        public Board(int width, int height, IList<Player> players)
         {
             if (height <= 5 || width <= 5)
             {
                 throw new ArgumentException();
             }
 
-            Height = height;
             Width = width;
+            Height = height;
             Tiles = new Tile[Width, Height];
             for (int i = 0; i < Width; i++)
                 for (int j = 0; j < Height; j++)
                     Tiles[i, j] = new Tile(i, j);
-            Pieces = new List<Piece>(pieces);
+            Players = new List<Player>(players);
             Turn = 0;
+            IsGameOver = false;
         }
 
-        public IList<Tile> GetSurroundingTiles(Tile tile, Direction direction)
+        public IList<Tile> GetSameTiles(Tile tile, Direction direction, bool includeSurrounding = true)
         {
             List<Tile> tiles = new List<Tile>();
-            char symbol = tile.Piece.Symbol;
+            string symbol = tile.Piece.Symbol;
 
             bool fnAddTiles(int i, int j)
             {
-                tiles.Add(Tiles[i, j]);
-                return Tiles[i, j].Piece.Symbol == symbol;
+                if (Tiles[i, j].Piece.Symbol == symbol)
+                {
+                    tiles.Add(Tiles[i, j]);
+                    return true;
+                }
+                else
+                {
+                    if (includeSurrounding)
+                        tiles.Add(Tiles[i, j]);
+
+                    return false;
+                }
             }
 
             switch (direction)
@@ -62,7 +87,7 @@ namespace Gomoku
                         i--) ;
                     break;
                 case Direction.Right:
-                    for (int i = tile.X + 1, j = tile.Y; 
+                    for (int i = tile.X + 1, j = tile.Y;
                         i < Width && fnAddTiles(i, j);
                         i++) ;
                     break;
@@ -72,7 +97,7 @@ namespace Gomoku
                         j--) ;
                     break;
                 case Direction.Down:
-                    for (int i = tile.X, j = tile.Y + 1; 
+                    for (int i = tile.X, j = tile.Y + 1;
                         j < Height && fnAddTiles(i, j);
                         j++) ;
                     break;
@@ -101,33 +126,66 @@ namespace Gomoku
             return tiles;
         }
 
-        public IList<Tile> GetSurroundingTiles(Tile tile, Orientation orientation)
+        public IList<Tile> GetSameTiles(Tile tile, Orientation orientation, bool includeSurrounding = true)
         {
             List<Tile> tiles = new List<Tile>();
 
             switch (orientation)
             {
                 case Orientation.Horizontal:
-                    tiles.AddRange(GetSurroundingTiles(tile, Direction.Left));
-                    tiles.AddRange(GetSurroundingTiles(tile, Direction.Right));
+                    tiles.AddRange(GetSameTiles(tile, Direction.Left, includeSurrounding));
+                    tiles.Add(tile);
+                    tiles.AddRange(GetSameTiles(tile, Direction.Right, includeSurrounding));
                     break;
                 case Orientation.Vertical:
-                    tiles.AddRange(GetSurroundingTiles(tile, Direction.Up));
-                    tiles.AddRange(GetSurroundingTiles(tile, Direction.Down));
+                    tiles.AddRange(GetSameTiles(tile, Direction.Up, includeSurrounding));
+                    tiles.Add(tile);
+                    tiles.AddRange(GetSameTiles(tile, Direction.Down, includeSurrounding));
                     break;
                 case Orientation.Diagonal:
-                    tiles.AddRange(GetSurroundingTiles(tile, Direction.UpLeft));
-                    tiles.AddRange(GetSurroundingTiles(tile, Direction.DownRight));
+                    tiles.AddRange(GetSameTiles(tile, Direction.UpLeft, includeSurrounding));
+                    tiles.Add(tile);
+                    tiles.AddRange(GetSameTiles(tile, Direction.DownRight, includeSurrounding));
                     break;
                 case Orientation.RvDiagonal:
-                    tiles.AddRange(GetSurroundingTiles(tile, Direction.UpRight));
-                    tiles.AddRange(GetSurroundingTiles(tile, Direction.DownLeft));
+                    tiles.AddRange(GetSameTiles(tile, Direction.UpRight, includeSurrounding));
+                    tiles.Add(tile);
+                    tiles.AddRange(GetSameTiles(tile, Direction.DownLeft, includeSurrounding));
                     break;
             }
 
             return tiles;
         }
 
-        
+        public Player GetCurrentPlayer()
+        {
+            return Players[Turn];
+        }
+
+        public void Play(Tile tile)
+        {
+            // Check if game is over
+            if (IsGameOver)
+                return;
+
+            // Check for already placed tile
+            if (tile.Piece.Symbol != Piece.EMPTY.Symbol)
+                return;
+
+            tile.Piece = GetCurrentPlayer().Piece;
+
+            // Check for game over
+            for (int i = 0; i <= 3; i++)
+            {
+                if (GetSameTiles(tile, (Orientation)i, false).Count == WINPIECES)
+                {
+                    IsGameOver = true;
+                    return;
+                }
+            }
+
+            // Increment turn
+            Turn = (Turn + 1) % Players.Count;
+        }
     }
 }

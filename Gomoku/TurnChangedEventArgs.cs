@@ -4,13 +4,13 @@ namespace Gomoku
 {
     public class TurnChangedEventArgs : EventArgs
     {
-        public readonly int order;
-        public readonly Piece piece;
+        public readonly int Order;
+        public readonly Player Player;
 
-        public TurnChangedEventArgs(int order, Piece piece)
+        public TurnChangedEventArgs(int order, Player player)
         {
-            this.order = order;
-            this.piece = piece;
+            Order = order;
+            Player = player;
         }
     }
 }
