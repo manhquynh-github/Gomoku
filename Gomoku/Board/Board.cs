@@ -58,10 +58,14 @@ namespace Gomoku.Board
             IsGameOver = false;
         }
 
-        public List<Tile> GetSameTiles(Tile tile, Direction direction, bool includeSurrounding = true)
+        public List<Tile> GetSameTiles(
+    Tile tile,
+    Direction direction,
+    Piece piece,
+    bool includeSurrounding = true)
         {
             List<Tile> tiles = new List<Tile>();
-            string symbol = tile.Piece.Symbol;
+            string symbol = piece.Symbol;
 
             bool fnAddTiles(int i, int j)
             {
@@ -126,35 +130,51 @@ namespace Gomoku.Board
             return tiles;
         }
 
-        public List<Tile> GetSameTiles(Tile tile, Orientation orientation, bool includeSurrounding = true)
+        public List<Tile> GetSameTiles(
+           Tile tile,
+           Direction direction,
+           bool includeSurrounding = true)
+        {
+            return GetSameTiles(tile, direction, tile.Piece, includeSurrounding);
+        }
+
+        public List<Tile> GetSameTiles(
+            Tile tile, 
+            Orientation orientation, 
+            Piece piece,
+            bool includeSurrounding = true)
         {
             List<Tile> tiles = new List<Tile>();
 
             switch (orientation)
             {
                 case Orientation.Horizontal:
-                    tiles.AddRange(GetSameTiles(tile, Direction.Left, includeSurrounding));
-                    tiles.Add(tile);
-                    tiles.AddRange(GetSameTiles(tile, Direction.Right, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.Left, piece, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.Right, piece, includeSurrounding));
                     break;
                 case Orientation.Vertical:
-                    tiles.AddRange(GetSameTiles(tile, Direction.Up, includeSurrounding));
-                    tiles.Add(tile);
-                    tiles.AddRange(GetSameTiles(tile, Direction.Down, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.Up, piece, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.Down, piece, includeSurrounding));
                     break;
                 case Orientation.Diagonal:
-                    tiles.AddRange(GetSameTiles(tile, Direction.UpLeft, includeSurrounding));
-                    tiles.Add(tile);
-                    tiles.AddRange(GetSameTiles(tile, Direction.DownRight, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.UpLeft, piece, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.DownRight, piece, includeSurrounding));
                     break;
                 case Orientation.RvDiagonal:
-                    tiles.AddRange(GetSameTiles(tile, Direction.UpRight, includeSurrounding));
-                    tiles.Add(tile);
-                    tiles.AddRange(GetSameTiles(tile, Direction.DownLeft, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.UpRight, piece, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.DownLeft, piece, includeSurrounding));
                     break;
             }
 
             return tiles;
+        }
+
+        public List<Tile> GetSameTiles(
+           Tile tile,
+           Orientation orientation,
+           bool includeSurrounding = true)
+        {
+            return GetSameTiles(tile, orientation, tile.Piece, includeSurrounding);
         }
 
         public Player GetCurrentPlayer()
@@ -181,7 +201,7 @@ namespace Gomoku.Board
                 int samePieces = tiles.FindAll(t => t.Piece == tile.Piece).Count;
                 bool hasBlank = tiles.Exists(t => t.Piece == Piece.EMPTY);
 
-                if (samePieces == WINPIECES
+                if (samePieces == WINPIECES + 1
                     && hasBlank)
                 {
                     IsGameOver = true;
