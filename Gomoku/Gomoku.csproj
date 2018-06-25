@@ -53,10 +53,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Player.cs" />
-    <Compile Include="Tile.cs" />
-    <Compile Include="TurnChangedEventArgs.cs" />
-    <Compile Include="TurnChangedEventHandler.cs" />
+    <Compile Include="Board\Player.cs" />
+    <Compile Include="Board\Tile.cs" />
+    <Compile Include="Board\TurnChangedEventArgs.cs" />
+    <Compile Include="Board\TurnChangedEventHandler.cs" />
     <Compile Include="ViewModelBase.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -66,14 +66,14 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Board.cs" />
+    <Compile Include="Board\Board.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Piece.cs" />
+    <Compile Include="Board\Piece.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
