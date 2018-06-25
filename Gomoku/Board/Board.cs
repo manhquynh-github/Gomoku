@@ -21,7 +21,7 @@ namespace Gomoku.Board
             set
             {
                 _turn = value;
-                TurnChanged?.Invoke(this, new TurnChangedEventArgs(_turn, GetCurrentPlayer()));
+                TurnChanged?.Invoke(new TurnChangedEventArgs(this, _turn, GetCurrentPlayer()));
             }
         }
 
@@ -58,7 +58,7 @@ namespace Gomoku.Board
             IsGameOver = false;
         }
 
-        public IList<Tile> GetSameTiles(Tile tile, Direction direction, bool includeSurrounding = true)
+        public List<Tile> GetSameTiles(Tile tile, Direction direction, bool includeSurrounding = true)
         {
             List<Tile> tiles = new List<Tile>();
             string symbol = tile.Piece.Symbol;
@@ -126,7 +126,7 @@ namespace Gomoku.Board
             return tiles;
         }
 
-        public IList<Tile> GetSameTiles(Tile tile, Orientation orientation, bool includeSurrounding = true)
+        public List<Tile> GetSameTiles(Tile tile, Orientation orientation, bool includeSurrounding = true)
         {
             List<Tile> tiles = new List<Tile>();
 
@@ -177,7 +177,12 @@ namespace Gomoku.Board
             // Check for game over
             for (int i = 0; i <= 3; i++)
             {
-                if (GetSameTiles(tile, (Orientation)i, false).Count == WINPIECES)
+                List<Tile> tiles = GetSameTiles(tile, (Orientation)i);
+                int samePieces = tiles.FindAll(t => t.Piece == tile.Piece).Count;
+                bool hasBlank = tiles.Exists(t => t.Piece == Piece.EMPTY);
+
+                if (samePieces == WINPIECES
+                    && hasBlank)
                 {
                     IsGameOver = true;
                     return;
