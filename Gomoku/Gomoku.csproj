@@ -53,6 +53,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AI\GomokuAIv1.cs" />
+    <Compile Include="AI\NTree.cs" />
     <Compile Include="Board\Player.cs" />
     <Compile Include="Board\Tile.cs" />
     <Compile Include="Board\TurnChangedEventArgs.cs" />
