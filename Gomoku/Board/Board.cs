@@ -4,7 +4,7 @@ using System.Windows;
 
 namespace Gomoku.Board
 {
-    public class Board
+    public class Board : ICloneable
     {
         public readonly int Height;
         public readonly int Width;
@@ -59,19 +59,29 @@ namespace Gomoku.Board
         }
 
         public List<Tile> GetSameTiles(
-    Tile tile,
-    Direction direction,
-    Piece piece,
-    bool includeSurrounding = true)
+            Tile tile,
+            Direction direction,
+            Piece piece,
+            int max = 4,
+            bool includeSurrounding = true)
         {
             List<Tile> tiles = new List<Tile>();
             string symbol = piece.Symbol;
 
+            int count = 0;
+
             bool fnAddTiles(int i, int j)
             {
+                if (count == max)
+                {
+                    count = 0;
+                    return false;
+                }
+
                 if (Tiles[i, j].Piece.Symbol == symbol)
                 {
                     tiles.Add(Tiles[i, j]);
+                    count++;
                     return true;
                 }
                 else
@@ -79,6 +89,7 @@ namespace Gomoku.Board
                     if (includeSurrounding)
                         tiles.Add(Tiles[i, j]);
 
+                    count = 0;
                     return false;
                 }
             }
@@ -112,7 +123,7 @@ namespace Gomoku.Board
                     break;
                 case Direction.DownRight:
                     for (int i = tile.X + 1, j = tile.Y + 1;
-                        i <= Width && j <= Height && fnAddTiles(i, j);
+                        i < Width && j < Height && fnAddTiles(i, j);
                         i++, j++) ;
                     break;
                 case Direction.UpRight:
@@ -131,17 +142,10 @@ namespace Gomoku.Board
         }
 
         public List<Tile> GetSameTiles(
-           Tile tile,
-           Direction direction,
-           bool includeSurrounding = true)
-        {
-            return GetSameTiles(tile, direction, tile.Piece, includeSurrounding);
-        }
-
-        public List<Tile> GetSameTiles(
-            Tile tile, 
-            Orientation orientation, 
+            Tile tile,
+            Orientation orientation,
             Piece piece,
+            int overflow = 4,
             bool includeSurrounding = true)
         {
             List<Tile> tiles = new List<Tile>();
@@ -149,32 +153,24 @@ namespace Gomoku.Board
             switch (orientation)
             {
                 case Orientation.Horizontal:
-                    tiles.AddRange(GetSameTiles(tile, Direction.Left, piece, includeSurrounding));
-                    tiles.AddRange(GetSameTiles(tile, Direction.Right, piece, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.Left, piece, overflow, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.Right, piece, overflow, includeSurrounding));
                     break;
                 case Orientation.Vertical:
-                    tiles.AddRange(GetSameTiles(tile, Direction.Up, piece, includeSurrounding));
-                    tiles.AddRange(GetSameTiles(tile, Direction.Down, piece, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.Up, piece, overflow, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.Down, piece, overflow, includeSurrounding));
                     break;
                 case Orientation.Diagonal:
-                    tiles.AddRange(GetSameTiles(tile, Direction.UpLeft, piece, includeSurrounding));
-                    tiles.AddRange(GetSameTiles(tile, Direction.DownRight, piece, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.UpLeft, piece, overflow, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.DownRight, piece, overflow, includeSurrounding));
                     break;
                 case Orientation.RvDiagonal:
-                    tiles.AddRange(GetSameTiles(tile, Direction.UpRight, piece, includeSurrounding));
-                    tiles.AddRange(GetSameTiles(tile, Direction.DownLeft, piece, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.UpRight, piece, overflow, includeSurrounding));
+                    tiles.AddRange(GetSameTiles(tile, Direction.DownLeft, piece, overflow, includeSurrounding));
                     break;
             }
 
             return tiles;
-        }
-
-        public List<Tile> GetSameTiles(
-           Tile tile,
-           Orientation orientation,
-           bool includeSurrounding = true)
-        {
-            return GetSameTiles(tile, orientation, tile.Piece, includeSurrounding);
         }
 
         public Player GetCurrentPlayer()
@@ -197,11 +193,11 @@ namespace Gomoku.Board
             // Check for game over
             for (int i = 0; i <= 3; i++)
             {
-                List<Tile> tiles = GetSameTiles(tile, (Orientation)i);
+                List<Tile> tiles = GetSameTiles(tile, (Orientation)i, tile.Piece);
                 int samePieces = tiles.FindAll(t => t.Piece == tile.Piece).Count;
                 bool hasBlank = tiles.Exists(t => t.Piece == Piece.EMPTY);
 
-                if (samePieces == WINPIECES + 1
+                if (samePieces + 1 == WINPIECES
                     && hasBlank)
                 {
                     IsGameOver = true;
@@ -211,6 +207,17 @@ namespace Gomoku.Board
 
             // Increment turn
             Turn = (Turn + 1) % Players.Count;
+
+            // AI
+            if (Turn == 1)
+            {
+                Play(new Gomoku.AI.GomokuAIv1().Play(this, GetCurrentPlayer()));
+            }
+        }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
         }
     }
 }
