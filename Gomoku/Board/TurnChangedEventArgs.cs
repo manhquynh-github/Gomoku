@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Gomoku
+namespace Gomoku.Board
 {
     public class TurnChangedEventArgs : EventArgs
     {

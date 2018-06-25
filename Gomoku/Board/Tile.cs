@@ -1,4 +1,4 @@
-﻿namespace Gomoku
+﻿namespace Gomoku.Board
 {
     public class Tile : ViewModelBase
     {

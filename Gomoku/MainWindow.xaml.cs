@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Gomoku.Board;
 
 namespace Gomoku
 {
@@ -20,7 +21,7 @@ namespace Gomoku
     /// </summary>
     public partial class MainWindow : Window
     {
-        public readonly Board Board;
+        public readonly Board.Board Board;
 
         public MainWindow() :
             this(15, 15,
@@ -36,7 +37,7 @@ namespace Gomoku
         {
             InitializeComponent();
 
-            Board = new Board(boardWidth, boardHeight, players);
+            Board = new Board.Board(boardWidth, boardHeight, players);
             InitializeBoard(boardWidth, boardHeight);
         }
 

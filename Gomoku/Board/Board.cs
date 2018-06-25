@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Windows;
 
-namespace Gomoku
+namespace Gomoku.Board
 {
     public class Board
     {

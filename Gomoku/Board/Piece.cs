@@ -1,6 +1,6 @@
 ﻿using System.Windows.Media;
 
-namespace Gomoku
+namespace Gomoku.Board
 {
     public class Piece : ViewModelBase
     {
