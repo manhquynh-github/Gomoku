@@ -222,8 +222,10 @@ namespace Gomoku.Board
                 for (int j = 0; j < Height; j++)
                 {
                     Tile tile = Tiles[i, j];
-                    b.Tiles[i, j] = new Tile(i, j);
-                    b.Tiles[i, j].Piece = tile.Piece;
+                    b.Tiles[i, j] = new Tile(i, j)
+                    {
+                        Piece = tile.Piece
+                    };
                 }
             b._turn = _turn;
             b._isGameOver = _isGameOver;

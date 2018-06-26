@@ -110,12 +110,17 @@ namespace Gomoku.AI
                 }
             }
 
-            nTrees.Sort((x, y) => x.Value.CompareTo(y.Value));
+            nTrees.Sort((x, y) => -1 * x.Value.CompareTo(y.Value));
             return nTrees;
         }
 
-        public Tile Play(Board.Board board)
+        public Tile Play(Board.Board board, out List<Tile> choices)
         {
+            choices = new List<Tile>();
+
+            if (board.IsGameOver)
+                return null;
+
             var result = Search(board, 1);
             //foreach (var node in result)
             //{
@@ -123,7 +128,30 @@ namespace Gomoku.AI
             //}
             //Console.WriteLine("--------------");
 
-            return result.Last().Value.Tile;
+
+            if (result.Count == 0)
+            {
+                return null;
+            }
+            else if (result.Count == 1)
+            {
+                choices.Add(result[0].Value.Tile);
+                return choices[0];
+            }
+            else
+            {
+                double maxpoint = result[0].Value.Point;
+                var enumerator = result.GetEnumerator();
+                while (enumerator.MoveNext()
+                    && enumerator.Current.Value.Point == maxpoint)
+                {
+                    choices.Add(enumerator.Current.Value.Tile);
+                }
+
+                Random random = new Random();
+                int choice = random.Next(choices.Count);
+                return choices[choice];
+            }
         }
 
     }

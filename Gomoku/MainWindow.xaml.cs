@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Gomoku.AI;
 using Gomoku.Board;
 
 namespace Gomoku
@@ -21,7 +22,9 @@ namespace Gomoku
     /// </summary>
     public partial class MainWindow : Window
     {
+        public readonly GomokuAIv1 AI;
         public readonly Board.Board Board;
+        private List<Tile> choices;
 
         public MainWindow() :
             this(15, 15,
@@ -39,6 +42,7 @@ namespace Gomoku
 
             Board = new Board.Board(boardWidth, boardHeight, players);
             InitializeBoard(boardWidth, boardHeight);
+            AI = new GomokuAIv1();
         }
 
         private void InitializeBoard(int width, int height)
@@ -46,32 +50,43 @@ namespace Gomoku
             Style widthStackPanelStyle = Resources["WidthStackPanelStyle"] as Style;
             Style tileStyle = Resources["TileButtonStyle"] as Style;
 
-            StackPanel columnStackPanel = new StackPanel();
-            columnStackPanel.Style = widthStackPanelStyle;
+            StackPanel columnStackPanel = new StackPanel
+            {
+                Style = widthStackPanelStyle
+            };
             for (int j = -1; j < width; j++)
             {
-                Button tileButton = new Button();
-                tileButton.Style = tileStyle;
-                tileButton.Content = j;
+                Button tileButton = new Button
+                {
+                    Style = tileStyle,
+                    Content = j
+                };
                 columnStackPanel.Children.Add(tileButton);
             }
             HeightStackPanel.Children.Add(columnStackPanel);
 
             for (int i = 0; i < height; i++)
             {
-                StackPanel widthStackPanel = new StackPanel();
-                widthStackPanel.Style = widthStackPanelStyle;
+                StackPanel widthStackPanel = new StackPanel
+                {
+                    Style = widthStackPanelStyle
+                };
 
-                Button rowButton = new Button();
-                rowButton.Style = tileStyle;
-                rowButton.Content = i;
+                Button rowButton = new Button
+                {
+                    Style = tileStyle,
+                    Content = i
+                };
                 widthStackPanel.Children.Add(rowButton);
 
                 for (int j = 0; j < width; j++)
                 {
-                    Button tileButton = new Button();
-                    tileButton.DataContext = Board.Tiles[j, i];
-                    tileButton.Style = tileStyle;
+                    Button tileButton = new Button
+                    {
+                        DataContext = Board.Tiles[j, i],
+                        Style = tileStyle
+                    };
+                    Board.Tiles[j, i].UIElement = tileButton;
                     widthStackPanel.Children.Add(tileButton);
                 }
 
@@ -91,13 +106,19 @@ namespace Gomoku
             Button button = sender as Button;
             if (button.DataContext != null)
             {
+                if (choices != null && choices.Count > 0)
+                    foreach (var tile in choices)
+                    {
+                        ((Button)tile.UIElement).BorderThickness = new Thickness(1.0);
+                    }
+
                 Board.Play(button.DataContext as Tile);
                 button.Content = (button.DataContext as Tile).Piece.Symbol;
 
                 // AI
                 if (Board.GetCurrentPlayer().IsAuto && UseAI.IsChecked == true)
                 {
-                    Board.Play(new Gomoku.AI.GomokuAIv1().Play(Board));
+                    Board.Play(AI.Play(Board, out choices));
                 }
             }
         }
@@ -109,7 +130,11 @@ namespace Gomoku
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Board.Play(new Gomoku.AI.GomokuAIv1().Play(Board));
+            AI.Play(Board, out choices);
+            foreach (var tile in choices)
+            {
+                ((Button)tile.UIElement).BorderThickness = new Thickness(2.0);
+            }
         }
     }
 }
