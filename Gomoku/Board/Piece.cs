@@ -8,8 +8,8 @@ namespace Gomoku.Board
         private Brush _brush;
 
         public static readonly Piece EMPTY = new Piece(" ", null);
-        public static readonly Piece X = new Piece("X", new SolidColorBrush(Color.FromRgb(255, 0, 0)));
-        public static readonly Piece O = new Piece("O", new SolidColorBrush(Color.FromRgb(0, 0, 255)));
+        public static readonly Piece X = new Piece("X", new SolidColorBrush(Colors.Red));
+        public static readonly Piece O = new Piece("O", new SolidColorBrush(Colors.Blue));
 
         public string Symbol
         {

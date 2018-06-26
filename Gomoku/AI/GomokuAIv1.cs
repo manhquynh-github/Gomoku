@@ -9,10 +9,11 @@ namespace Gomoku.AI
 {
     public class GomokuAIv1
     {
-        public int Level { get; set; } = 1;
+        public int Level { get; set; }
 
-        public GomokuAIv1()
+        public GomokuAIv1(int level = 1)
         {
+            Level = level;
         }
 
         protected class AINode : IComparable<AINode>
@@ -45,12 +46,15 @@ namespace Gomoku.AI
                     placedTiles.Add(tile);
             }
 
-            List<Tile> playableTiles = new List<Tile>();
+            HashSet<Tile> playableTiles = new HashSet<Tile>();
             foreach (var tile in placedTiles)
             {
                 for (int i = 0; i <= 3; i++)
                 {
-                    playableTiles.AddRange(board.GetLineGroup(tile, (Orientation)i, Piece.EMPTY, 2).GetChainTiles());
+                    foreach (var t in board.GetLineGroup(tile, (Orientation)i, Piece.EMPTY, 2).GetChainTiles())
+                    {
+                        playableTiles.Add(t);
+                    }
                 }
             }
 
@@ -83,9 +87,6 @@ namespace Gomoku.AI
                             point += chainTilesCount;
                         }
 
-
-
-
                         //point += (1.0 * (1.0 - Math.Pow(2.0, lineGroup.CountChainTiles())) / (1.0 - 2.0));
                         //point += 0.25 * lineGroup.CountBlankTiles();
                         //point -= 1.0 * lineGroup.CountBlockTiles();
@@ -106,7 +107,9 @@ namespace Gomoku.AI
                     node.Point -= maxpoint;
                     node.Point -= 0.01 * nTree.Nodes.Where(n => n.Value.Point == maxpoint).Count();
 
-                    //node.Point -= nTree.Nodes.Sum(n => n.Value.Point);
+                    nTree.Nodes.RemoveAll(n => n.Value.Point < maxpoint);
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
                 }
             }
 
@@ -147,6 +150,9 @@ namespace Gomoku.AI
                 {
                     choices.Add(enumerator.Current.Value.Tile);
                 }
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
 
                 Random random = new Random();
                 int choice = random.Next(choices.Count);

@@ -103,22 +103,34 @@ namespace Gomoku
 
         private void TileButton_Click(object sender, RoutedEventArgs e)
         {
+            if (sender == null || Board.IsGameOver)
+                return;
+
             Button button = sender as Button;
             if (button.DataContext != null)
             {
+                Tile tile = button.DataContext as Tile;
+
                 if (choices != null && choices.Count > 0)
-                    foreach (var tile in choices)
+                    foreach (var t in choices)
                     {
-                        ((Button)tile.UIElement).BorderThickness = new Thickness(1.0);
+                        ((Button)t.UIElement).BorderThickness = new Thickness(1.0);
                     }
 
-                Board.Play(button.DataContext as Tile);
-                button.Content = (button.DataContext as Tile).Piece.Symbol;
+                if (Board.LastPlayedTile != null)
+                {
+                    ((Button)Board.LastPlayedTile.UIElement).BorderBrush = new SolidColorBrush(Colors.Gray);
+                }
+
+                Board.Play(tile);
+                ((Button)tile.UIElement).BorderBrush = new SolidColorBrush(Colors.Red);
+                //button.Content = tile.Piece.Symbol;
 
                 // AI
                 if (Board.GetCurrentPlayer().IsAuto && UseAI.IsChecked == true)
                 {
-                    Board.Play(AI.Play(Board, out choices));
+                    //await Task.Delay(100);
+                    TileButton_Click(AI.Play(Board, out choices)?.UIElement, null);
                 }
             }
         }

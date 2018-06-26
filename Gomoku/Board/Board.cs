@@ -12,6 +12,7 @@ namespace Gomoku.Board
         public readonly List<Player> Players;
         private int _turn;
         private bool _isGameOver;
+        public Tile LastPlayedTile { get; private set; }
 
         public static readonly int WINPIECES = 5;
 
@@ -197,6 +198,7 @@ namespace Gomoku.Board
                 return;
 
             _tile.Piece = GetCurrentPlayer().Piece;
+            LastPlayedTile = _tile;
 
             // Check for game over
             for (int i = 0; i <= 3; i++)
