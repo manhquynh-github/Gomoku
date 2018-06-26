@@ -5,7 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Gomoku"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="900">
+        Title="MainWindow"
+        Height="500"
+        Width="600"
+        WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <Style x:Key="TileButtonStyle"
                TargetType="Button">
@@ -20,26 +23,55 @@
             <EventSetter Event="Click"
                          Handler="TileButton_Click" />
         </Style>
-        <Style x:Key="WidthStackPanelStyle"
+        <Style x:Key="BoardStackPanelStyle"
                TargetType="StackPanel">
+            <Setter Property="Background"
+                    Value="{x:Null}" />
+        </Style>
+        <Style x:Key="WidthStackPanelStyle"
+               TargetType="StackPanel"
+               BasedOn="{StaticResource BoardStackPanelStyle}">
             <Setter Property="Orientation"
                     Value="Horizontal" />
         </Style>
     </Window.Resources>
     <Grid>
+        <Grid.Background>
+            <RadialGradientBrush Center="0.5,1"
+                                 RadiusY="1">
+                <GradientStop Color="#FFD4D4D4"
+                              Offset="1" />
+                <GradientStop Color="White" />
+            </RadialGradientBrush>
+        </Grid.Background>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="300px" />
+            <ColumnDefinition Width="auto" />
         </Grid.ColumnDefinitions>
 
-        <ScrollViewer>
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto">
             <StackPanel x:Name="HeightStackPanel"
+                        Style="{StaticResource BoardStackPanelStyle}"
                         Orientation="Vertical" />
         </ScrollViewer>
-        <ScrollViewer Grid.Column="1">
+        <ScrollViewer Grid.Column="1"
+                      Padding="10"
+                      VerticalScrollBarVisibility="Auto">
             <StackPanel Orientation="Vertical">
-                <CheckBox x:Name="UseAI" Content="UseAI" Checked="CheckBox_Checked" />
-                <Button Content="Analyze" Click="Button_Click" />
+                <StackPanel.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="Margin"
+                                Value="0,5" />
+                    </Style>
+                </StackPanel.Resources>
+                <CheckBox x:Name="UseAI"
+                          Content="UseAI"
+                          Checked="CheckBox_Checked" />
+                <Button Content="Analyze"
+                        Click="AnalyzeButton_Click" />
+                <Button Content="Restart"
+                        Click="RestartButton_Click" />
             </StackPanel>
         </ScrollViewer>
     </Grid>

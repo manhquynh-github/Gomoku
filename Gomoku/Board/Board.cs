@@ -215,6 +215,17 @@ namespace Gomoku.Board
             Turn = (Turn + 1) % Players.Count;        
         }
 
+        public void Restart()
+        {
+            foreach (var tile in Tiles)
+            {
+                tile.Piece = Piece.EMPTY;
+            }
+
+            Turn = 0;
+            IsGameOver = false;
+        }
+
         public object Clone()
         {
             Board b = new Board(Width, Height, Players);

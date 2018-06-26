@@ -128,13 +128,18 @@ namespace Gomoku
 
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void AnalyzeButton_Click(object sender, RoutedEventArgs e)
         {
             AI.Play(Board, out choices);
             foreach (var tile in choices)
             {
                 ((Button)tile.UIElement).BorderThickness = new Thickness(2.0);
             }
+        }
+
+        private void RestartButton_Click(object sender, RoutedEventArgs e)
+        {
+            Board.Restart();
         }
     }
 }
