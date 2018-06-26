@@ -28,7 +28,7 @@ namespace Gomoku
                 new List<Player>()
                 {
                     new Player("Player 1", Piece.X),
-                    new Player("Player 2", Piece.O)
+                    new Player("Player 2", Piece.O, true)
                 })
         {
         }
@@ -95,7 +95,7 @@ namespace Gomoku
                 button.Content = (button.DataContext as Tile).Piece.Symbol;
 
                 // AI
-                if (Board.Turn == 1 && UseAI.IsChecked == true)
+                if (Board.GetCurrentPlayer().IsAuto && UseAI.IsChecked == true)
                 {
                     Board.Play(new Gomoku.AI.GomokuAIv1().Play(Board));
                 }
