@@ -2,6 +2,9 @@
 
 namespace Gomoku.Board
 {
+    /// <summary>
+    /// Defines a player's move symbol. 
+    /// </summary>
     public class Piece : ViewModelBase
     {
         private string _symbol;
