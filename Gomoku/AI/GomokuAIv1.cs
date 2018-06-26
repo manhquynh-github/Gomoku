@@ -9,6 +9,8 @@ namespace Gomoku.AI
 {
     public class GomokuAIv1
     {
+        public int Level { get; set; } = 1;
+
         public GomokuAIv1()
         {
         }
@@ -32,8 +34,10 @@ namespace Gomoku.AI
             }
         }
 
-        public Tile Play(Board.Board board, Player player)
+        protected List<NTree<AINode>> Search(Board.Board board, int level)
         {
+            Player player = board.GetCurrentPlayer();
+
             List<Tile> placedTiles = new List<Tile>();
             foreach (var tile in board.Tiles)
             {
@@ -46,37 +50,80 @@ namespace Gomoku.AI
             {
                 for (int i = 0; i <= 3; i++)
                 {
-                    playableTiles.AddRange(board.GetSameTiles(tile, (Orientation)i, Piece.EMPTY, 2, false));
+                    playableTiles.AddRange(board.GetLineGroup(tile, (Orientation)i, Piece.EMPTY, 2).GetChainTiles());
                 }
             }
 
             List<NTree<AINode>> nTrees = new List<NTree<AINode>>();
             foreach (var tile in playableTiles)
             {
-                //Board.Board b = board.Clone() as Board.Board;
-                //b.Play(tile);
+                Board.Board b = board.Clone() as Board.Board;
+                b.Play(tile);
 
                 double point = 0.0;
-                for (int i = 0; i <= 3; i++)
-                {
-                    List<Tile> surroundingTiles = board.GetSameTiles(tile, (Orientation)i, player.Piece, 4, true);
-                    int sameCount = surroundingTiles.Where(t => t.Piece == player.Piece).Count();
-                    point += (1.0 * (1.0 - Math.Pow(2.0, sameCount) / (1.0 - 2.0)));
 
-                    foreach (var t in surroundingTiles)
+                if (b.IsGameOver)
+                {
+                    point = 100.0;
+                }
+                else
+                {
+                    for (int i = 0; i <= 3; i++)
                     {
-                        if (t.Piece == Piece.EMPTY)
-                            point += 0.5;
-                        else
-                            point -= 1.0;
+                        LineGroup lineGroup = board.GetLineGroup(tile, (Orientation)i, player.Piece, 4);
+                        int chainTilesCount = lineGroup.CountChainTiles();
+                        int blockTilesCount = lineGroup.CountBlockTiles();
+                        if (blockTilesCount == 0)
+                        {
+                            double _point = (1.0 * (1.0 - Math.Pow(2.0, chainTilesCount)) / (1.0 - 2.0));
+                            point += _point * _point;
+                        }
+                        else if (blockTilesCount == 1)
+                        {
+                            point += chainTilesCount;
+                        }
+
+
+
+
+                        //point += (1.0 * (1.0 - Math.Pow(2.0, lineGroup.CountChainTiles())) / (1.0 - 2.0));
+                        //point += 0.25 * lineGroup.CountBlankTiles();
+                        //point -= 1.0 * lineGroup.CountBlockTiles();
                     }
                 }
 
-                nTrees.Add(new NTree<AINode>(new AINode(tile, null, point)));
+                AINode node = new AINode(tile, b, point);
+                NTree<AINode> nTree = new NTree<AINode>(node);
+                nTrees.Add(nTree);
+
+                if (b.IsGameOver)
+                    break;
+
+                if (level > 0 && level <= Level)
+                {
+                    nTree.Nodes = Search(b, level - 1);
+                    double maxpoint = nTree.Nodes.Max(n => n.Value.Point);
+                    node.Point -= maxpoint;
+                    node.Point -= 0.01 * nTree.Nodes.Where(n => n.Value.Point == maxpoint).Count();
+
+                    //node.Point -= nTree.Nodes.Sum(n => n.Value.Point);
+                }
             }
 
             nTrees.Sort((x, y) => x.Value.CompareTo(y.Value));
-            return nTrees.Last().Value.Tile;
+            return nTrees;
+        }
+
+        public Tile Play(Board.Board board)
+        {
+            var result = Search(board, 1);
+            //foreach (var node in result)
+            //{
+            //    Console.WriteLine(node.Value.Tile.X + "," + node.Value.Tile.Y + " = " + node.Value.Point);
+            //}
+            //Console.WriteLine("--------------");
+
+            return result.Last().Value.Tile;
         }
 
     }

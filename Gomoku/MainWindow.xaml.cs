@@ -46,10 +46,27 @@ namespace Gomoku
             Style widthStackPanelStyle = Resources["WidthStackPanelStyle"] as Style;
             Style tileStyle = Resources["TileButtonStyle"] as Style;
 
+            StackPanel columnStackPanel = new StackPanel();
+            columnStackPanel.Style = widthStackPanelStyle;
+            for (int j = -1; j < width; j++)
+            {
+                Button tileButton = new Button();
+                tileButton.Style = tileStyle;
+                tileButton.Content = j;
+                columnStackPanel.Children.Add(tileButton);
+            }
+            HeightStackPanel.Children.Add(columnStackPanel);
+
             for (int i = 0; i < height; i++)
             {
                 StackPanel widthStackPanel = new StackPanel();
                 widthStackPanel.Style = widthStackPanelStyle;
+
+                Button rowButton = new Button();
+                rowButton.Style = tileStyle;
+                rowButton.Content = i;
+                widthStackPanel.Children.Add(rowButton);
+
                 for (int j = 0; j < width; j++)
                 {
                     Button tileButton = new Button();
@@ -60,6 +77,13 @@ namespace Gomoku
 
                 HeightStackPanel.Children.Add(widthStackPanel);
             }
+
+            Board.GameOver += Board_GameOver;
+        }
+
+        private void Board_GameOver(GameOverEventArgs e)
+        {
+            MessageBox.Show(e.Winner.Name + " wins!");
         }
 
         private void TileButton_Click(object sender, RoutedEventArgs e)
@@ -69,7 +93,23 @@ namespace Gomoku
             {
                 Board.Play(button.DataContext as Tile);
                 button.Content = (button.DataContext as Tile).Piece.Symbol;
+
+                // AI
+                if (Board.Turn == 1 && UseAI.IsChecked == true)
+                {
+                    Board.Play(new Gomoku.AI.GomokuAIv1().Play(Board));
+                }
             }
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Board.Play(new Gomoku.AI.GomokuAIv1().Play(Board));
         }
     }
 }

@@ -9,12 +9,12 @@ namespace Gomoku.AI
     public class NTree<T>
     {
         public T Value;
-        public LinkedList<NTree<T>> Nodes;
+        public List<NTree<T>> Nodes;
 
         public NTree(T value)
         {
             Value = value;
-            Nodes = new LinkedList<NTree<T>>();
+            Nodes = new List<NTree<T>>();
         }
     }
 }

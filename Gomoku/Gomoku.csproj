@@ -55,10 +55,13 @@
     </ApplicationDefinition>
     <Compile Include="AI\GomokuAIv1.cs" />
     <Compile Include="AI\NTree.cs" />
+    <Compile Include="Board\GameOverEventArgs.cs" />
+    <Compile Include="Board\Line.cs" />
+    <Compile Include="Board\LineGroup.cs" />
     <Compile Include="Board\Player.cs" />
     <Compile Include="Board\Tile.cs" />
     <Compile Include="Board\TurnChangedEventArgs.cs" />
-    <Compile Include="Board\TurnChangedEventHandler.cs" />
+    <Compile Include="Board\BoardEventHandler.cs" />
     <Compile Include="ViewModelBase.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

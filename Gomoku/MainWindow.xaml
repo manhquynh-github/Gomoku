@@ -36,5 +36,11 @@
             <StackPanel x:Name="HeightStackPanel"
                         Orientation="Vertical" />
         </ScrollViewer>
+        <ScrollViewer Grid.Column="1">
+            <StackPanel Orientation="Vertical">
+                <CheckBox x:Name="UseAI" Content="UseAI" Checked="CheckBox_Checked" />
+                <Button Content="Analyze" Click="Button_Click" />
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Window>

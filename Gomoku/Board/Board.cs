@@ -31,14 +31,15 @@ namespace Gomoku.Board
             private set
             {
                 _isGameOver = value;
-                if (value == true)
+                if (value == true && GameOver != null)
                 {
-                    MessageBox.Show(GetCurrentPlayer().Name + " wins!");
+                    GameOver.Invoke(new GameOverEventArgs(this, true, Turn, GetCurrentPlayer()));
                 }
             }
         }
 
         public event TurnChangedEventHandler TurnChanged;
+        public event GameOverEventHandler GameOver;
 
         public Board(int width, int height, IList<Player> players)
         {
@@ -58,119 +59,124 @@ namespace Gomoku.Board
             IsGameOver = false;
         }
 
-        public List<Tile> GetSameTiles(
+        public void RunTilesFunction(
             Tile tile,
             Direction direction,
-            Piece piece,
-            int max = 4,
-            bool includeSurrounding = true)
+            Predicate<Tile> predicate)
         {
-            List<Tile> tiles = new List<Tile>();
-            string symbol = piece.Symbol;
-
-            int count = 0;
-
-            bool fnAddTiles(int i, int j)
-            {
-                if (count == max)
-                {
-                    count = 0;
-                    return false;
-                }
-
-                if (Tiles[i, j].Piece.Symbol == symbol)
-                {
-                    tiles.Add(Tiles[i, j]);
-                    count++;
-                    return true;
-                }
-                else
-                {
-                    if (includeSurrounding)
-                        tiles.Add(Tiles[i, j]);
-
-                    count = 0;
-                    return false;
-                }
-            }
-
             switch (direction)
             {
                 case Direction.Left:
                     for (int i = tile.X - 1, j = tile.Y;
-                        i >= 0 && fnAddTiles(i, j);
+                        i >= 0 && predicate(Tiles[i, j]);
                         i--) ;
                     break;
                 case Direction.Right:
                     for (int i = tile.X + 1, j = tile.Y;
-                        i < Width && fnAddTiles(i, j);
+                        i < Width && predicate(Tiles[i, j]);
                         i++) ;
                     break;
                 case Direction.Up:
                     for (int i = tile.X, j = tile.Y - 1;
-                        j >= 0 && fnAddTiles(i, j);
+                        j >= 0 && predicate(Tiles[i, j]);
                         j--) ;
                     break;
                 case Direction.Down:
                     for (int i = tile.X, j = tile.Y + 1;
-                        j < Height && fnAddTiles(i, j);
+                        j < Height && predicate(Tiles[i, j]);
                         j++) ;
                     break;
                 case Direction.UpLeft:
                     for (int i = tile.X - 1, j = tile.Y - 1;
-                        i >= 0 && j >= 0 && fnAddTiles(i, j);
+                        i >= 0 && j >= 0 && predicate(Tiles[i, j]);
                         i--, j--) ;
                     break;
                 case Direction.DownRight:
                     for (int i = tile.X + 1, j = tile.Y + 1;
-                        i < Width && j < Height && fnAddTiles(i, j);
+                        i < Width && j < Height && predicate(Tiles[i, j]);
                         i++, j++) ;
                     break;
                 case Direction.UpRight:
                     for (int i = tile.X + 1, j = tile.Y - 1;
-                        i < Width && j >= 0 && fnAddTiles(i, j);
+                        i < Width && j >= 0 && predicate(Tiles[i, j]);
                         i++, j--) ;
                     break;
                 case Direction.DownLeft:
                     for (int i = tile.X - 1, j = tile.Y + 1;
-                        i >= 0 && j < Height && fnAddTiles(i, j);
+                        i >= 0 && j < Height && predicate(Tiles[i, j]);
                         i--, j++) ;
                     break;
             }
-
-            return tiles;
         }
 
-        public List<Tile> GetSameTiles(
+        public Line GetLine(
+            Tile tile,
+            Direction direction,
+            Piece piece,
+            int max = 5)
+        {
+            List<Tile> chainTiles = new List<Tile>();
+            List<Tile> blankTiles = new List<Tile>();
+            List<Tile> blockTiles = new List<Tile>();
+
+            string symbol = piece.Symbol;
+            int count = 0;
+
+            RunTilesFunction(
+                tile,
+                direction,
+                t =>
+                {
+                    if (count == max)
+                        return false;
+
+                    if (t.Piece.Symbol == symbol)
+                    {
+                        chainTiles.Add(t);
+                        count++;
+                        return true;
+                    }
+                    else
+                    {
+                        if (t.Piece.Symbol == Piece.EMPTY.Symbol)
+                            blankTiles.Add(t);
+                        else
+                            blockTiles.Add(t);
+
+                        return false;
+                    }
+                });
+
+            return new Line(chainTiles, blankTiles, blockTiles);
+        }
+
+        public LineGroup GetLineGroup(
             Tile tile,
             Orientation orientation,
             Piece piece,
-            int overflow = 4,
-            bool includeSurrounding = true)
+            int max = 5)
         {
-            List<Tile> tiles = new List<Tile>();
-
             switch (orientation)
             {
                 case Orientation.Horizontal:
-                    tiles.AddRange(GetSameTiles(tile, Direction.Left, piece, overflow, includeSurrounding));
-                    tiles.AddRange(GetSameTiles(tile, Direction.Right, piece, overflow, includeSurrounding));
-                    break;
+                    return new LineGroup(
+                        GetLine(tile, Direction.Left, piece, max),
+                        GetLine(tile, Direction.Right, piece, max));
                 case Orientation.Vertical:
-                    tiles.AddRange(GetSameTiles(tile, Direction.Up, piece, overflow, includeSurrounding));
-                    tiles.AddRange(GetSameTiles(tile, Direction.Down, piece, overflow, includeSurrounding));
-                    break;
+                    return new LineGroup(
+                        GetLine(tile, Direction.Up, piece, max),
+                        GetLine(tile, Direction.Down, piece, max));
                 case Orientation.Diagonal:
-                    tiles.AddRange(GetSameTiles(tile, Direction.UpLeft, piece, overflow, includeSurrounding));
-                    tiles.AddRange(GetSameTiles(tile, Direction.DownRight, piece, overflow, includeSurrounding));
-                    break;
+                    return new LineGroup(
+                        GetLine(tile, Direction.UpLeft, piece, max),
+                        GetLine(tile, Direction.DownRight, piece, max));
                 case Orientation.RvDiagonal:
-                    tiles.AddRange(GetSameTiles(tile, Direction.UpRight, piece, overflow, includeSurrounding));
-                    tiles.AddRange(GetSameTiles(tile, Direction.DownLeft, piece, overflow, includeSurrounding));
-                    break;
+                    return new LineGroup(
+                        GetLine(tile, Direction.UpRight, piece, max),
+                        GetLine(tile, Direction.DownLeft, piece, max));
             }
 
-            return tiles;
+            return new LineGroup();
         }
 
         public Player GetCurrentPlayer()
@@ -184,21 +190,21 @@ namespace Gomoku.Board
             if (IsGameOver)
                 return;
 
+            Tile _tile = Tiles[tile.X, tile.Y];
+
             // Check for already placed tile
-            if (tile.Piece.Symbol != Piece.EMPTY.Symbol)
+            if (_tile.Piece.Symbol != Piece.EMPTY.Symbol)
                 return;
 
-            tile.Piece = GetCurrentPlayer().Piece;
+            _tile.Piece = GetCurrentPlayer().Piece;
 
             // Check for game over
             for (int i = 0; i <= 3; i++)
             {
-                List<Tile> tiles = GetSameTiles(tile, (Orientation)i, tile.Piece);
-                int samePieces = tiles.FindAll(t => t.Piece == tile.Piece).Count;
-                bool hasBlank = tiles.Exists(t => t.Piece == Piece.EMPTY);
+                LineGroup lineGroup = GetLineGroup(_tile, (Orientation)i, _tile.Piece);
 
-                if (samePieces + 1 == WINPIECES
-                    && hasBlank)
+                if (lineGroup.CountChainTiles() + 1 == WINPIECES
+                    && lineGroup.CountBlockTiles() < 2)
                 {
                     IsGameOver = true;
                     return;
@@ -206,18 +212,24 @@ namespace Gomoku.Board
             }
 
             // Increment turn
-            Turn = (Turn + 1) % Players.Count;
-
-            // AI
-            if (Turn == 1)
-            {
-                Play(new Gomoku.AI.GomokuAIv1().Play(this, GetCurrentPlayer()));
-            }
+            Turn = (Turn + 1) % Players.Count;        
         }
 
         public object Clone()
         {
-            return this.MemberwiseClone();
+            Board b = new Board(Width, Height, Players);
+            for (int i = 0; i < Width; i++)
+                for (int j = 0; j < Height; j++)
+                {
+                    Tile tile = Tiles[i, j];
+                    b.Tiles[i, j] = new Tile(i, j);
+                    b.Tiles[i, j].Piece = tile.Piece;
+                }
+            b._turn = _turn;
+            b._isGameOver = _isGameOver;
+            return b;
+
+            // return this.MemberwiseClone();
         }
     }
 }
