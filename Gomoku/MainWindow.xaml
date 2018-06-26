@@ -50,10 +50,12 @@
         </Grid.ColumnDefinitions>
 
         <ScrollViewer VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Auto">
+                      HorizontalScrollBarVisibility="Auto"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center">
             <StackPanel x:Name="HeightStackPanel"
                         Style="{StaticResource BoardStackPanelStyle}"
-                        Orientation="Vertical" />
+                        Orientation="Vertical"/>
         </ScrollViewer>
         <ScrollViewer Grid.Column="1"
                       Padding="10"
