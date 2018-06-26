@@ -101,7 +101,7 @@ namespace Gomoku
             MessageBox.Show(e.Winner.Name + " wins!");
         }
 
-        private void TileButton_Click(object sender, RoutedEventArgs e)
+        private async void TileButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender == null || Board.IsGameOver)
                 return;
@@ -129,7 +129,7 @@ namespace Gomoku
                 // AI
                 if (Board.GetCurrentPlayer().IsAuto && UseAI.IsChecked == true)
                 {
-                    //await Task.Delay(100);
+                    await Task.Delay(100);
                     TileButton_Click(AI.Play(Board, out choices)?.UIElement, null);
                 }
             }

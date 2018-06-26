@@ -80,13 +80,20 @@ namespace Gomoku.AI
                 {
                     for (int i = 0; i <= 3; i++)
                     {
-                        LineGroup lineGroup = board.GetLineGroup(tile, (Orientation)i, player.Piece, 4);
+                        LineGroup lineGroup = board.GetLineGroup(tile, (Orientation)i, player.Piece, 5);
                         int chainTilesCount = lineGroup.CountChainTiles();
                         int blockTilesCount = lineGroup.CountBlockTiles();
                         if (blockTilesCount == 0)
                         {
-                            double _point = (1.0 * (1.0 - Math.Pow(2.0, chainTilesCount)) / (1.0 - 2.0));
-                            point += _point * _point;
+                            if (chainTilesCount + 1 >= Board.Board.WINPIECES)
+                            {
+                                point += chainTilesCount;
+                            }
+                            else
+                            {
+                                double _point = (1.0 * (1.0 - Math.Pow(2.0, chainTilesCount)) / (1.0 - 2.0));
+                                point += _point * _point;
+                            }
                         }
                         else if (blockTilesCount == 1)
                         {
