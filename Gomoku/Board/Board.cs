@@ -217,9 +217,9 @@ namespace Gomoku.Board
             {
                 LineGroup lineGroup = GetLineGroup(_tile, (Orientation)i, _tile.Piece);
 
-                if (lineGroup.IsChained()
-                    && lineGroup.CountSameTiles() + 1 == WINPIECES
-                    && lineGroup.CountBlockTiles() < 2)
+                if (lineGroup.IsChained
+                    && lineGroup.SameTileCount + 1 == WINPIECES
+                    && lineGroup.BlockTileCount < 2)
                 {
                     IsGameOver = true;
                     return;

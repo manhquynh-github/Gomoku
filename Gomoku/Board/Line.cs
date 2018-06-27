@@ -14,12 +14,12 @@ namespace Gomoku.Board
         public readonly bool IsChained;
 
         public Line(
-            IReadOnlyList<Tile> chainTiles, 
+            IReadOnlyList<Tile> sameTiles, 
             IReadOnlyList<Tile> blankTiles,
             IReadOnlyList<Tile> blockTiles,
             bool isChained)
         {
-            SameTiles = chainTiles;
+            SameTiles = sameTiles;
             BlankTiles = blankTiles;
             BlockTiles = blockTiles;
             IsChained = isChained;

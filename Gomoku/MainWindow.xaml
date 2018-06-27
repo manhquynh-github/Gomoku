@@ -58,8 +58,9 @@
                         Orientation="Vertical"/>
         </ScrollViewer>
         <ScrollViewer Grid.Column="1"
-                      Padding="10"
-                      VerticalScrollBarVisibility="Auto">
+                      Padding="20"
+                      VerticalScrollBarVisibility="Auto"
+                      VerticalAlignment="Center">
             <StackPanel Orientation="Vertical">
                 <StackPanel.Resources>
                     <Style TargetType="Button">

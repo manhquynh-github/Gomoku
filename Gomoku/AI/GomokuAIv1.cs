@@ -72,7 +72,7 @@ namespace Gomoku.AI
                         board.GetLineGroup(
                             tile, 
                             (Orientation)i, 
-                            Piece.EMPTY, 2).GetSameTiles())
+                            Piece.EMPTY, 2).SameTiles)
                     {
                         playableTiles.Add(t);
                     }
@@ -116,8 +116,8 @@ namespace Gomoku.AI
                                 5);
                         
                         // Calculate points
-                        int sameTilesCount = lineGroup.CountSameTiles();
-                        int blockTilesCount = lineGroup.CountBlockTiles();
+                        int sameTilesCount = lineGroup.SameTileCount;
+                        int blockTilesCount = lineGroup.BlockTileCount;
 
                         // When the line is not blocked
                         if (blockTilesCount == 0)
@@ -139,7 +139,7 @@ namespace Gomoku.AI
 
                                 // Finally the point is added with the
                                 // power of itself
-                                point += Math.Pow(_point, lineGroup.IsChained() ? 2.0 : 1.5);
+                                point += Math.Pow(_point, lineGroup.IsChained ? 2.0 : 1.5);
                             }
                         }
                         // When the line is partially blocked,
@@ -153,7 +153,7 @@ namespace Gomoku.AI
 
                         //point += (1.0 * (1.0 - Math.Pow(2.0, lineGroup.CountChainTiles())) / (1.0 - 2.0));
                         //point += 0.25 * lineGroup.CountBlankTiles();
-                        //point -= 1.0 * lineGroup.CountBlockTiles();
+                        //point -= 1.0 * lineGroup.BlockTileCount;
                     }
                 }
 

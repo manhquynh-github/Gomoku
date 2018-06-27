@@ -22,45 +22,40 @@ namespace Gomoku.Board
             Lines.AddRange(lines);
         }
 
-        public int CountSameTiles()
+        public int SameTileCount => Lines.Sum(l => l.SameTiles.Count);
+        public int BlankTileCount => Lines.Sum(l => l.BlankTiles.Count);
+        public int BlockTileCount => Lines.Sum(l => l.BlockTiles.Count);
+        public bool IsChained => !Lines.Exists(l => !l.IsChained);
+
+        public IReadOnlyList<Tile> SameTiles
         {
-            return Lines.Sum(l => l.SameTiles.Count);
+            get
+            {
+                List<Tile> tiles = new List<Tile>();
+                tiles.AddRange(Lines.SelectMany(l => l.SameTiles));
+                return tiles;
+            }
         }
 
-        public int CountBlankTiles()
+        public IReadOnlyList<Tile> BlankTiles
         {
-            return Lines.Sum(l => l.BlankTiles.Count);
+            get
+            {
+                List<Tile> tiles = new List<Tile>();
+                tiles.AddRange(Lines.SelectMany(l => l.BlankTiles));
+                return tiles;
+            }
         }
 
-        public int CountBlockTiles()
+        public IReadOnlyList<Tile> BlockTiles
         {
-            return Lines.Sum(l => l.BlockTiles.Count);
+            get
+            {
+                List<Tile> tiles = new List<Tile>();
+                tiles.AddRange(Lines.SelectMany(l => l.BlockTiles));
+                return tiles;
+            }
         }
 
-        public IReadOnlyList<Tile> GetSameTiles()
-        {
-            List<Tile> tiles = new List<Tile>();
-            tiles.AddRange(Lines.SelectMany(l => l.SameTiles));
-            return tiles;
-        }
-
-        public IReadOnlyList<Tile> GetBlankTiles()
-        {
-            List<Tile> tiles = new List<Tile>();
-            tiles.AddRange(Lines.SelectMany(l => l.BlankTiles));
-            return tiles;
-        }
-
-        public IReadOnlyList<Tile> GetBlockTiles()
-        {
-            List<Tile> tiles = new List<Tile>();
-            tiles.AddRange(Lines.SelectMany(l => l.BlockTiles));
-            return tiles;
-        }
-
-        public bool IsChained()
-        {
-            return !Lines.Exists(l => !l.IsChained);
-        }
     }
 }
