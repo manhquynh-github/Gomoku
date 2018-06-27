@@ -52,6 +52,15 @@ namespace Gomoku
             return result.Item1;
         }
 
+        private void CleanAnalyze()
+        {
+            if (choices != null && choices.Count > 0)
+                foreach (var t in choices)
+                {
+                    ((Button)t.UIElement).BorderThickness = new Thickness(1.0);
+                }
+        }
+
         private void InitializeBoard(int width, int height)
         {
             Style widthStackPanelStyle = Resources["WidthStackPanelStyle"] as Style;
@@ -114,7 +123,7 @@ namespace Gomoku
             }
 
             // AI
-            if (e.Player.IsAuto && UseAI.IsChecked == true)
+            if (!Board.IsGameOver && e.Player.IsAuto && UseAI.IsChecked == true)
             {
                 Tile tile = await AIPlayAsync();
                 TileButton_Click(tile?.UIElement, null);
@@ -147,13 +156,7 @@ namespace Gomoku
             if (button.DataContext != null)
             {
                 Tile tile = button.DataContext as Tile;
-
-                if (choices != null && choices.Count > 0)
-                    foreach (var t in choices)
-                    {
-                        ((Button)t.UIElement).BorderThickness = new Thickness(1.0);
-                    }
-
+                CleanAnalyze();
                 Board.Play(tile);
             }
         }
@@ -179,11 +182,13 @@ namespace Gomoku
 
         private void RestartButton_Click(object sender, RoutedEventArgs e)
         {
+            CleanAnalyze();
             Board.Restart();
         }
 
         private void UndoButton_Click(object sender, RoutedEventArgs e)
         {
+            CleanAnalyze();
             Board.Undo();
         }
     }
