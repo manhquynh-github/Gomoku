@@ -46,13 +46,23 @@ namespace Gomoku.AI
 
         protected List<NTree<AINode>> Search(Board.Board board, Player originalPlayer, int level)
         {
-            // Get current player to determine 
-            // which side to search for
-            Player player = board.GetCurrentPlayer();
-
             // Get all the placed tiles to determine
             // all the correct playable tiles
-            IEnumerable<Tile> placedTiles = board.History;
+            Stack<Tile> placedTiles = board.History;
+
+            // If it is a new game,
+            // select the center most
+            if (placedTiles.Count == 0)
+            {
+                return new List<NTree<AINode>>()
+                {
+                    new NTree<AINode>(
+                        new AINode(
+                            board.Tiles[board.Width / 2, board.Height / 2],
+                            board,
+                            0))
+                };
+            }
 
             // Get all the playable tiles using a HashSet
             // where only distinct tiles are added
@@ -74,6 +84,10 @@ namespace Gomoku.AI
                     }
                 }
             }
+
+            // Get current player to determine 
+            // which side to search for
+            Player player = board.GetCurrentPlayer();
 
             // Populate corresponding NTrees with each
             // playable tile found.
