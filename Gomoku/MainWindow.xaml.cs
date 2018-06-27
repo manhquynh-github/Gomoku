@@ -45,6 +45,13 @@ namespace Gomoku
             AI = new GomokuAIv1();
         }
 
+        private async Task<Tile> AIPlayAsync()
+        {
+            var result = await AI.PlayAsync(Board);
+            choices = result.Item2;
+            return result.Item1;
+        }
+
         private void InitializeBoard(int width, int height)
         {
             Style widthStackPanelStyle = Resources["WidthStackPanelStyle"] as Style;
@@ -94,11 +101,11 @@ namespace Gomoku
             }
 
             Board.BoardChanging += Board_BoardChanging;
-            Board.BoardChanged += Board_BoardChanged;
+            Board.BoardChanged += Board_BoardChangedAsync;
             Board.GameOver += Board_GameOver;
         }
 
-        private void Board_BoardChanged(BoardChangedEventArgs e)
+        private async void Board_BoardChangedAsync(BoardChangedEventArgs e)
         {
             var button = (Button)e.Tile?.UIElement;
             if (button != null)
@@ -109,7 +116,8 @@ namespace Gomoku
             // AI
             if (e.Player.IsAuto && UseAI.IsChecked == true)
             {
-                TileButton_Click(AI.Play(Board, out choices)?.UIElement, null);
+                Tile tile = await AIPlayAsync();
+                TileButton_Click(tile?.UIElement, null);
             }
         }
 
@@ -147,18 +155,19 @@ namespace Gomoku
             }
         }
 
-        private void UseAICheckBox_Checked(object sender, RoutedEventArgs e)
+        private async void UseAICheckBox_Checked(object sender, RoutedEventArgs e)
         {
             // AI
             if (Board.GetCurrentPlayer().IsAuto && UseAI.IsChecked == true)
             {
-                TileButton_Click(AI.Play(Board, out choices)?.UIElement, null);
+                Tile tile = await AIPlayAsync();
+                TileButton_Click(tile?.UIElement, null);
             }
         }
 
-        private void AnalyzeButton_Click(object sender, RoutedEventArgs e)
+        private async void AnalyzeButton_Click(object sender, RoutedEventArgs e)
         {
-            AI.Play(Board, out choices);
+            await AIPlayAsync();
             foreach (var tile in choices)
             {
                 ((Button)tile.UIElement).BorderThickness = new Thickness(2.0);

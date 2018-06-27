@@ -214,10 +214,10 @@ namespace Gomoku.AI
         /// <param name="board">the board used for searching</param>
         /// <param name="choices">all the results of the search</param>
         /// <returns>a <see cref="Tile"/> that the AI selects.</returns>
-        public Tile Play(Board.Board board, out List<Tile> choices)
+        public Tuple<Tile, List<Tile>> Play(Board.Board board)
         {
             // Initialize the choices
-            choices = new List<Tile>();
+            List<Tile> choices = new List<Tile>();
 
             // If game is over then stop            
             if (board.IsGameOver)
@@ -231,13 +231,13 @@ namespace Gomoku.AI
             // If found no result, return null
             if (result.Count == 0)
             {
-                return null;
+                return new Tuple<Tile, List<Tile>>(null, choices);
             }
             // If found one result, return the first
             else if (result.Count == 1)
             {
                 choices.Add(result[0].Value.Tile);
-                return choices[0];
+                return new Tuple<Tile, List<Tile>>(choices[0], choices);
             }
             // Otherwise
             else
@@ -259,8 +259,13 @@ namespace Gomoku.AI
 
                 // Randomly pick one result from the choices
                 int choice = App.Random.Next(choices.Count);
-                return choices[choice];
+                return new Tuple<Tile, List<Tile>>(choices[choice], choices);
             }
+        }
+
+        public async Task<Tuple<Tile, List<Tile>>> PlayAsync(Board.Board board)
+        {
+            return await Task.Run(() => Play(board));
         }
 
         protected void PrintSearchResult(List<NTree<AINode>> nTrees)
