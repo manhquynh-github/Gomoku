@@ -145,6 +145,11 @@ namespace Gomoku
                 MessageBox.Show("Tie!");
             else
                 MessageBox.Show(e.Winner.Name + " wins!");
+
+            var players = Board.Players;
+            Player last = players[players.Count - 1];
+            players.RemoveAt(players.Count - 1);
+            players.Insert(0, last);
         }
 
         private void TileButton_Click(object sender, RoutedEventArgs e)

@@ -250,8 +250,12 @@ namespace Gomoku.Board
 
             Tile tile = History.Pop();
             BoardChanging?.Invoke(new BoardChangingEventArgs(Turn, GetCurrentPlayer(), tile));
+
             tile.Piece = Piece.EMPTY;
             Turn = (Turn - 1 + Players.Count) % Players.Count;
+            if (IsGameOver)
+                IsGameOver = false;
+
             BoardChanged?.Invoke(new BoardChangedEventArgs(Turn, GetCurrentPlayer(), LastPlayedTile));
         }
 

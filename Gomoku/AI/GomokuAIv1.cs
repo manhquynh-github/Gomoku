@@ -78,7 +78,8 @@ namespace Gomoku.AI
                         board.GetLineGroup(
                             tile, 
                             (Orientation)i, 
-                            Piece.EMPTY, 2).SameTiles)
+                            Piece.EMPTY, 
+                            2).SameTiles)
                     {
                         playableTiles.Add(t);
                     }
