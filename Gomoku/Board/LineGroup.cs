@@ -22,9 +22,9 @@ namespace Gomoku.Board
             Lines.AddRange(lines);
         }
 
-        public int CountChainTiles()
+        public int CountSameTiles()
         {
-            return Lines.Sum(l => l.ChainTiles.Count);
+            return Lines.Sum(l => l.SameTiles.Count);
         }
 
         public int CountBlankTiles()
@@ -37,10 +37,10 @@ namespace Gomoku.Board
             return Lines.Sum(l => l.BlockTiles.Count);
         }
 
-        public IReadOnlyList<Tile> GetChainTiles()
+        public IReadOnlyList<Tile> GetSameTiles()
         {
             List<Tile> tiles = new List<Tile>();
-            tiles.AddRange(Lines.SelectMany(l => l.ChainTiles));
+            tiles.AddRange(Lines.SelectMany(l => l.SameTiles));
             return tiles;
         }
 
@@ -56,6 +56,11 @@ namespace Gomoku.Board
             List<Tile> tiles = new List<Tile>();
             tiles.AddRange(Lines.SelectMany(l => l.BlockTiles));
             return tiles;
+        }
+
+        public bool IsChained()
+        {
+            return !Lines.Exists(l => !l.IsChained);
         }
     }
 }

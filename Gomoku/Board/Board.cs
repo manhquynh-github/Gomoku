@@ -116,39 +116,51 @@ namespace Gomoku.Board
             Piece piece,
             int max = 5)
         {
-            List<Tile> chainTiles = new List<Tile>();
+            List<Tile> sameTiles = new List<Tile>();
             List<Tile> blankTiles = new List<Tile>();
             List<Tile> blockTiles = new List<Tile>();
 
             string symbol = piece.Symbol;
             int count = 0;
+            bool chainBreak = false;
+            bool previouslyBlank = false;
 
             RunTilesFunction(
                 tile,
                 direction,
                 t =>
                 {
-                    if (count == max)
+                    if (count++ == max)
                         return false;
 
                     if (t.Piece.Symbol == symbol)
                     {
-                        chainTiles.Add(t);
-                        count++;
+                        if (previouslyBlank)
+                            chainBreak = true;
+                        
+                        previouslyBlank = false;
+
+                        sameTiles.Add(t);
+                        return true;
+                    }
+                    else if (t.Piece.Symbol == Piece.EMPTY.Symbol)
+                    {
+                        if (previouslyBlank || chainBreak)
+                            return false;
+                        
+                        previouslyBlank = true;
+
+                        blankTiles.Add(t);
                         return true;
                     }
                     else
                     {
-                        if (t.Piece.Symbol == Piece.EMPTY.Symbol)
-                            blankTiles.Add(t);
-                        else
-                            blockTiles.Add(t);
-
+                        blockTiles.Add(t);
                         return false;
                     }
                 });
 
-            return new Line(chainTiles, blankTiles, blockTiles);
+            return new Line(sameTiles, blankTiles, blockTiles, !chainBreak);
         }
 
         public LineGroup GetLineGroup(
@@ -205,7 +217,8 @@ namespace Gomoku.Board
             {
                 LineGroup lineGroup = GetLineGroup(_tile, (Orientation)i, _tile.Piece);
 
-                if (lineGroup.CountChainTiles() + 1 == WINPIECES
+                if (lineGroup.IsChained()
+                    && lineGroup.CountSameTiles() + 1 == WINPIECES
                     && lineGroup.CountBlockTiles() < 2)
                 {
                     IsGameOver = true;
@@ -214,7 +227,7 @@ namespace Gomoku.Board
             }
 
             // Increment turn
-            Turn = (Turn + 1) % Players.Count;        
+            Turn = (Turn + 1) % Players.Count;
         }
 
         public void Restart()

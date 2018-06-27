@@ -35,5 +35,6 @@ namespace Gomoku
     /// </summary>
     public partial class App : Application
     {
+        public static readonly Random Random = new Random();
     }
 }

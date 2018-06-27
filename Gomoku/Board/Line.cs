@@ -8,18 +8,21 @@ namespace Gomoku.Board
 {
     public class Line
     {
-        public readonly IReadOnlyList<Tile> ChainTiles;
+        public readonly IReadOnlyList<Tile> SameTiles;
         public readonly IReadOnlyList<Tile> BlankTiles;
         public readonly IReadOnlyList<Tile> BlockTiles;
+        public readonly bool IsChained;
 
         public Line(
             IReadOnlyList<Tile> chainTiles, 
             IReadOnlyList<Tile> blankTiles,
-            IReadOnlyList<Tile> blockTiles)
+            IReadOnlyList<Tile> blockTiles,
+            bool isChained)
         {
-            ChainTiles = chainTiles;
+            SameTiles = chainTiles;
             BlankTiles = blankTiles;
             BlockTiles = blockTiles;
+            IsChained = isChained;
         }
     }
 }

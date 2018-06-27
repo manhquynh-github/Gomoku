@@ -43,7 +43,7 @@ namespace Gomoku.AI
             }
         }
 
-        protected List<NTree<AINode>> Search(Board.Board board, int level)
+        protected List<NTree<AINode>> Search(Board.Board board, Player originalPlayer, int level)
         {
             // Get current player to determine 
             // which side to search for
@@ -72,7 +72,7 @@ namespace Gomoku.AI
                         board.GetLineGroup(
                             tile, 
                             (Orientation)i, 
-                            Piece.EMPTY, 2).GetChainTiles())
+                            Piece.EMPTY, 2).GetSameTiles())
                     {
                         playableTiles.Add(t);
                     }
@@ -116,7 +116,7 @@ namespace Gomoku.AI
                                 5);
                         
                         // Calculate points
-                        int chainTilesCount = lineGroup.CountChainTiles();
+                        int sameTilesCount = lineGroup.CountSameTiles();
                         int blockTilesCount = lineGroup.CountBlockTiles();
 
                         // When the line is not blocked
@@ -124,9 +124,9 @@ namespace Gomoku.AI
                         {
                             // If the line chain has more tiles than win pieces,
                             // then this tile is less worth.
-                            if (chainTilesCount + 1 >= Board.Board.WINPIECES)
+                            if (sameTilesCount + 1 >= Board.Board.WINPIECES)
                             {
-                                point += chainTilesCount;
+                                point += sameTilesCount;
                             }
                             // Otherwise
                             else
@@ -134,20 +134,20 @@ namespace Gomoku.AI
                                 // Calculate point using Geometric series of 2.0
                                 // so that the more chain it has, the more
                                 // valuable the line
-                                double _point = 
-                                    (1.0 * (1.0 - Math.Pow(2.0, chainTilesCount)) / (1.0 - 2.0));
+                                double _point =
+                                    (1.0 * (1.0 - Math.Pow(2.0, sameTilesCount)) / (1.0 - 2.0));
 
                                 // Finally the point is added with the
                                 // power of itself
-                                point += _point * _point;
+                                point += Math.Pow(_point, lineGroup.IsChained() ? 2.0 : 1.5);
                             }
                         }
                         // When the line is partially blocked,
                         // only add the point which equals to
-                        // the chain count
+                        // the same count
                         else if (blockTilesCount == 1)
                         {
-                            point += chainTilesCount;
+                            point += sameTilesCount;
                         }
                         // Otherwise, add no point.
 
@@ -180,26 +180,29 @@ namespace Gomoku.AI
                 if (level > 0 && level <= Level)
                 {
                     // Evaluate children nodes by recursion
-                    nTree.Nodes = Search(b, level - 1);
+                    nTree.Nodes = Search(b, originalPlayer, level - 1);
 
-                    // Get max point of the children nodes
-                    double maxPoint = nTree.Nodes.Max(n => n.Value.Point);
+                    if (nTree.Nodes.Count > 0)
+                    {
+                        // Get max point of the children nodes
+                        double maxPoint = nTree.Nodes.First().Value.Point;
 
-                    // Minus the current node's point by the max point
-                    // so if the children node's point is high,
-                    // this node is less likely to be selected.
-                    node.Point -= maxPoint;
-                    
-                    // The more the same chilren nodes with same max point
-                    // the less likely the node is to be selected.
-                    node.Point -= 0.01 * nTree.Nodes.Where(n => n.Value.Point == maxPoint).Count();
+                        // Minus the current node's point by the max point
+                        // so if the children node's point is high,
+                        // this node is less likely to be selected.
+                        node.Point -= maxPoint;
 
-                    // Remove all chilren nodes with lower points
-                    nTree.Nodes.RemoveAll(n => n.Value.Point < maxPoint);
+                        // Remove all chilren nodes with lower points
+                        nTree.Nodes.RemoveAll(n => n.Value.Point < maxPoint);
 
-                    // Call GC to free up memory
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
+                        // Call GC to free up memory
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
+
+                        // The more the chilren nodes are left,
+                        // the less likely the node is to be selected.
+                        node.Point -= 0.01 * nTree.Nodes.Count;
+                    }
                 }
             }
 
@@ -224,14 +227,10 @@ namespace Gomoku.AI
             if (board.IsGameOver)
                 return null;
 
-            var result = Search(board, 1);
+            var result = Search(board, board.GetCurrentPlayer(), 1);
 
             // Print out to console for debugging
-            //foreach (var node in result)
-            //{
-            //    Console.WriteLine(node.Value.Tile.X + "," + node.Value.Tile.Y + " = " + node.Value.Point);
-            //}
-            //Console.WriteLine("--------------");
+            //PrintSearchResult(result);
 
             // If found no result, return null
             if (result.Count == 0)
@@ -263,11 +262,18 @@ namespace Gomoku.AI
                 GC.WaitForPendingFinalizers();
 
                 // Randomly pick one result from the choices
-                Random random = new Random();
-                int choice = random.Next(choices.Count);
+                int choice = App.Random.Next(choices.Count);
                 return choices[choice];
             }
         }
 
+        protected void PrintSearchResult(List<NTree<AINode>> nTrees)
+        {
+            foreach (var node in nTrees)
+            {
+                Console.WriteLine(node.Value.Tile.X + "," + node.Value.Tile.Y + " = " + node.Value.Point);
+            }
+            Console.WriteLine("--------------");
+        }
     }
 }
