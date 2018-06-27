@@ -93,7 +93,33 @@ namespace Gomoku
                 HeightStackPanel.Children.Add(widthStackPanel);
             }
 
+            Board.BoardChanging += Board_BoardChanging;
+            Board.BoardChanged += Board_BoardChanged;
             Board.GameOver += Board_GameOver;
+        }
+
+        private void Board_BoardChanged(BoardChangedEventArgs e)
+        {
+            var button = (Button)e.Tile?.UIElement;
+            if (button != null)
+            {
+                button.BorderBrush = new SolidColorBrush(Colors.Red);
+            }
+
+            // AI
+            if (e.Player.IsAuto && UseAI.IsChecked == true)
+            {
+                TileButton_Click(AI.Play(Board, out choices)?.UIElement, null);
+            }
+        }
+
+        private void Board_BoardChanging(BoardChangingEventArgs e)
+        {
+            var button = (Button)e.Tile?.UIElement;
+            if (button != null)
+            {
+                button.BorderBrush = new SolidColorBrush(Colors.Gray);
+            }
         }
 
         private void Board_GameOver(GameOverEventArgs e)
@@ -101,7 +127,7 @@ namespace Gomoku
             MessageBox.Show(e.Winner.Name + " wins!");
         }
 
-        private async void TileButton_Click(object sender, RoutedEventArgs e)
+        private void TileButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender == null || Board.IsGameOver)
                 return;
@@ -117,27 +143,17 @@ namespace Gomoku
                         ((Button)t.UIElement).BorderThickness = new Thickness(1.0);
                     }
 
-                if (Board.LastPlayedTile != null)
-                {
-                    ((Button)Board.LastPlayedTile.UIElement).BorderBrush = new SolidColorBrush(Colors.Gray);
-                }
-
-                Board.Play(tile);
-                ((Button)tile.UIElement).BorderBrush = new SolidColorBrush(Colors.Red);
-                //button.Content = tile.Piece.Symbol;
-
-                // AI
-                if (Board.GetCurrentPlayer().IsAuto && UseAI.IsChecked == true)
-                {
-                    await Task.Delay(100);
-                    TileButton_Click(AI.Play(Board, out choices)?.UIElement, null);
-                }
+                Board.Play(tile);            
             }
         }
 
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        private void UseAICheckBox_Checked(object sender, RoutedEventArgs e)
         {
-
+            // AI
+            if (Board.GetCurrentPlayer().IsAuto && UseAI.IsChecked == true)
+            {
+                TileButton_Click(AI.Play(Board, out choices)?.UIElement, null);
+            }
         }
 
         private void AnalyzeButton_Click(object sender, RoutedEventArgs e)
@@ -152,6 +168,11 @@ namespace Gomoku
         private void RestartButton_Click(object sender, RoutedEventArgs e)
         {
             Board.Restart();
+        }
+
+        private void UndoButton_Click(object sender, RoutedEventArgs e)
+        {
+            Board.Undo();
         }
     }
 }

@@ -70,11 +70,13 @@
                 </StackPanel.Resources>
                 <CheckBox x:Name="UseAI"
                           Content="UseAI"
-                          Checked="CheckBox_Checked" />
+                          Checked="UseAICheckBox_Checked" />
                 <Button Content="Analyze"
                         Click="AnalyzeButton_Click" />
                 <Button Content="Restart"
                         Click="RestartButton_Click" />
+                <Button Content="Undo"
+                        Click="UndoButton_Click" />
             </StackPanel>
         </ScrollViewer>
     </Grid>

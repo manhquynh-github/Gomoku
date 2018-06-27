@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Gomoku.Board;
 
 namespace Gomoku.AI
@@ -51,12 +52,7 @@ namespace Gomoku.AI
 
             // Get all the placed tiles to determine
             // all the correct playable tiles
-            List<Tile> placedTiles = new List<Tile>();
-            foreach (var tile in board.Tiles)
-            {
-                if (tile.Piece != Piece.EMPTY)
-                    placedTiles.Add(tile);
-            }
+            IEnumerable<Tile> placedTiles = board.History;
 
             // Get all the playable tiles using a HashSet
             // where only distinct tiles are added

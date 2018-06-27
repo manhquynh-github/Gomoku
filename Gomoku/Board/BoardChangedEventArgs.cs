@@ -2,17 +2,17 @@
 
 namespace Gomoku.Board
 {
-    public class TurnChangedEventArgs : EventArgs
+    public class BoardChangedEventArgs : EventArgs
     {
-        public readonly Board Board;
         public readonly int Turn;
         public readonly Player Player;
+        public readonly Tile Tile;
 
-        public TurnChangedEventArgs(Board board, int turn, Player player)
+        public BoardChangedEventArgs(int turn, Player player, Tile tile)
         {
-            Board = board;
             Turn = turn;
             Player = player;
+            Tile = tile;
         }
     }
 }

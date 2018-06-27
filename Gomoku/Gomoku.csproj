@@ -60,8 +60,9 @@
     <Compile Include="Board\LineGroup.cs" />
     <Compile Include="Board\Player.cs" />
     <Compile Include="Board\Tile.cs" />
-    <Compile Include="Board\TurnChangedEventArgs.cs" />
+    <Compile Include="Board\BoardChangedEventArgs.cs" />
     <Compile Include="Board\BoardEventHandler.cs" />
+    <Compile Include="Board\BoardChangingEventArgs.cs" />
     <Compile Include="ViewModelBase.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
