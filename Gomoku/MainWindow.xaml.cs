@@ -132,7 +132,10 @@ namespace Gomoku
 
         private void Board_GameOver(GameOverEventArgs e)
         {
-            MessageBox.Show(e.Winner.Name + " wins!");
+            if (e.Winner == null)
+                MessageBox.Show("Tie!");
+            else
+                MessageBox.Show(e.Winner.Name + " wins!");
         }
 
         private void TileButton_Click(object sender, RoutedEventArgs e)
@@ -151,7 +154,7 @@ namespace Gomoku
                         ((Button)t.UIElement).BorderThickness = new Thickness(1.0);
                     }
 
-                Board.Play(tile);            
+                Board.Play(tile);
             }
         }
 
