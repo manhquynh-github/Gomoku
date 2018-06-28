@@ -128,10 +128,8 @@ namespace Gomoku
 
         private async void Board_BoardChangedAsync(BoardChangedEventArgs e)
         {
-            if (e.Tile == null)
-                return;
-
-            Buttons[e.Tile].BorderBrush = new SolidColorBrush(Colors.Red);
+            if (e.Tile != null)
+                Buttons[e.Tile].BorderBrush = new SolidColorBrush(Colors.Red);
 
             // AI
             if (!Board.IsGameOver && e.Player.IsAuto && UseAI.IsChecked == true)
@@ -140,10 +138,8 @@ namespace Gomoku
 
         private void Board_BoardChanging(BoardChangingEventArgs e)
         {
-            if (e.Tile == null)
-                return;
-
-            Buttons[e.Tile].BorderBrush = new SolidColorBrush(Colors.Gray);
+            if (e.Tile != null)
+                Buttons[e.Tile].BorderBrush = new SolidColorBrush(Colors.Gray);
         }
 
         private void Board_GameOver(GameOverEventArgs e)
