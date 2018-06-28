@@ -24,7 +24,8 @@ namespace Gomoku
     {
         public readonly GomokuAIv1 AI;
         public readonly Board.Board Board;
-        private List<Tile> choices;
+        public readonly Dictionary<Tile, Button> Buttons;
+        private List<Tile> Choices;
 
         public MainWindow() :
             this(15, 15,
@@ -41,23 +42,34 @@ namespace Gomoku
             InitializeComponent();
 
             Board = new Board.Board(boardWidth, boardHeight, players);
+            Buttons = new Dictionary<Tile, Button>();
             InitializeBoard(boardWidth, boardHeight);
             AI = new GomokuAIv1();
+            Choices = new List<Tile>();
         }
 
         private async Task<Tile> AIPlayAsync()
         {
             var result = await AI.PlayAsync(Board);
-            choices = result.Item2;
+            Choices = result.Item2;
             return result.Item1;
+        }
+
+        private async Task RunAI()
+        {
+            Tile tile = await AIPlayAsync();
+            if (tile == null)
+                return;
+
+            TileButton_Click(Buttons[tile], null);
         }
 
         private void CleanAnalyze()
         {
-            if (choices != null && choices.Count > 0)
-                foreach (var t in choices)
+            if (Choices != null && Choices.Count > 0)
+                foreach (var tile in Choices)
                 {
-                    ((Button)t.UIElement).BorderThickness = new Thickness(1.0);
+                    Buttons[tile].BorderThickness = new Thickness(1.0);
                 }
         }
 
@@ -102,7 +114,7 @@ namespace Gomoku
                         DataContext = Board.Tiles[j, i],
                         Style = tileStyle
                     };
-                    Board.Tiles[j, i].UIElement = tileButton;
+                    Buttons.Add(Board.Tiles[j, i], tileButton);
                     widthStackPanel.Children.Add(tileButton);
                 }
 
@@ -116,27 +128,22 @@ namespace Gomoku
 
         private async void Board_BoardChangedAsync(BoardChangedEventArgs e)
         {
-            var button = (Button)e.Tile?.UIElement;
-            if (button != null)
-            {
-                button.BorderBrush = new SolidColorBrush(Colors.Red);
-            }
+            if (e.Tile == null)
+                return;
+
+            Buttons[e.Tile].BorderBrush = new SolidColorBrush(Colors.Red);
 
             // AI
             if (!Board.IsGameOver && e.Player.IsAuto && UseAI.IsChecked == true)
-            {
-                Tile tile = await AIPlayAsync();
-                TileButton_Click(tile?.UIElement, null);
-            }
+                await RunAI();
         }
 
         private void Board_BoardChanging(BoardChangingEventArgs e)
         {
-            var button = (Button)e.Tile?.UIElement;
-            if (button != null)
-            {
-                button.BorderBrush = new SolidColorBrush(Colors.Gray);
-            }
+            if (e.Tile == null)
+                return;
+
+            Buttons[e.Tile].BorderBrush = new SolidColorBrush(Colors.Gray);
         }
 
         private void Board_GameOver(GameOverEventArgs e)
@@ -170,18 +177,15 @@ namespace Gomoku
         {
             // AI
             if (Board.GetCurrentPlayer().IsAuto && UseAI.IsChecked == true)
-            {
-                Tile tile = await AIPlayAsync();
-                TileButton_Click(tile?.UIElement, null);
-            }
+                await RunAI();
         }
 
         private async void AnalyzeButton_Click(object sender, RoutedEventArgs e)
         {
             await AIPlayAsync();
-            foreach (var tile in choices)
+            foreach (var tile in Choices)
             {
-                ((Button)tile.UIElement).BorderThickness = new Thickness(2.0);
+                Buttons[tile].BorderThickness = new Thickness(2.0);
             }
         }
 

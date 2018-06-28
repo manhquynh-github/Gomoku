@@ -16,10 +16,6 @@ namespace Gomoku.Board
         /// The Y coordinate of the <see cref="Tile"/>
         /// </summary>
         public int Y { get; set; }
-        /// <summary>
-        /// The <see cref="UIElement"/> assocating with this <see cref="Tile"/>
-        /// </summary>
-        public UIElement UIElement { get; set; }
 
         /// <summary>
         /// The <see cref="Piece"/> this <see cref="Tile"/> currently holds
