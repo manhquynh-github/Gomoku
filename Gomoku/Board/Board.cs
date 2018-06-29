@@ -217,12 +217,16 @@ namespace Gomoku.Board
                     {
                         IsGameOver = true;
                         GameOver?.Invoke(new GameOverEventArgs(true, Turn, oldPlayer));
+                        break;
                     }
                 }
+                
+                if (!IsGameOver)
+                {
+                    // Increment turn
+                    Turn = (Turn + 1) % Players.Count;
+                }
             }
-
-            // Increment turn
-            Turn = (Turn + 1) % Players.Count;
 
             BoardChanged?.Invoke(new BoardChangedEventArgs(Turn, GetCurrentPlayer(), _tile));
         }

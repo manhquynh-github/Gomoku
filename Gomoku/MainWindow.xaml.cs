@@ -1,19 +1,10 @@
-﻿using System;
+﻿using Gomoku.AI;
+using Gomoku.Board;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Gomoku.AI;
-using Gomoku.Board;
 
 namespace Gomoku
 {
@@ -50,6 +41,7 @@ namespace Gomoku
 
         private async Task<Tile> AIPlayAsync()
         {
+            await Task.Delay(500);
             var result = await AI.PlayAsync(Board);
             Choices = result.Item2;
             return result.Item1;
@@ -195,6 +187,18 @@ namespace Gomoku
         {
             CleanAnalyze();
             Board.Undo();
+        }
+
+        private void DemoCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            Board.Players.Find(p => p.Name.Contains("1")).IsAuto = true;
+            UseAI.IsChecked = true;
+        }
+
+        private void DemoCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            UseAI.IsChecked = false;
+            Board.Players.Find(p => p.Name.Contains("1")).IsAuto = false;
         }
     }
 }

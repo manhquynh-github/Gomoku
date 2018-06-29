@@ -71,6 +71,10 @@
                 <CheckBox x:Name="UseAI"
                           Content="UseAI"
                           Checked="UseAICheckBox_Checked" />
+                <CheckBox x:Name="Demo"
+                          Content="Demo"
+                          Checked="DemoCheckBox_Checked"
+                          Unchecked="DemoCheckBox_Unchecked"/>
                 <Button Content="Analyze"
                         Click="AnalyzeButton_Click" />
                 <Button Content="Restart"

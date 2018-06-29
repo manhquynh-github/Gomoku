@@ -207,8 +207,8 @@ namespace Gomoku.AI
                         nTree.Nodes.RemoveAll(n => n.Value.Point < maxPoint);
 
                         // Call GC to free up memory
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
+                        //GC.Collect();
+                        //GC.WaitForPendingFinalizers();
 
                         // The more the chilren nodes are left,
                         // the less likely the node is to be selected.
