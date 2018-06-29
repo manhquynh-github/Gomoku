@@ -41,8 +41,8 @@ namespace Gomoku
 
         private async Task<Tile> AIPlayAsync()
         {
-            await Task.Delay(500);
             var result = await AI.PlayAsync(Board);
+            await Task.Delay(500);
             Choices = result.Item2;
             return result.Item1;
         }
