@@ -139,6 +139,9 @@ namespace Gomoku.Board
                     }
                     else
                     {
+                        if (previouslyBlank)
+                            return false;
+
                         blockTiles.Add(t);
                         return false;
                     }
