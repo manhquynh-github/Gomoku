@@ -1,6 +1,7 @@
 ﻿using Gomoku.AI;
-using Gomoku.Board;
+using Gomoku.BoardNS;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,10 +14,10 @@ namespace Gomoku
     /// </summary>
     public partial class MainWindow : Window
     {
-        public readonly GomokuAIv1 AI;
-        public readonly Board.Board Board;
+        public readonly AbstractGomokuAI AI;
+        public readonly Board Board;
         public readonly Dictionary<Tile, Button> Buttons;
-        private List<Tile> Choices;
+        private IEnumerable<Tile> Choices;
 
         public MainWindow() :
             this(15, 15,
@@ -32,7 +33,7 @@ namespace Gomoku
         {
             InitializeComponent();
 
-            Board = new Board.Board(boardWidth, boardHeight, players);
+            Board = new Board(boardWidth, boardHeight, players);
             Buttons = new Dictionary<Tile, Button>();
             InitializeBoard(boardWidth, boardHeight);
             AI = new GomokuAIv1();
@@ -58,7 +59,7 @@ namespace Gomoku
 
         private void CleanAnalyze()
         {
-            if (Choices != null && Choices.Count > 0)
+            if (Choices != null && Choices.Count() > 0)
                 foreach (var tile in Choices)
                 {
                     Buttons[tile].BorderThickness = new Thickness(1.0);

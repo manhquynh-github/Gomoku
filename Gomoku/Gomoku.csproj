@@ -53,16 +53,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AI\AbstractGomokuAI.cs" />
     <Compile Include="AI\GomokuAIv1.cs" />
     <Compile Include="AI\NTree.cs" />
-    <Compile Include="Board\GameOverEventArgs.cs" />
-    <Compile Include="Board\Line.cs" />
-    <Compile Include="Board\LineGroup.cs" />
-    <Compile Include="Board\Player.cs" />
-    <Compile Include="Board\Tile.cs" />
-    <Compile Include="Board\BoardChangedEventArgs.cs" />
-    <Compile Include="Board\BoardEventHandler.cs" />
-    <Compile Include="Board\BoardChangingEventArgs.cs" />
+    <Compile Include="BoardNS\GameOverEventArgs.cs" />
+    <Compile Include="BoardNS\Line.cs" />
+    <Compile Include="BoardNS\LineGroup.cs" />
+    <Compile Include="BoardNS\Player.cs" />
+    <Compile Include="BoardNS\Tile.cs" />
+    <Compile Include="BoardNS\BoardChangedEventArgs.cs" />
+    <Compile Include="BoardNS\BoardEventHandler.cs" />
+    <Compile Include="BoardNS\BoardChangingEventArgs.cs" />
     <Compile Include="ViewModelBase.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -72,14 +73,14 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Board\Board.cs" />
+    <Compile Include="BoardNS\Board.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Board\Piece.cs" />
+    <Compile Include="BoardNS\Piece.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

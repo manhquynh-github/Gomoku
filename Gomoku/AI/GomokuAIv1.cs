@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Gomoku.Board;
+using Gomoku.BoardNS;
 
 namespace Gomoku.AI
 {
     // The AI used for playing Gomoku version 1
-    public class GomokuAIv1
+    public class GomokuAIv1 : AbstractGomokuAI
     {
         /// <summary>
         /// The level of the AI, or more specifically, depth of AI
@@ -22,10 +22,10 @@ namespace Gomoku.AI
         protected class AINode : IComparable<AINode>
         {
             public Tile Tile;
-            public Board.Board Board;
+            public Board Board;
             public double Point;
 
-            public AINode(Tile tile, Board.Board board, double point)
+            public AINode(Tile tile, Board board, double point)
             {
                 Tile = tile;
                 Board = board;
@@ -44,7 +44,7 @@ namespace Gomoku.AI
             }
         }
 
-        protected List<NTree<AINode>> Search(Board.Board board, Player originalPlayer, int level)
+        protected List<NTree<AINode>> Search(Board board, Player originalPlayer, int level)
         {
             // Get all the placed tiles to determine
             // all the correct playable tiles
@@ -97,7 +97,7 @@ namespace Gomoku.AI
             {
                 // Clone the current board to create
                 // a new state of NTree
-                Board.Board b = board.Clone() as Board.Board;
+                Board b = board.Clone() as Board;
 
                 // Play the new cloned board
                 b.Play(tile);
@@ -135,7 +135,7 @@ namespace Gomoku.AI
                         {
                             // If the line chain has more tiles than win pieces,
                             // then this tile is less worth.
-                            if (sameTilesCount + 1 >= Board.Board.WINPIECES)
+                            if (sameTilesCount + 1 >= Board.WINPIECES)
                             {
                                 point += sameTilesCount;
                             }
@@ -227,9 +227,8 @@ namespace Gomoku.AI
         /// Searches for a suitable tile for the current turn of the board.
         /// </summary>
         /// <param name="board">the board used for searching</param>
-        /// <param name="choices">all the results of the search</param>
         /// <returns>a <see cref="Tile"/> that the AI selects.</returns>
-        public Tuple<Tile, List<Tile>> Play(Board.Board board)
+        public override Tuple<Tile, IEnumerable<Tile>> Play(Board board)
         {
             // Initialize the choices
             List<Tile> choices = new List<Tile>();
@@ -246,13 +245,13 @@ namespace Gomoku.AI
             // If found no result, return null
             if (result.Count == 0)
             {
-                return new Tuple<Tile, List<Tile>>(null, choices);
+                return new Tuple<Tile, IEnumerable<Tile>>(null, choices);
             }
             // If found one result, return the first
             else if (result.Count == 1)
             {
                 choices.Add(result[0].Value.Tile);
-                return new Tuple<Tile, List<Tile>>(choices[0], choices);
+                return new Tuple<Tile, IEnumerable<Tile>>(choices[0], choices);
             }
             // Otherwise
             else
@@ -274,13 +273,8 @@ namespace Gomoku.AI
 
                 // Randomly pick one result from the choices
                 int choice = App.Random.Next(choices.Count);
-                return new Tuple<Tile, List<Tile>>(choices[choice], choices);
+                return new Tuple<Tile, IEnumerable<Tile>>(choices[choice], choices);
             }
-        }
-
-        public async Task<Tuple<Tile, List<Tile>>> PlayAsync(Board.Board board)
-        {
-            return await Task.Run(() => Play(board));
         }
 
         protected void PrintSearchResult(List<NTree<AINode>> nTrees)

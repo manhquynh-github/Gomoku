@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Windows;
 
-namespace Gomoku.Board
+namespace Gomoku.BoardNS
 {
     public class Board : ICloneable
     {

@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace Gomoku.Board
+namespace Gomoku.BoardNS
 {
     /// <summary>
     /// Defines a tile in the board

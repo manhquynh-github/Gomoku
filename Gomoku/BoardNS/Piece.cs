@@ -1,6 +1,6 @@
 ﻿using System.Windows.Media;
 
-namespace Gomoku.Board
+namespace Gomoku.BoardNS
 {
     /// <summary>
     /// Defines a player's move symbol. 

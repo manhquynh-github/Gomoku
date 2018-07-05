@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Gomoku.Board
+namespace Gomoku.BoardNS
 {
     /// <summary>
     /// Defines a player in the game.
