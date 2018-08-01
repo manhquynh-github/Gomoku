@@ -1,4 +1,7 @@
-﻿using System;
+﻿/// ----------------------
+/// A Gomoku AI written by https://github.com/manhquynh-github
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
