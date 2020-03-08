@@ -4,8 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:Gomoku"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        Title="MainWindow"
-        MinWidth="800"
+        Title="Gomoku"
+        MinWidth="1000"
         MinHeight="670"
         d:DesignHeight="900"
         d:DesignWidth="1400"
@@ -356,17 +356,44 @@
           <ImageBrush ImageSource="Resources/paper.png"
                       Stretch="Uniform" />
         </Border.Background>
-        <ScrollViewer HorizontalAlignment="Center"
-                      VerticalAlignment="Center"
-                      HorizontalScrollBarVisibility="Auto"
-                      VerticalScrollBarVisibility="Auto">
-          <Border BorderBrush="#FFBFBFBF"
-                  BorderThickness="0,0,1,1">
-            <StackPanel x:Name="HeightStackPanel"
-                        Orientation="Vertical"
-                        Style="{StaticResource BoardStackPanelStyle}" />
-          </Border>
-        </ScrollViewer>
+        <Grid>
+          <ScrollViewer HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        HorizontalScrollBarVisibility="Auto"
+                        VerticalScrollBarVisibility="Auto">
+            <Border BorderBrush="#FFBFBFBF"
+                    BorderThickness="0,0,1,1">
+              <StackPanel x:Name="HeightStackPanel"
+                          Orientation="Vertical"
+                          Style="{StaticResource BoardStackPanelStyle}" />
+            </Border>
+          </ScrollViewer>
+          <Grid x:Name="MessageGrid"
+                Background="Transparent"
+                Cursor="Hand"
+                PreviewMouseDown="MessageGrid_PreviewMouseDown"
+                Visibility="Collapsed">
+            <TextBlock x:Name="MessageTextBlock"
+                       Margin="50,100"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       FontFamily="Comic Sans MS"
+                       FontSize="56"
+                       FontWeight="Bold"
+                       Text="Wins!"
+                       TextAlignment="Center"
+                       TextTrimming="WordEllipsis">
+              <TextBlock.Foreground>
+                <ImageBrush ImageSource="Resources/button_texture.jpg"
+                            Stretch="UniformToFill" />
+              </TextBlock.Foreground>
+              <TextBlock.Effect>
+                <DropShadowEffect BlurRadius="6"
+                                  Direction="270"
+                                  ShadowDepth="3" />
+              </TextBlock.Effect></TextBlock>
+          </Grid>
+        </Grid>
       </Border>
       <ScrollViewer Grid.Column="1"
                     Margin="0,150,0,0"
@@ -375,24 +402,50 @@
                     VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="10"
                     Orientation="Vertical">
+          <StackPanel.Resources>
+            <Style BasedOn="{StaticResource {x:Type ToolTip}}"
+                   TargetType="{x:Type ToolTip}">
+              <Setter Property="ContentTemplate">
+                <Setter.Value>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding}">
+                      <TextBlock.Effect>
+                        <DropShadowEffect BlurRadius="3"
+                                          Direction="270"
+                                          ShadowDepth="1" />
+                      </TextBlock.Effect></TextBlock>
+                  </DataTemplate>
+                </Setter.Value>
+              </Setter>
+              <Setter Property="Placement"
+                      Value="Left" />
+              <Setter Property="PlacementRectangle"
+                      Value="-10,7,1,1" />
+            </Style>
+          </StackPanel.Resources>
           <ToggleButton x:Name="UseAIToggleButton"
                         Checked="UseAIToggleButton_Checked"
                         Content="UseAI"
-                        Style="{DynamicResource ToggleButtonStyle}" />
+                        Style="{DynamicResource ToggleButtonStyle}"
+                        ToolTip="Turn on/off AI player" />
           <ToggleButton x:Name="DemoToggleButton"
                         Checked="DemoToggleButton_Checked"
                         Content="Demo"
                         Style="{DynamicResource ToggleButtonStyle}"
+                        ToolTip="Turn on/off AI playing against each other"
                         Unchecked="DemoToggleButton_Unchecked" />
           <Button Click="AnalyzeButton_Click"
                   Content="Analyze"
-                  Style="{StaticResource ButtonStyle}" />
+                  Style="{StaticResource ButtonStyle}"
+                  ToolTip="Suggest good moves" />
           <Button Click="RestartButton_Click"
                   Content="Restart"
-                  Style="{StaticResource ButtonStyle}" />
+                  Style="{StaticResource ButtonStyle}"
+                  ToolTip="Start a new game" />
           <Button Click="UndoButton_Click"
                   Content="Undo"
-                  Style="{StaticResource ButtonStyle}" />
+                  Style="{StaticResource ButtonStyle}"
+                  ToolTip="Undo last move" />
         </StackPanel>
       </ScrollViewer>
     </Grid>

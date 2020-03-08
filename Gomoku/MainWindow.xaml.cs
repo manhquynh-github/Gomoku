@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Gomoku
 {
@@ -78,15 +79,21 @@ namespace Gomoku
       }
     }
 
+    private void ShowMessage(string message)
+    {
+      MessageTextBlock.Text = message;
+      MessageGrid.Visibility = Visibility.Visible;
+    }
+
     private void Board_GameOver(GameOverEventArgs e)
     {
       if (e.Winner == null)
       {
-        MessageBox.Show("Tie!");
+        ShowMessage("Tie!");
       }
       else
       {
-        MessageBox.Show(e.Winner.Name + " wins!");
+        ShowMessage($"{e.Winner.Name} wins!");
       }
 
       List<Player> players = Board.Players;
@@ -135,7 +142,6 @@ namespace Gomoku
       };
       for (var j = -1; j < width; j++)
       {
-
         var tileButton = new Button
         {
           Style = coorTileStlye,
@@ -178,6 +184,11 @@ namespace Gomoku
       Board.BoardChanging += Board_BoardChanging;
       Board.BoardChanged += Board_BoardChangedAsync;
       Board.GameOver += Board_GameOver;
+    }
+
+    private void MessageGrid_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      ((Grid)sender).Visibility = Visibility.Collapsed;
     }
 
     private void RestartButton_Click(object sender, RoutedEventArgs e)
