@@ -107,6 +107,61 @@
         </DataTrigger>
       </Style.Triggers>
     </Style>
+    <Style x:Key="CoordinateTileButtonStyle"
+           TargetType="Button">
+      <Setter Property="Background"
+              Value="Transparent" />
+      <Setter Property="BorderBrush"
+              Value="#FFBFBFBF" />
+      <Setter Property="BorderThickness"
+              Value="1,1,0,0" />
+      <Setter Property="Height"
+              Value="30" />
+      <Setter Property="IsEnabled"
+              Value="False" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="{x:Type Button}">
+            <Border x:Name="border"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    SnapsToDevicePixels="True">
+              <ContentPresenter x:Name="contentPresenter"
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding Content}"
+                                ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Focusable="False"
+                                RecognizesAccessKey="True"
+                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+      <Setter Property="Width"
+              Value="30" />
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding IsHighlighted}"
+                     Value="True">
+          <Setter Property="Background"
+                  Value="#3FFFFF00" />
+        </DataTrigger>
+        <MultiDataTrigger>
+          <MultiDataTrigger.Conditions>
+            <Condition Binding="{Binding IsHighlighted}"
+                       Value="False" />
+            <Condition Binding="{Binding RelativeSource={RelativeSource Mode=Self},
+                                         Path=IsMouseOver}"
+                       Value="True" />
+          </MultiDataTrigger.Conditions>
+          <Setter Property="Background"
+                  Value="#07000000" />
+        </MultiDataTrigger>
+      </Style.Triggers>
+    </Style>
     <Style x:Key="BoardStackPanelStyle"
            TargetType="StackPanel">
       <Setter Property="Background"

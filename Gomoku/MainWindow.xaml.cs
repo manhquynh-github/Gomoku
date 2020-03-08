@@ -127,6 +127,7 @@ namespace Gomoku
     {
       var widthStackPanelStyle = Resources["WidthStackPanelStyle"] as Style;
       var tileStyle = Resources["TileButtonStyle"] as Style;
+      var coorTileStlye = Resources["CoordinateTileButtonStyle"] as Style;
 
       var columnStackPanel = new StackPanel
       {
@@ -134,15 +135,13 @@ namespace Gomoku
       };
       for (var j = -1; j < width; j++)
       {
-        if (j == -1)
-        {
-          continue;
-        }
 
         var tileButton = new Button
         {
-          Style = tileStyle,
-          Content = j
+          Style = coorTileStlye,
+          Content = j == -1
+            ? ' '
+            : (char)(j + char.Parse("a")),
         };
         columnStackPanel.Children.Add(tileButton);
       }
@@ -157,8 +156,8 @@ namespace Gomoku
 
         var rowButton = new Button
         {
-          Style = tileStyle,
-          Content = i
+          Style = coorTileStlye,
+          Content = i + 1
         };
         widthStackPanel.Children.Add(rowButton);
 
