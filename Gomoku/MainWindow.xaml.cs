@@ -105,6 +105,8 @@ namespace Gomoku
       {
         tile.IsHighlighted = true;
       }
+
+      DemoToggleButton.IsChecked = false;
     }
 
     private void CleanAnalyze()
