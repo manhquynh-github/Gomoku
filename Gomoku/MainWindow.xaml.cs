@@ -64,7 +64,7 @@ namespace Gomoku
       }
 
       // AI
-      if (!Board.IsGameOver && e.Player.IsAuto && UseAI.IsChecked == true)
+      if (!Board.IsGameOver && e.Player.IsAuto && UseAIToggleButton.IsChecked == true)
       {
         await RunAI();
       }
@@ -111,15 +111,15 @@ namespace Gomoku
       }
     }
 
-    private void DemoCheckBox_Checked(object sender, RoutedEventArgs e)
+    private void DemoToggleButton_Checked(object sender, RoutedEventArgs e)
     {
       Board.Players.Find(p => p.Name.Contains("1")).IsAuto = true;
-      UseAI.IsChecked = true;
+      UseAIToggleButton.IsChecked = true;
     }
 
-    private void DemoCheckBox_Unchecked(object sender, RoutedEventArgs e)
+    private void DemoToggleButton_Unchecked(object sender, RoutedEventArgs e)
     {
-      UseAI.IsChecked = false;
+      UseAIToggleButton.IsChecked = false;
       Board.Players.Find(p => p.Name.Contains("1")).IsAuto = false;
     }
 
@@ -134,6 +134,11 @@ namespace Gomoku
       };
       for (var j = -1; j < width; j++)
       {
+        if (j == -1)
+        {
+          continue;
+        }
+
         var tileButton = new Button
         {
           Style = tileStyle,
@@ -180,6 +185,7 @@ namespace Gomoku
     {
       CleanAnalyze();
       Board.Restart();
+      DemoToggleButton.IsChecked = false;
     }
 
     private async Task RunAI()
@@ -215,10 +221,10 @@ namespace Gomoku
       Board.Undo();
     }
 
-    private async void UseAICheckBox_Checked(object sender, RoutedEventArgs e)
+    private async void UseAIToggleButton_Checked(object sender, RoutedEventArgs e)
     {
       // AI
-      if (Board.GetCurrentPlayer().IsAuto && UseAI.IsChecked == true)
+      if (Board.GetCurrentPlayer().IsAuto && UseAIToggleButton.IsChecked == true)
       {
         await RunAI();
       }

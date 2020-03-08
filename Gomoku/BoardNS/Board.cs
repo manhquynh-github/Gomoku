@@ -247,6 +247,7 @@ namespace Gomoku.BoardNS
       foreach (Tile tile in History)
       {
         tile.Piece = new Piece(Pieces.None);
+        tile.IsHighlighted = false;
       }
 
       Turn = 0;
