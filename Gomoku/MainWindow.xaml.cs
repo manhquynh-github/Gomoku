@@ -120,14 +120,20 @@ namespace Gomoku
 
     private void DemoToggleButton_Checked(object sender, RoutedEventArgs e)
     {
-      Board.Players.Find(p => p.Name.Contains("1")).IsAuto = true;
+      foreach (Player player in Board.Players)
+      {
+        player.IsAuto = true;
+      }
+
       UseAIToggleButton.IsChecked = true;
+      UseAIToggleButton.IsEnabled = false;
     }
 
     private void DemoToggleButton_Unchecked(object sender, RoutedEventArgs e)
     {
       UseAIToggleButton.IsChecked = false;
-      Board.Players.Find(p => p.Name.Contains("1")).IsAuto = false;
+      UseAIToggleButton.IsEnabled = true;
+      Board.Players.First().IsAuto = false;
     }
 
     private void InitializeBoard(int width, int height)
