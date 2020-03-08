@@ -1,42 +1,43 @@
-﻿using System.Windows.Media;
-
-namespace Gomoku.BoardNS
+﻿namespace Gomoku.BoardNS
 {
-    /// <summary>
-    /// Defines a player's move symbol. 
-    /// </summary>
-    public class Piece : ViewModelBase
+  public enum Pieces
+  {
+    None,
+    X,
+    O,
+  };
+
+  /// <summary>
+  /// Defines a piece.
+  /// </summary>
+  public class Piece : VMBase
+  {
+    private int _typeIndex;
+
+    public Piece(int typeIndex)
     {
-        private string _symbol;
-        private Brush _brush;
-
-        public static readonly Piece EMPTY = new Piece(" ", null);
-        public static readonly Piece X = new Piece("X", new SolidColorBrush(Colors.Red));
-        public static readonly Piece O = new Piece("O", new SolidColorBrush(Colors.Blue));
-
-        public string Symbol
-        {
-            get => _symbol;
-            private set
-            {
-                _symbol = value;
-                NotifyPropertyChanged();
-            }
-        }
-        public Brush Brush
-        {
-            get => _brush;
-            private set
-            {
-                _brush = value;
-                NotifyPropertyChanged();
-            }
-        }
-                
-        public Piece(string symbol, Brush brush)
-        {
-            Symbol = symbol;
-            Brush = brush;
-        }
+      TypeIndex = typeIndex;
     }
+
+    public Piece(Pieces pieces) :
+      this((int)pieces)
+    {
+    }
+
+    public Pieces Type
+    {
+      get => (Pieces)TypeIndex;
+      set
+      {
+        TypeIndex = (int)value;
+        NotifyPropertyChanged();
+      }
+    }
+
+    public int TypeIndex
+    {
+      get => _typeIndex;
+      set => SetProperty(ref _typeIndex, value);
+    }
+  }
 }

@@ -1,28 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Gomoku.BoardNS
 {
-    public class Line
-    {
-        public readonly IReadOnlyList<Tile> SameTiles;
-        public readonly IReadOnlyList<Tile> BlankTiles;
-        public readonly IReadOnlyList<Tile> BlockTiles;
-        public readonly bool IsChained;
+  public class Line
+  {
+    public static readonly Line EMPTY = new Line(new List<Tile>());
 
-        public Line(
-            IReadOnlyList<Tile> sameTiles, 
-            IReadOnlyList<Tile> blankTiles,
-            IReadOnlyList<Tile> blockTiles,
-            bool isChained)
-        {
-            SameTiles = sameTiles;
-            BlankTiles = blankTiles;
-            BlockTiles = blockTiles;
-            IsChained = isChained;
-        }
+    public Line(IEnumerable<Tile> sameTiles, bool isChained)
+    {
+      SameTiles = new List<Tile>(sameTiles);
+      IsChained = isChained;
     }
+
+    public Line(IEnumerable<Tile> sameTiles) :
+      this(sameTiles, false)
+    {
+    }
+
+    public Line(
+      IEnumerable<Tile> sameTiles,
+      IEnumerable<Tile> blankTiles,
+      IEnumerable<Tile> blockTiles,
+      bool isChained)
+    {
+      SameTiles = new List<Tile>(sameTiles);
+      BlankTiles = new List<Tile>(blankTiles);
+      BlockTiles = new List<Tile>(blockTiles);
+      IsChained = isChained;
+    }
+
+    public IReadOnlyList<Tile> BlankTiles { get; }
+    public IReadOnlyList<Tile> BlockTiles { get; }
+    public bool IsChained { get; }
+    public IReadOnlyList<Tile> SameTiles { get; }
+  }
 }

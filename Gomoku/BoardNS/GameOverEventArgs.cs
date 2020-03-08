@@ -1,22 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Gomoku.BoardNS
 {
-    public class GameOverEventArgs
-    {
-        public readonly bool IsGameOver;
-        public readonly int Turn;
-        public readonly Player Winner;
+  public class GameOverEventArgs
+  {
+    public bool IsGameOver { get; }
+    public int Turn { get; }
+    public Player Winner { get; }
+    public Line WinningLine { get; }
 
-        public GameOverEventArgs(bool isGameOver, int turn, Player winner)
-        {
-            IsGameOver = isGameOver;
-            Turn = turn;
-            Winner = winner;
-        }
+    public GameOverEventArgs(bool isGameOver, int turn, Player winner, Line winningLine)
+    {
+      IsGameOver = isGameOver;
+      Turn = turn;
+      Winner = winner ?? throw new ArgumentNullException(nameof(winner));
+      WinningLine = winningLine ?? throw new ArgumentNullException(nameof(winningLine));
     }
+  }
 }

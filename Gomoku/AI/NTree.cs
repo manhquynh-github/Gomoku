@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Gomoku.AI
 {
-    public class NTree<T>
-    {
-        public T Value;
-        public List<NTree<T>> Nodes;
+  public class NTree<T>
+  {
+    public List<NTree<T>> Nodes;
+    public T Value;
 
-        public NTree(T value)
-        {
-            Value = value;
-            Nodes = new List<NTree<T>>();
-        }
+    public NTree(T value)
+    {
+      Value = value;
+      Nodes = new List<NTree<T>>();
     }
+  }
 }
