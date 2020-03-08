@@ -7,6 +7,8 @@
         Title="MainWindow"
         MinWidth="800"
         MinHeight="670"
+        d:DesignHeight="900"
+        d:DesignWidth="1400"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
   <Window.Resources>
@@ -17,7 +19,7 @@
       <Setter Property="BorderBrush"
               Value="#FFBFBFBF" />
       <Setter Property="BorderThickness"
-              Value="0.5" />
+              Value="1,1,0,0" />
       <Setter Property="ContentTemplate">
         <Setter.Value>
           <DataTemplate />
@@ -52,31 +54,22 @@
       <EventSetter Event="Click"
                    Handler="TileButton_Click" />
       <Style.Triggers>
+        <DataTrigger Binding="{Binding IsHighlighted}"
+                     Value="True">
+          <Setter Property="Background"
+                  Value="#3FFFFF00" />
+        </DataTrigger>
         <MultiDataTrigger>
           <MultiDataTrigger.Conditions>
             <Condition Binding="{Binding IsHighlighted}"
+                       Value="False" />
+            <Condition Binding="{Binding RelativeSource={RelativeSource Mode=Self},
+                                         Path=IsMouseOver}"
                        Value="True" />
-            <Condition Binding="{Binding Piece.TypeIndex}"
-                       Value="1" />
           </MultiDataTrigger.Conditions>
-          <Setter Property="BorderBrush"
-                  Value="Red" />
-        </MultiDataTrigger>
-        <MultiDataTrigger>
-          <MultiDataTrigger.Conditions>
-            <Condition Binding="{Binding IsHighlighted}"
-                       Value="True" />
-            <Condition Binding="{Binding Piece.TypeIndex}"
-                       Value="2" />
-          </MultiDataTrigger.Conditions>
-          <Setter Property="BorderBrush"
-                  Value="Blue" />
-        </MultiDataTrigger>
-        <Trigger Property="IsMouseOver"
-                 Value="True">
           <Setter Property="Background"
                   Value="#07000000" />
-        </Trigger>
+        </MultiDataTrigger>
         <DataTrigger Binding="{Binding Piece.TypeIndex}"
                      Value="1">
           <Setter Property="ContentTemplate">
@@ -125,6 +118,81 @@
       <Setter Property="Orientation"
               Value="Horizontal" />
     </Style>
+    <Style x:Key="ButtonStyle"
+           TargetType="{x:Type Button}">
+      <Setter Property="Background">
+        <Setter.Value>
+          <ImageBrush ImageSource="Resources\button_texture.jpg"
+                      Stretch="UniformToFill" />
+        </Setter.Value>
+      </Setter>
+      <Setter Property="ContentTemplate">
+        <Setter.Value>
+          <DataTemplate>
+            <TextBlock Text="{Binding}">
+              <TextBlock.Effect>
+                <DropShadowEffect BlurRadius="3"
+                                  Direction="270"
+                                  ShadowDepth="1" />
+              </TextBlock.Effect></TextBlock>
+          </DataTemplate>
+        </Setter.Value>
+      </Setter>
+      <Setter Property="Effect">
+        <Setter.Value>
+          <DropShadowEffect BlurRadius="6"
+                            Direction="270"
+                            ShadowDepth="2" />
+        </Setter.Value>
+      </Setter>
+      <Setter Property="FontFamily"
+              Value="Comic Sans MS" />
+      <Setter Property="FontSize"
+              Value="24" />
+      <Setter Property="Foreground"
+              Value="#FFF9F8F5" />
+      <Setter Property="Height"
+              Value="50" />
+      <Setter Property="Margin"
+              Value="0,5" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="{x:Type ButtonBase}">
+            <Border x:Name="border"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="20"
+                    SnapsToDevicePixels="True">
+              <ContentPresenter x:Name="contentPresenter"
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding Content}"
+                                ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Focusable="False"
+                                RecognizesAccessKey="True"
+                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+      <Setter Property="Width"
+              Value="125" />
+      <Style.Triggers>
+        <Trigger Property="IsMouseOver"
+                 Value="True">
+          <Setter Property="Foreground"
+                  Value="#FFFFFFBF" />
+        </Trigger>
+        <Trigger Property="IsPressed"
+                 Value="True">
+          <Setter Property="Foreground"
+                  Value="Yellow" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
   </Window.Resources>
   <Grid>
     <Grid.Background>
@@ -137,52 +205,54 @@
         <GradientStop Color="White" />
       </RadialGradientBrush>-->
     </Grid.Background>
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="*" />
-      <ColumnDefinition Width="auto" />
-    </Grid.ColumnDefinitions>
-    <Border>
-      <Border.Background>
-        <ImageBrush ImageSource="Resources/paper.png"
-                    Stretch="Uniform" />
-      </Border.Background>
-      <ScrollViewer HorizontalAlignment="Center"
+    <Grid MaxWidth="900">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="3*"
+                          MinWidth="750" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <Border>
+        <Border.Background>
+          <ImageBrush ImageSource="Resources/paper.png"
+                      Stretch="Uniform" />
+        </Border.Background>
+        <ScrollViewer HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto">
+          <Border BorderBrush="#FFBFBFBF"
+                  BorderThickness="0,0,1,1">
+            <StackPanel x:Name="HeightStackPanel"
+                        Orientation="Vertical"
+                        Style="{StaticResource BoardStackPanelStyle}" />
+          </Border>
+        </ScrollViewer>
+      </Border>
+      <ScrollViewer Grid.Column="1"
+                    Margin="0,150,0,0"
+                    HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    HorizontalScrollBarVisibility="Auto"
                     VerticalScrollBarVisibility="Auto">
-        <Border BorderBrush="#FFBFBFBF"
-                BorderThickness="0.5">
-          <StackPanel x:Name="HeightStackPanel"
-                      Orientation="Vertical"
-                      Style="{StaticResource BoardStackPanelStyle}" />
-        </Border>
+        <StackPanel Margin="10"
+                    Orientation="Vertical">
+          <CheckBox x:Name="UseAI"
+                    Checked="UseAICheckBox_Checked"
+                    Content="UseAI" />
+          <CheckBox x:Name="Demo"
+                    Checked="DemoCheckBox_Checked"
+                    Content="Demo"
+                    Unchecked="DemoCheckBox_Unchecked" />
+          <Button Click="AnalyzeButton_Click"
+                  Content="Analyze"
+                  Style="{StaticResource ButtonStyle}" />
+          <Button Click="RestartButton_Click"
+                  Content="Restart"
+                  Style="{StaticResource ButtonStyle}" />
+          <Button Click="UndoButton_Click"
+                  Content="Undo"
+                  Style="{StaticResource ButtonStyle}" />
+        </StackPanel>
       </ScrollViewer>
-    </Border>
-    <ScrollViewer Grid.Column="1"
-                  Padding="20"
-                  VerticalAlignment="Center"
-                  VerticalScrollBarVisibility="Auto">
-      <StackPanel Orientation="Vertical">
-        <StackPanel.Resources>
-          <Style TargetType="Button">
-            <Setter Property="Margin"
-                    Value="0,5" />
-          </Style>
-        </StackPanel.Resources>
-        <CheckBox x:Name="UseAI"
-                  Checked="UseAICheckBox_Checked"
-                  Content="UseAI" />
-        <CheckBox x:Name="Demo"
-                  Checked="DemoCheckBox_Checked"
-                  Content="Demo"
-                  Unchecked="DemoCheckBox_Unchecked" />
-        <Button Click="AnalyzeButton_Click"
-                Content="Analyze" />
-        <Button Click="RestartButton_Click"
-                Content="Restart" />
-        <Button Click="UndoButton_Click"
-                Content="Undo" />
-      </StackPanel>
-    </ScrollViewer>
+    </Grid>
   </Grid>
 </Window>

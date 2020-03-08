@@ -355,7 +355,7 @@ namespace Gomoku.BoardNS
       Tile tile = History.Pop();
       BoardChanging?.Invoke(new BoardChangingEventArgs(Turn, GetCurrentPlayer(), tile));
 
-      tile.Piece.Type = Pieces.None;
+      tile.Piece = new Piece(Pieces.None);
       Turn = (Turn - 1 + Players.Count) % Players.Count;
       if (IsGameOver)
       {
