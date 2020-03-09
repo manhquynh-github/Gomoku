@@ -6,7 +6,7 @@ using System.Windows;
 // of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Gomoku")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("https://github.com/manhquynh-github/Gomoku")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Gomoku")]
