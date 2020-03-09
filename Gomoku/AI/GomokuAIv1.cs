@@ -1,14 +1,16 @@
 ﻿using Gomoku.BoardNS;
-
-/// ---------------------- A Gomoku AI written by https://github.com/manhquynh-github
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Gomoku.AI
 {
-  // The AI used for playing Gomoku version 1
+  /// <summary>
+  /// An algorithm used for playing Gomoku version 1, based on N-Tree.
+  /// Advantage: can perform fundamentally well on any scenario with n = 1.
+  /// Disadvantage: Very slow when n &gt;= 2
+  /// </summary>
+  /// <remarks>written by https://github.com/manhquynh-github</remarks>
   public class GomokuAIv1 : AbstractGomokuAI
   {
     public GomokuAIv1(int level = 1)
@@ -37,7 +39,7 @@ namespace Gomoku.AI
         return null;
       }
 
-      List<NTree<AINode>> result = Search(board, board.GetCurrentPlayer(), 1);
+      List<NTree<AINode>> result = Search(board, null, Level);
 
       // Print out to console for debugging
       //PrintSearchResult(result);
@@ -63,7 +65,7 @@ namespace Gomoku.AI
         var maxpoint = result[0].Value.Point;
         List<NTree<AINode>>.Enumerator enumerator = result.GetEnumerator();
         while (enumerator.MoveNext()
-            && enumerator.Current.Value.Point == maxpoint)
+          && enumerator.Current.Value.Point == maxpoint)
         {
           choices.Add(enumerator.Current.Value.Tile);
         }
@@ -87,7 +89,7 @@ namespace Gomoku.AI
       Console.WriteLine("--------------");
     }
 
-    protected List<NTree<AINode>> Search(Board board, Player originalPlayer, int level)
+    protected List<NTree<AINode>> Search(Board board, NTree<AINode> currentNode, int level)
     {
       // Get all the placed tiles to determine all the correct playable tiles
       Stack<Tile> placedTiles = board.History;
@@ -96,13 +98,13 @@ namespace Gomoku.AI
       if (placedTiles.Count == 0)
       {
         return new List<NTree<AINode>>()
-                {
-                    new NTree<AINode>(
-                        new AINode(
-                            board.Tiles[board.Width / 2, board.Height / 2],
-                            board,
-                            0))
-                };
+          {
+            new NTree<AINode>(
+              new AINode(
+                board.Tiles[board.Width / 2, board.Height / 2],
+                board,
+                0))
+          };
       }
 
       // Get all the playable tiles using a HashSet where only distinct tiles
@@ -116,11 +118,11 @@ namespace Gomoku.AI
           // Retrieve LineGroup of each orientation within 2-tile range where
           // the tiles are empty
           foreach (Tile t in
-              board.GetLineGroup(
-                  tile,
-                  (Orientation)i,
-                  Pieces.None,
-                  2).SameTiles)
+            board.GetLineGroup(
+              tile,
+              (Orientation)i,
+              Pieces.None,
+              2).SameTiles)
           {
             playableTiles.Add(t);
           }
@@ -129,6 +131,7 @@ namespace Gomoku.AI
 
       // Get current player to determine which side to search for
       Player player = board.GetCurrentPlayer();
+      var playerCount = board.Players.Count;
 
       // Populate corresponding NTrees with each playable tile found.
       var nTrees = new List<NTree<AINode>>();
@@ -183,7 +186,7 @@ namespace Gomoku.AI
                 // Calculate point using Geometric series of 2.0 so that the
                 // more chain it has, the more valuable the line
                 var _point =
-                    (1.0 * (1.0 - Math.Pow(2.0, sameTilesCount)) / (1.0 - 2.0));
+                    1.0 * (1.0 - Math.Pow(2.0, sameTilesCount)) / (1.0 - 2.0);
 
                 // Finally the point is added with the power of itself
                 point += Math.Pow(_point, lineGroup.IsChained ? 2.0 : 1.5);
@@ -206,8 +209,8 @@ namespace Gomoku.AI
         }
 
         // Instatiate an AINode containing all of the above information
-        var node = new AINode(tile, b, point);
-        var nTree = new NTree<AINode>(node);
+        var aiNode = new AINode(tile, b, point);
+        var nTree = new NTree<AINode>(currentNode, aiNode);
 
         // Add to the list of NTrees
         nTrees.Add(nTree);
@@ -226,16 +229,25 @@ namespace Gomoku.AI
         if (level > 0 && level <= Level)
         {
           // Evaluate children nodes by recursion
-          nTree.Nodes = Search(b, originalPlayer, level - 1);
+          nTree.Nodes = Search(b, currentNode, level - 1);
 
           if (nTree.Nodes.Count > 0)
           {
-            // Get max point of the children nodes
-            var maxPoint = nTree.Nodes.First().Value.Point;
+            // Get max point of the children nodes Take the first node because
+            // it is sorted by descending
+            NTree<AINode> firstNode = nTree.Nodes.First();
+            var maxPoint = firstNode.Value.Point;
 
             // Minus the current node's point by the max point so if the
             // children node's point is high, this node is less likely to be selected.
-            node.Point -= maxPoint;
+            // use j as a factor for the point as it goes shallower back to its parent 
+            // right before the original player's turn again
+            NTree<AINode> traverseNode = nTree;
+            for (var j = 1; j < playerCount && traverseNode != null; j++)
+            {
+              traverseNode.Value.Point -= j * maxPoint;
+              traverseNode = traverseNode.ParentNode;
+            }
 
             // Remove all chilren nodes with lower points
             nTree.Nodes.RemoveAll(n => n.Value.Point < maxPoint);
@@ -246,7 +258,15 @@ namespace Gomoku.AI
 
             // The more the chilren nodes are left, the less likely the node is
             // to be selected.
-            node.Point -= 0.01 * nTree.Nodes.Count;
+            // use j as a factor for the point as it goes shallower back to its parent 
+            // right before the original player's turn again
+            // use 0.01 as a small factor to penalize same nodes left
+            traverseNode = nTree;
+            for (var j = 1; j < playerCount && traverseNode != null; j++)
+            {
+              traverseNode.Value.Point -= j * nTree.Nodes.Count * 0.01;
+              traverseNode = traverseNode.ParentNode;
+            }
           }
         }
       }
