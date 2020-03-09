@@ -51,6 +51,7 @@ namespace Gomoku
     private async void AnalyzeButton_Click(object sender, RoutedEventArgs e)
     {
       await AIPlayAsync();
+      CleanAnalyze();
       foreach (Tile tile in Choices)
       {
         tile.IsHighlighted = true;
@@ -129,6 +130,7 @@ namespace Gomoku
 
       UseAIToggleButton.IsChecked = true;
       UseAIToggleButton.IsEnabled = false;
+      CleanAnalyze();
     }
 
     private void DemoToggleButton_Unchecked(object sender, RoutedEventArgs e)
