@@ -249,7 +249,9 @@ namespace Gomoku
     private async void UseAIToggleButton_Checked(object sender, RoutedEventArgs e)
     {
       // AI
-      if (Board.GetCurrentPlayer().IsAuto && UseAIToggleButton.IsChecked == true)
+      if (DemoToggleButton.IsChecked == false
+        && Board.GetCurrentPlayer().IsAuto
+        && UseAIToggleButton.IsChecked == true)
       {
         await RunAI();
       }
