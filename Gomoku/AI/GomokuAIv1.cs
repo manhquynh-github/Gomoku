@@ -229,7 +229,7 @@ namespace Gomoku.AI
         if (level > 0 && level <= Level)
         {
           // Evaluate children nodes by recursion
-          nTree.Nodes = Search(b, currentNode, level - 1);
+          nTree.Nodes = Search(b, nTree, level - 1);
 
           if (nTree.Nodes.Count > 0)
           {
