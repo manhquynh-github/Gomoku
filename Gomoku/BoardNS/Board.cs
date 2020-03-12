@@ -98,50 +98,50 @@ namespace Gomoku.BoardNS
       var previouslyBlank = false;
 
       RunTilesFunction(
-          tile,
-          direction,
-          t =>
+        tile,
+        direction,
+        t =>
+        {
+          if (count++ == max)
           {
-            if (count++ == max)
+            return false;
+          }
+
+          if (t.Piece.Type == type)
+          {
+            if (previouslyBlank)
+            {
+              chainBreak = true;
+            }
+
+            previouslyBlank = false;
+
+            sameTiles.Add(t);
+            return true;
+          }
+          else if (t.Piece.Type == Pieces.None)
+          {
+            if (previouslyBlank || chainBreak)
             {
               return false;
             }
 
-            if (t.Piece.Type == type)
+            previouslyBlank = true;
+
+            blankTiles.Add(t);
+            return true;
+          }
+          else
+          {
+            if (previouslyBlank)
             {
-              if (previouslyBlank)
-              {
-                chainBreak = true;
-              }
-
-              previouslyBlank = false;
-
-              sameTiles.Add(t);
-              return true;
-            }
-            else if (t.Piece.Type == Pieces.None)
-            {
-              if (previouslyBlank || chainBreak)
-              {
-                return false;
-              }
-
-              previouslyBlank = true;
-
-              blankTiles.Add(t);
-              return true;
-            }
-            else
-            {
-              if (previouslyBlank)
-              {
-                return false;
-              }
-
-              blockTiles.Add(t);
               return false;
             }
-          });
+
+            blockTiles.Add(t);
+            return false;
+          }
+        });
 
       return new Line(sameTiles, blankTiles, blockTiles, !chainBreak);
     }
@@ -280,7 +280,7 @@ namespace Gomoku.BoardNS
     }
 
     public void RunTilesFunction(
-                                Tile tile,
+        Tile tile,
         Direction direction,
         Predicate<Tile> predicate)
     {
@@ -291,7 +291,6 @@ namespace Gomoku.BoardNS
               i >= 0 && predicate(Tiles[i, j]);
               i--)
           {
-            ;
           }
 
           break;
@@ -301,7 +300,6 @@ namespace Gomoku.BoardNS
               i < Width && predicate(Tiles[i, j]);
               i++)
           {
-            ;
           }
 
           break;
@@ -311,7 +309,6 @@ namespace Gomoku.BoardNS
               j >= 0 && predicate(Tiles[i, j]);
               j--)
           {
-            ;
           }
 
           break;
@@ -321,7 +318,6 @@ namespace Gomoku.BoardNS
               j < Height && predicate(Tiles[i, j]);
               j++)
           {
-            ;
           }
 
           break;
@@ -331,7 +327,6 @@ namespace Gomoku.BoardNS
               i >= 0 && j >= 0 && predicate(Tiles[i, j]);
               i--, j--)
           {
-            ;
           }
 
           break;
@@ -351,7 +346,6 @@ namespace Gomoku.BoardNS
               i < Width && j >= 0 && predicate(Tiles[i, j]);
               i++, j--)
           {
-            ;
           }
 
           break;
@@ -361,7 +355,6 @@ namespace Gomoku.BoardNS
               i >= 0 && j < Height && predicate(Tiles[i, j]);
               i--, j++)
           {
-            ;
           }
 
           break;

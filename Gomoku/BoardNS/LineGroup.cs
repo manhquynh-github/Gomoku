@@ -17,42 +17,27 @@ namespace Gomoku.BoardNS
       Lines.AddRange(lines);
     }
 
-    public int BlankTileCount => Lines.Sum(l => l.BlankTiles.Count);
+    public int BlankTileCount
+      => Lines.Sum(l => l.BlankTiles.Count);
 
     public IReadOnlyList<Tile> BlankTiles
-    {
-      get
-      {
-        var tiles = new List<Tile>();
-        tiles.AddRange(Lines.SelectMany(l => l.BlankTiles));
-        return tiles;
-      }
-    }
+      => Lines.SelectMany(l => l.BlankTiles).ToList();
 
-    public int BlockTileCount => Lines.Sum(l => l.BlockTiles.Count);
+    public int BlockTileCount
+      => Lines.Sum(l => l.BlockTiles.Count);
 
     public IReadOnlyList<Tile> BlockTiles
-    {
-      get
-      {
-        var tiles = new List<Tile>();
-        tiles.AddRange(Lines.SelectMany(l => l.BlockTiles));
-        return tiles;
-      }
-    }
+      => Lines.SelectMany(l => l.BlockTiles).ToList();
 
-    public bool IsChained => !Lines.Exists(l => !l.IsChained);
+    public bool IsChained
+      => !Lines.Exists(l => !l.IsChained);
+
     public List<Line> Lines { get; set; }
-    public int SameTileCount => Lines.Sum(l => l.SameTiles.Count);
+
+    public int SameTileCount
+      => Lines.Sum(l => l.SameTiles.Count);
 
     public IReadOnlyList<Tile> SameTiles
-    {
-      get
-      {
-        var tiles = new List<Tile>();
-        tiles.AddRange(Lines.SelectMany(l => l.SameTiles));
-        return tiles;
-      }
-    }
+      => Lines.SelectMany(l => l.SameTiles).ToList();
   }
 }

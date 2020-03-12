@@ -80,32 +80,81 @@ namespace Gomoku.AI
       }
     }
 
-    protected void PrintSearchResult(List<NTree<AINode>> nTrees)
+    protected AINode EvaluatePoint(Board board, Tile tile, Pieces type)
     {
-      foreach (NTree<AINode> node in nTrees)
+      // Evaluate the point of the current node
+      var point = 0.0;
+
+      // If game is over the point should be high enough so that this node is
+      // more likely to get noticed
+      if (board.IsGameOver)
       {
-        Console.WriteLine(node.Value.Tile.X + "," + node.Value.Tile.Y + " = " + node.Value.Point);
+        point = 100.0;
       }
-      Console.WriteLine("--------------");
+
+      // Otherwise evaluate the point matching lines and other information
+      else
+      {
+        // Retrieve line group of each orientation to fully evaluate a tile
+        for (var i = 0; i <= 3; i++)
+        {
+          // Get LineGroup within 5-tile range
+          LineGroup lineGroup =
+            board.GetLineGroup(
+              tile, (Orientation)i,
+              type,
+              5);
+
+          // Calculate points
+          var sameTilesCount = lineGroup.SameTileCount;
+          var blockTilesCount = lineGroup.BlockTileCount;
+
+          // When the line is not blocked
+          if (blockTilesCount == 0)
+          {
+            // If the line chain has more tiles than win pieces, then this tile
+            // is less worth.
+            if (sameTilesCount + 1 >= Board.WINPIECES)
+            {
+              point += sameTilesCount;
+            }
+
+            // Otherwise
+            else
+            {
+              // Calculate point using Geometric series of 2.0 so that the more
+              // chain it has, the more valuable the line
+              var _point =
+                  1.0 * (1.0 - Math.Pow(2.0, sameTilesCount)) / (1.0 - 2.0);
+
+              // Finally the point is added with the power of itself
+              point += Math.Pow(_point, lineGroup.IsChained ? 2.0 : 1.5);
+            }
+          }
+
+          // When the line is partially blocked, only add the point which equals
+          // to the same count
+          else if (blockTilesCount == 1)
+          {
+            point += sameTilesCount;
+          }
+
+          // Otherwise, add no point.
+
+          //point += (1.0 * (1.0 - Math.Pow(2.0, lineGroup.CountChainTiles())) / (1.0 - 2.0));
+          //point += 0.25 * lineGroup.CountBlankTiles();
+          //point -= 1.0 * lineGroup.BlockTileCount;
+        }
+      }
+
+      // Instatiate an AINode containing all of the above information
+      return new AINode(tile, board, point);
     }
 
-    protected List<NTree<AINode>> Search(Board board, NTree<AINode> currentNode, int level)
+    protected IEnumerable<Tile> GetPlayableTiles(Board board)
     {
       // Get all the placed tiles to determine all the correct playable tiles
       Stack<Tile> placedTiles = board.History;
-
-      // If it is a new game, select the center most
-      if (placedTiles.Count == 0)
-      {
-        return new List<NTree<AINode>>()
-          {
-            new NTree<AINode>(
-              new AINode(
-                board.Tiles[board.Width / 2, board.Height / 2],
-                board,
-                0))
-          };
-      }
 
       // Get all the playable tiles using a HashSet where only distinct tiles
       // are added
@@ -129,6 +178,39 @@ namespace Gomoku.AI
         }
       }
 
+      return playableTiles;
+    }
+
+    protected void PrintSearchResult(List<NTree<AINode>> nTrees)
+    {
+      foreach (NTree<AINode> node in nTrees)
+      {
+        Console.WriteLine(node.Value.Tile.X + "," + node.Value.Tile.Y + " = " + node.Value.Point);
+      }
+      Console.WriteLine("--------------");
+    }
+
+    protected List<NTree<AINode>> Search(Board board, NTree<AINode> currentNode, int level)
+    {
+      // Get all the placed tiles to determine all the correct playable tiles
+      Stack<Tile> placedTiles = board.History;
+
+      // If it is a new game, select the center most
+      if (placedTiles.Count == 0)
+      {
+        return new List<NTree<AINode>>()
+        {
+          new NTree<AINode>(
+            new AINode(
+              board.Tiles[board.Width / 2, board.Height / 2],
+              board,
+              0))
+        };
+      }
+
+      // Get all the playable tiles
+      IEnumerable<Tile> playableTiles = GetPlayableTiles(board);
+
       // Get current player to determine which side to search for
       Player player = board.GetCurrentPlayer();
       var playerCount = board.Players.Count;
@@ -143,76 +225,11 @@ namespace Gomoku.AI
         // Play the new cloned board
         b.Play(tile);
 
-        // Evaluate the point of the current node
-        var point = 0.0;
-
-        // If game is over the point should be high enough so that this node is
-        // more likely to get noticed
-        if (b.IsGameOver)
-        {
-          point = 100.0;
-        }
-
-        // Otherwise evaluate the point matching lines and other information
-        else
-        {
-          // Retrieve line group of each orientation to fully evaluate a tile
-          for (var i = 0; i <= 3; i++)
-          {
-            // Get LineGroup within 5-tile range
-            LineGroup lineGroup =
-              board.GetLineGroup(
-                tile, (Orientation)i,
-                player.Piece.Type,
-                5);
-
-            // Calculate points
-            var sameTilesCount = lineGroup.SameTileCount;
-            var blockTilesCount = lineGroup.BlockTileCount;
-
-            // When the line is not blocked
-            if (blockTilesCount == 0)
-            {
-              // If the line chain has more tiles than win pieces, then this
-              // tile is less worth.
-              if (sameTilesCount + 1 >= Board.WINPIECES)
-              {
-                point += sameTilesCount;
-              }
-
-              // Otherwise
-              else
-              {
-                // Calculate point using Geometric series of 2.0 so that the
-                // more chain it has, the more valuable the line
-                var _point =
-                    1.0 * (1.0 - Math.Pow(2.0, sameTilesCount)) / (1.0 - 2.0);
-
-                // Finally the point is added with the power of itself
-                point += Math.Pow(_point, lineGroup.IsChained ? 2.0 : 1.5);
-              }
-            }
-
-            // When the line is partially blocked, only add the point which
-            // equals to the same count
-            else if (blockTilesCount == 1)
-            {
-              point += sameTilesCount;
-            }
-
-            // Otherwise, add no point.
-
-            //point += (1.0 * (1.0 - Math.Pow(2.0, lineGroup.CountChainTiles())) / (1.0 - 2.0));
-            //point += 0.25 * lineGroup.CountBlankTiles();
-            //point -= 1.0 * lineGroup.BlockTileCount;
-          }
-        }
-
-        // Instatiate an AINode containing all of the above information
-        var aiNode = new AINode(tile, b, point);
-        var nTree = new NTree<AINode>(currentNode, aiNode);
+        // Evalue this tile
+        AINode aiNode = EvaluatePoint(b, tile, player.Piece.Type);
 
         // Add to the list of NTrees
+        var nTree = new NTree<AINode>(currentNode, aiNode);
         nTrees.Add(nTree);
 
         // If the current node's board's game is over, stop evaluating because
@@ -239,9 +256,9 @@ namespace Gomoku.AI
             var maxPoint = firstNode.Value.Point;
 
             // Minus the current node's point by the max point so if the
-            // children node's point is high, this node is less likely to be selected.
-            // use j as a factor for the point as it goes shallower back to its parent 
-            // right before the original player's turn again
+            // children node's point is high, this node is less likely to be
+            // selected. use j as a factor for the point as it goes shallower
+            // back to its parent right before the original player's turn again
             NTree<AINode> traverseNode = nTree;
             for (var j = 1; j < playerCount && traverseNode != null; j++)
             {
@@ -257,10 +274,9 @@ namespace Gomoku.AI
             //GC.WaitForPendingFinalizers();
 
             // The more the chilren nodes are left, the less likely the node is
-            // to be selected.
-            // use j as a factor for the point as it goes shallower back to its parent 
-            // right before the original player's turn again
-            // use 0.01 as a small factor to penalize same nodes left
+            // to be selected. use j as a factor for the point as it goes
+            // shallower back to its parent right before the original player's
+            // turn again use 0.01 as a small factor to penalize same nodes left
             traverseNode = nTree;
             for (var j = 1; j < playerCount && traverseNode != null; j++)
             {
