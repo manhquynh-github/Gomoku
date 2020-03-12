@@ -17,7 +17,7 @@ namespace Gomoku.BoardNS
       IsAuto = isAuto;
     }
 
-    public AbstractGomokuAI AI { get; }
+    public AbstractGomokuAI AI { get; set; }
 
     /// <summary>
     /// If this <see cref="Player"/> will use AI.
