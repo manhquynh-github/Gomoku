@@ -74,6 +74,11 @@ namespace Gomoku
 
     private async void AnalyzeButton_Click(object sender, RoutedEventArgs e)
     {
+      if (Board.IsGameOver)
+      {
+        return;
+      }
+
       await AIPlayAsync();
       CleanAnalyze();
       foreach (Tile tile in Choices)
@@ -142,6 +147,12 @@ namespace Gomoku
 
     private async void DemoToggleButton_Checked(object sender, RoutedEventArgs e)
     {
+      if (Board.IsGameOver)
+      {
+        CleanAnalyze();
+        Board.Restart();
+      }
+
       foreach (Player player in Board.Players)
       {
         player.IsAuto = true;
