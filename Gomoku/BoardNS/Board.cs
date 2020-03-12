@@ -34,7 +34,9 @@ namespace Gomoku.BoardNS
     }
 
     public event BoardChangedEventHandler BoardChanged;
+
     public event BoardChangingEventHandler BoardChanging;
+
     public event GameOverEventHandler GameOver;
 
     public int Height { get; }
@@ -174,6 +176,26 @@ namespace Gomoku.BoardNS
       }
 
       return new LineGroup();
+    }
+
+    public int getPlayersTurn(Player player)
+    {
+      if (player == null)
+      {
+        throw new ArgumentNullException(nameof(player));
+      }
+
+      return Players.FindIndex(p => p == player);
+    }
+
+    public bool IsPlayersTurn(Player player)
+    {
+      if (player == null)
+      {
+        throw new ArgumentNullException(nameof(player));
+      }
+
+      return GetCurrentPlayer() == player;
     }
 
     public void Play(Tile tile)

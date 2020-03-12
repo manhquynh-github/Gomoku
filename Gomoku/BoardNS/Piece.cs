@@ -5,6 +5,7 @@
     None,
     X,
     O,
+    Y
   };
 
   /// <summary>

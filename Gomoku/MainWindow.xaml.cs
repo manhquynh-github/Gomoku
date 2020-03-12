@@ -1,6 +1,8 @@
 ﻿using Gomoku.AI;
 using Gomoku.BoardNS;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,17 +16,16 @@ namespace Gomoku
   /// </summary>
   public partial class MainWindow : Window
   {
-    public readonly AbstractGomokuAI AI;
     public readonly Board Board;
     public readonly Dictionary<Tile, Button> Buttons;
-    private IEnumerable<Tile> Choices;
+    private List<Tile> Choices;
 
     public MainWindow() :
       this(15, 15,
         new List<Player>()
         {
-          new Player("Player 1", new Piece(Pieces.X)),
-          new Player("Player 2", new Piece(Pieces.O), true)
+          new Player("Player 1", new Piece(Pieces.X), new GomokuAIv1(), false),
+          new Player("Player 2", new Piece(Pieces.O), new GomokuAIv1(), true),
         })
     {
     }
@@ -36,15 +37,38 @@ namespace Gomoku
       Board = new Board(boardWidth, boardHeight, players);
       Buttons = new Dictionary<Tile, Button>();
       InitializeBoard(boardWidth, boardHeight);
-      AI = new GomokuAIv1();
       Choices = new List<Tile>();
     }
 
     private async Task<Tile> AIPlayAsync()
     {
-      System.Tuple<Tile, IEnumerable<Tile>> result = await AI.PlayAsync(Board);
-      await Task.Delay(500);
-      Choices = result.Item2;
+      Player player = Board.GetCurrentPlayer();
+
+      if (player == null)
+      {
+        throw new InvalidOperationException($"{nameof(player)} is null.");
+      }
+
+      if (player.AI == null)
+      {
+        throw new InvalidOperationException($"{nameof(player.AI)} is null.");
+      }
+
+      BoardBorder.IsEnabled = false;
+
+      var sw = Stopwatch.StartNew();
+      Tuple<Tile, IEnumerable<Tile>> result = await player.AI.PlayAsync(Board);
+      sw.Stop();
+      if (sw.ElapsedMilliseconds < 500)
+      {
+        var delay = 500 - sw.ElapsedMilliseconds;
+        await Task.Delay((int)delay);
+      }
+
+      Choices = result.Item2.ToList();
+
+      BoardBorder.IsEnabled = true;
+
       return result.Item1;
     }
 
@@ -80,12 +104,6 @@ namespace Gomoku
       }
     }
 
-    private void ShowMessage(string message)
-    {
-      MessageTextBlock.Text = message;
-      MessageGrid.Visibility = Visibility.Visible;
-    }
-
     private void Board_GameOver(GameOverEventArgs e)
     {
       if (e.Winner == null)
@@ -105,6 +123,7 @@ namespace Gomoku
       foreach (Tile tile in e.WinningLine.SameTiles)
       {
         tile.IsHighlighted = true;
+        Choices.Add(tile);
       }
 
       DemoToggleButton.IsChecked = false;
@@ -132,10 +151,7 @@ namespace Gomoku
       UseAIToggleButton.IsEnabled = false;
       CleanAnalyze();
 
-      if (Board.Turn == Board.Players.FindIndex(p => p == Board.GetCurrentPlayer()))
-      {
-        await RunAI();
-      }
+      await RunAI();
     }
 
     private void DemoToggleButton_Unchecked(object sender, RoutedEventArgs e)
@@ -222,6 +238,12 @@ namespace Gomoku
       }
 
       TileButton_Click(Buttons[tile], null);
+    }
+
+    private void ShowMessage(string message)
+    {
+      MessageTextBlock.Text = message;
+      MessageGrid.Visibility = Visibility.Visible;
     }
 
     private void TileButton_Click(object sender, RoutedEventArgs e)

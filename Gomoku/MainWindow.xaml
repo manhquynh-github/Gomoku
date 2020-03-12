@@ -105,6 +105,24 @@
             </Setter.Value>
           </Setter>
         </DataTrigger>
+        <DataTrigger Binding="{Binding Piece.TypeIndex}"
+                     Value="3">
+          <Setter Property="ContentTemplate">
+            <Setter.Value>
+              <DataTemplate>
+                <Viewbox>
+                  <Path Margin="10"
+                        Data="M 50,0 L 0,100 100,100 Z"
+                        RenderOptions.CachingHint="Cache"
+                        Stroke="Green"
+                        StrokeEndLineCap="Round"
+                        StrokeStartLineCap="Round"
+                        StrokeThickness="10" />
+                </Viewbox>
+              </DataTemplate>
+            </Setter.Value>
+          </Setter>
+        </DataTrigger>
       </Style.Triggers>
     </Style>
     <Style x:Key="CoordinateTileButtonStyle"
@@ -351,7 +369,7 @@
                           MinWidth="750" />
         <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>
-      <Border>
+      <Border x:Name="BoardBorder">
         <Border.Background>
           <ImageBrush ImageSource="Resources/paper.png"
                       Stretch="Uniform" />
