@@ -58,10 +58,12 @@
     </ApplicationDefinition>
     <Compile Include="AI\AbstractGomokuAI.cs" />
     <Compile Include="AI\GomokuAIv1.cs" />
+    <Compile Include="AI\GomokuAIv2.cs" />
     <Compile Include="AI\NTree.cs" />
     <Compile Include="BoardNS\GameOverEventArgs.cs" />
     <Compile Include="BoardNS\Line.cs" />
     <Compile Include="BoardNS\LineGroup.cs" />
+    <Compile Include="BoardNS\Piece.cs" />
     <Compile Include="BoardNS\Player.cs" />
     <Compile Include="BoardNS\Tile.cs" />
     <Compile Include="BoardNS\BoardChangedEventArgs.cs" />
@@ -83,7 +85,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BoardNS\Piece.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

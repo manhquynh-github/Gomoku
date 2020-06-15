@@ -11,9 +11,9 @@ namespace Gomoku.AI
   /// Disadvantage: Very slow when n &gt;= 2
   /// </summary>
   /// <remarks>written by https://github.com/manhquynh-github</remarks>
-  public class GomokuAIv1 : AbstractGomokuAI
+  public class GomokuAIv2 : AbstractGomokuAI
   {
-    public GomokuAIv1(int level = 1)
+    public GomokuAIv2(int level = 3)
     {
       Level = level;
     }
@@ -39,10 +39,7 @@ namespace Gomoku.AI
         return null;
       }
 
-      List<NTree<AINode>> result = Search(board, null, Level);
-
-      // Print out to console for debugging
-      //PrintSearchResult(result);
+      var result = Search(board, Level).ToList();
 
       // If found no result, return null
       if (result.Count == 0)
@@ -53,21 +50,23 @@ namespace Gomoku.AI
       // If found one result, return the first
       else if (result.Count == 1)
       {
-        choices.Add(result[0].Value.Tile);
+        choices.Add(result[0].Tile);
         return new Tuple<Tile, IEnumerable<Tile>>(choices[0], choices);
       }
 
       // Otherwise
       else
       {
+        result.Sort((x, y) => -1 * x.CompareTo(y));
+
         // Find the max point of all the nodes, then add all nodes with the max
         // point to the choice collection
-        var maxpoint = result[0].Value.Point;
-        List<NTree<AINode>>.Enumerator enumerator = result.GetEnumerator();
+        var maxpoint = result[0].Point;
+        List<AINode>.Enumerator enumerator = result.GetEnumerator();
         while (enumerator.MoveNext()
-          && enumerator.Current.Value.Point == maxpoint)
+          && enumerator.Current.Point == maxpoint)
         {
-          choices.Add(enumerator.Current.Value.Tile);
+          choices.Add(enumerator.Current.Tile);
         }
 
         // Call GC to free up memory from other nodes
@@ -112,8 +111,8 @@ namespace Gomoku.AI
           // When the line is not blocked
           if (blockTilesCount == 0)
           {
-            // If the line chain has more tiles than win pieces, then this tile
-            // is less worth.
+            // If the line chain has more tiles than win pieces, then this
+            // tile is less worth.
             if (sameTilesCount + 1 >= Board.WINPIECES)
             {
               point += sameTilesCount;
@@ -122,8 +121,8 @@ namespace Gomoku.AI
             // Otherwise
             else
             {
-              // Calculate point using Geometric series of 2.0 so that the more
-              // chain it has, the more valuable the line
+              // Calculate point using Geometric series of 2.0 so that the
+              // more chain it has, the more valuable the line
               var _point =
                   1.0 * (1.0 - Math.Pow(2.0, sameTilesCount)) / (1.0 - 2.0);
 
@@ -132,8 +131,8 @@ namespace Gomoku.AI
             }
           }
 
-          // When the line is partially blocked, only add the point which equals
-          // to the same count
+          // When the line is partially blocked, only add the point which
+          // equals to the same count
           else if (blockTilesCount == 1)
           {
             point += sameTilesCount;
@@ -181,16 +180,7 @@ namespace Gomoku.AI
       return playableTiles;
     }
 
-    protected void PrintSearchResult(List<NTree<AINode>> nTrees)
-    {
-      foreach (NTree<AINode> node in nTrees)
-      {
-        Console.WriteLine(node.Value.Tile.X + "," + node.Value.Tile.Y + " = " + node.Value.Point);
-      }
-      Console.WriteLine("--------------");
-    }
-
-    protected List<NTree<AINode>> Search(Board board, NTree<AINode> currentNode, int level)
+    protected IEnumerable<AINode> Search(Board board, int level)
     {
       // Get all the placed tiles to determine all the correct playable tiles
       Stack<Tile> placedTiles = board.History;
@@ -198,26 +188,24 @@ namespace Gomoku.AI
       // If it is a new game, select the center most
       if (placedTiles.Count == 0)
       {
-        return new List<NTree<AINode>>()
+        return new List<AINode>()
         {
-          new NTree<AINode>(
-            new AINode(
-              board.Tiles[board.Width / 2, board.Height / 2],
-              board,
-              0))
+          new AINode(
+            board.Tiles[board.Width / 2, board.Height / 2],
+            board,
+            0)
         };
       }
-
-      // Get all the playable tiles
-      IEnumerable<Tile> playableTiles = GetPlayableTiles(board);
 
       // Get current player to determine which side to search for
       Player player = board.GetCurrentPlayer();
       var playerCount = board.Players.Count;
 
+      var maxPoint = double.MinValue;
+      var candidateNodes = new List<AINode>();
+
       // Populate corresponding NTrees with each playable tile found.
-      var nTrees = new List<NTree<AINode>>();
-      foreach (Tile tile in playableTiles)
+      foreach (Tile tile in GetPlayableTiles(board))
       {
         // Clone the current board to create a new state of NTree
         var b = board.DeepCopy() as Board;
@@ -225,71 +213,75 @@ namespace Gomoku.AI
         // Play the new cloned board
         b.Play(tile);
 
-        // Evalue this tile
+        // Evaluate this tile
         AINode aiNode = EvaluatePoint(b, tile, player.Piece.Type);
 
-        // Add to the list of NTrees
-        var nTree = new NTree<AINode>(currentNode, aiNode);
-        nTrees.Add(nTree);
+        if (level < Level)
+        {
+          if (aiNode.Point > maxPoint)
+          {
+            maxPoint = aiNode.Point;
+            candidateNodes.Clear();
+            candidateNodes.Add(aiNode);
+          }
+          else if (aiNode.Point == maxPoint)
+          {
+            candidateNodes.Add(aiNode);
+          }
+          else
+          {
+            continue;
+          }
+        }
+        else
+        {
+          candidateNodes.Add(aiNode);
+        }
+      }
+
+      if (level == Level && placedTiles.Count <= 2)
+      {
+        return candidateNodes;
+      }
+
+      if (level == 0)
+      {
+        return candidateNodes;
+      }
+
+      foreach (AINode node in candidateNodes)
+      {
+        if (node.Point >= 1000.0)
+        {
+          return candidateNodes;
+        }
+
+        var childNodes = Search(node.Board, level - 1).ToList();
+
+        childNodes.Sort((x, y) => -1 * x.CompareTo(y));
+        AINode maxNode = childNodes.First();
+        childNodes.RemoveAll((x) => x.Point < maxNode.Point);
 
         // If the current node's board's game is over, stop evaluating because
         // there is a chance this node will reach the end of game, so there is
         // no longer any need to continue evaluating
-        if (b.IsGameOver)
-        {
-          break;
-        }
+        //if (b.IsGameOver)
+        //{
+        //  break;
+        //}
 
-        // If the recursion of searching didn't reach the bottom (where level ==
-        // 0) then, keep evaluating current node by evaluating its children
-        // nodes, where the children's side is the next player's side.
-        if (level > 0 && level <= Level)
-        {
-          // Evaluate children nodes by recursion
-          nTree.Nodes = Search(b, nTree, level - 1);
+        node.Point -= maxNode.Point;
 
-          if (nTree.Nodes.Count > 0)
-          {
-            // Get max point of the children nodes Take the first node because
-            // it is sorted by descending
-            NTree<AINode> firstNode = nTree.Nodes.First();
-            var maxPoint = firstNode.Value.Point;
-
-            // Minus the current node's point by the max point so if the
-            // children node's point is high, this node is less likely to be
-            // selected. use j as a factor for the point as it goes shallower
-            // back to its parent right before the original player's turn again
-            NTree<AINode> traverseNode = nTree;
-            for (var j = 1; j < playerCount && traverseNode != null; j++)
-            {
-              traverseNode.Value.Point -= j * maxPoint;
-              traverseNode = traverseNode.ParentNode;
-            }
-
-            // Remove all chilren nodes with lower points
-            nTree.Nodes.RemoveAll(n => n.Value.Point < maxPoint);
-
-            // Call GC to free up memory
-            //GC.Collect();
-            //GC.WaitForPendingFinalizers();
-
-            // The more the chilren nodes are left, the less likely the node is
-            // to be selected. use j as a factor for the point as it goes
-            // shallower back to its parent right before the original player's
-            // turn again use 0.01 as a small factor to penalize same nodes left
-            traverseNode = nTree;
-            for (var j = 1; j < playerCount && traverseNode != null; j++)
-            {
-              traverseNode.Value.Point -= j * nTree.Nodes.Count * 0.01;
-              traverseNode = traverseNode.ParentNode;
-            }
-          }
-        }
+        // Minus the current node's point by the max point so if the
+        // children node's point is high, this node is less likely to be selected.
+        node.Point -= 0.01 * childNodes.Count;
       }
 
-      // Sort the NTrees list by descending where the first item has the largest point
-      nTrees.Sort((x, y) => -1 * x.Value.CompareTo(y.Value));
-      return nTrees;
+      candidateNodes.Sort((x, y) => -1 * x.CompareTo(y));
+      AINode maxNode2 = candidateNodes.First();
+      candidateNodes.RemoveAll((x) => x.Point < maxNode2.Point);
+
+      return candidateNodes;
     }
 
     protected class AINode : IComparable<AINode>
