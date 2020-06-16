@@ -3,69 +3,69 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Gomoku"
              StartupUri="MainWindow.xaml">
-  <Application.Resources>
-    <SolidColorBrush x:Key="Custom.ToolTip.Background"
-                     Color="#FFC7814C" />
-    <SolidColorBrush x:Key="Custom.ToolTip.Foreground"
-                     Color="#fff" />
-    <SolidColorBrush x:Key="Custom.ToolTip.BorderBrush"
-                     Color="#FFCCCCCC" />
-    <Style x:Key="{x:Type ToolTip}"
-           TargetType="{x:Type ToolTip}">
-      <Setter Property="Background">
-        <Setter.Value>
-          <ImageBrush ImageSource="Resources\button_texture.jpg"
-                      Stretch="UniformToFill" />
-        </Setter.Value>
-      </Setter>
-      <Setter Property="BorderBrush"
-              Value="{StaticResource Custom.ToolTip.BorderBrush}" />
-      <Setter Property="BorderThickness"
-              Value="0" />
-      <Setter Property="Effect">
-        <Setter.Value>
-          <DropShadowEffect BlurRadius="6"
-                            Direction="270"
-                            ShadowDepth="2" />
-        </Setter.Value>
-      </Setter>
-      <Setter Property="FontSize"
-              Value="16" />
-      <Setter Property="Foreground"
-              Value="{StaticResource Custom.ToolTip.Foreground}" />
-      <Setter Property="HasDropShadow"
-              Value="True" />
-      <Setter Property="Margin"
-              Value="10" />
-      <Setter Property="OverridesDefaultStyle"
-              Value="true" />
-      <Setter Property="Padding"
-              Value="7" />
-      <Setter Property="Template">
-        <Setter.Value>
-          <ControlTemplate TargetType="ToolTip">
-            <Border Name="Border"
-                    Width="{TemplateBinding Width}"
-                    Height="{TemplateBinding Height}"
-                    Background="{TemplateBinding Background}"
-                    BorderBrush="{TemplateBinding BorderBrush}"
-                    BorderThickness="{TemplateBinding BorderThickness}"
-                    CornerRadius="10">
-              <ContentPresenter Margin="{TemplateBinding Padding}"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Top" />
-            </Border>
-            <ControlTemplate.Triggers>
-              <Trigger Property="HasDropShadow"
-                       Value="true">
-                <Setter TargetName="Border"
-                        Property="SnapsToDevicePixels"
-                        Value="true" />
-              </Trigger>
-            </ControlTemplate.Triggers>
-          </ControlTemplate>
-        </Setter.Value>
-      </Setter>
-    </Style>
-  </Application.Resources>
+    <Application.Resources>
+        <SolidColorBrush x:Key="Custom.ToolTip.Background"
+                         Color="#FFC7814C" />
+        <SolidColorBrush x:Key="Custom.ToolTip.Foreground"
+                         Color="#fff" />
+        <SolidColorBrush x:Key="Custom.ToolTip.BorderBrush"
+                         Color="#FFCCCCCC" />
+        <Style x:Key="{x:Type ToolTip}"
+               TargetType="{x:Type ToolTip}">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <ImageBrush ImageSource="Resources\button_texture.jpg"
+                                Stretch="UniformToFill" />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource Custom.ToolTip.BorderBrush}" />
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="6"
+                                      Direction="270"
+                                      ShadowDepth="2" />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="FontSize"
+                    Value="16" />
+            <Setter Property="Foreground"
+                    Value="{StaticResource Custom.ToolTip.Foreground}" />
+            <Setter Property="HasDropShadow"
+                    Value="True" />
+            <Setter Property="Margin"
+                    Value="10" />
+            <Setter Property="OverridesDefaultStyle"
+                    Value="true" />
+            <Setter Property="Padding"
+                    Value="7" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToolTip">
+                        <Border Name="Border"
+                                Width="{TemplateBinding Width}"
+                                Height="{TemplateBinding Height}"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="Left"
+                                              VerticalAlignment="Top" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="HasDropShadow"
+                                     Value="true">
+                                <Setter TargetName="Border"
+                                        Property="SnapsToDevicePixels"
+                                        Value="true" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Application.Resources>
 </Application>

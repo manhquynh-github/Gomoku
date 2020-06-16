@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Gomoku.BoardNS
+namespace Gomoku.Logic
 {
   public class LineGroup
   {
@@ -21,10 +21,10 @@ namespace Gomoku.BoardNS
       => Lines.Sum(l => l.BlankTiles.Count);
 
     public IReadOnlyList<Tile> BlankTiles
-      => Lines.SelectMany(l => l.BlankTiles).ToList();
+                      => Lines.SelectMany(l => l.BlankTiles).ToList();
 
     public int BlockTileCount
-      => Lines.Sum(l => l.BlockTiles.Count);
+          => Lines.Sum(l => l.BlockTiles.Count);
 
     public IReadOnlyList<Tile> BlockTiles
       => Lines.SelectMany(l => l.BlockTiles).ToList();

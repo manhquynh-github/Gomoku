@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Gomoku.BoardNS
+namespace Gomoku.Logic
 {
   public class Line
   {

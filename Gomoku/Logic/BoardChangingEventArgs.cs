@@ -1,4 +1,4 @@
-﻿namespace Gomoku.BoardNS
+﻿namespace Gomoku.Logic
 {
   public class BoardChangingEventArgs
   {

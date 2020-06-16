@@ -5,8 +5,8 @@ namespace Gomoku.AI
   public class NTree<T>
   {
     public List<NTree<T>> Nodes;
-    public T Value;
     public NTree<T> ParentNode;
+    public T Value;
 
     public NTree(NTree<T> parentNode, T value)
     {

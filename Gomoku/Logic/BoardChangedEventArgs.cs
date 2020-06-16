@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Gomoku.BoardNS
+namespace Gomoku.Logic
 {
   public class BoardChangedEventArgs : EventArgs
   {

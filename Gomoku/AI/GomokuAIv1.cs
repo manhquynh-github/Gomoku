@@ -1,7 +1,8 @@
-﻿using Gomoku.BoardNS;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using Gomoku.Logic;
 
 namespace Gomoku.AI
 {
@@ -26,20 +27,20 @@ namespace Gomoku.AI
     /// <summary>
     /// Searches for a suitable tile for the current turn of the board.
     /// </summary>
-    /// <param name="board">the board used for searching</param>
+    /// <param name="game">the game used for searching</param>
     /// <returns>a <see cref="Tile"/> that the AI selects.</returns>
-    public override Tuple<Tile, IEnumerable<Tile>> Play(Board board)
+    public override Tuple<Tile, IEnumerable<Tile>> Play(Game game)
     {
       // Initialize the choices
       var choices = new List<Tile>();
 
       // If game is over then stop
-      if (board.IsGameOver)
+      if (game.IsOver)
       {
         return null;
       }
 
-      List<NTree<AINode>> result = Search(board, null, Level);
+      List<NTree<AINode>> result = Search(game, null, Level);
 
       // Print out to console for debugging
       //PrintSearchResult(result);
@@ -80,14 +81,14 @@ namespace Gomoku.AI
       }
     }
 
-    protected AINode EvaluatePoint(Board board, Tile tile, Pieces type)
+    protected AINode EvaluatePoint(Game game, Tile tile, Pieces type)
     {
       // Evaluate the point of the current node
       var point = 0.0;
 
       // If game is over the point should be high enough so that this node is
       // more likely to get noticed
-      if (board.IsGameOver)
+      if (game.IsOver)
       {
         point = 1000.0;
       }
@@ -100,10 +101,10 @@ namespace Gomoku.AI
         {
           // Get LineGroup within 5-tile range
           LineGroup lineGroup =
-            board.GetLineGroup(
+            game.Board.GetLineGroup(
               tile, (Orientation)i,
               type,
-              5);
+              Game.WINPIECES);
 
           // Calculate points
           var sameTilesCount = lineGroup.SameTileCount;
@@ -114,7 +115,7 @@ namespace Gomoku.AI
           {
             // If the line chain has more tiles than win pieces, then this tile
             // is less worth.
-            if (sameTilesCount + 1 >= Board.WINPIECES)
+            if (sameTilesCount + 1 >= Game.WINPIECES)
             {
               point += sameTilesCount;
             }
@@ -148,13 +149,13 @@ namespace Gomoku.AI
       }
 
       // Instatiate an AINode containing all of the above information
-      return new AINode(tile, board, point);
+      return new AINode(tile, game, point);
     }
 
-    protected IEnumerable<Tile> GetPlayableTiles(Board board)
+    protected IEnumerable<Tile> GetPlayableTiles(Game game)
     {
       // Get all the placed tiles to determine all the correct playable tiles
-      Stack<Tile> placedTiles = board.History;
+      Stack<Tile> placedTiles = game.History;
 
       // Get all the playable tiles using a HashSet where only distinct tiles
       // are added
@@ -167,7 +168,7 @@ namespace Gomoku.AI
           // Retrieve LineGroup of each orientation within 2-tile range where
           // the tiles are empty
           foreach (Tile t in
-            board.GetLineGroup(
+            game.Board.GetLineGroup(
               tile,
               (Orientation)i,
               Pieces.None,
@@ -190,10 +191,10 @@ namespace Gomoku.AI
       Console.WriteLine("--------------");
     }
 
-    protected List<NTree<AINode>> Search(Board board, NTree<AINode> currentNode, int level)
+    protected List<NTree<AINode>> Search(Game game, NTree<AINode> currentNode, int level)
     {
       // Get all the placed tiles to determine all the correct playable tiles
-      Stack<Tile> placedTiles = board.History;
+      Stack<Tile> placedTiles = game.History;
 
       // If it is a new game, select the center most
       if (placedTiles.Count == 0)
@@ -202,31 +203,31 @@ namespace Gomoku.AI
         {
           new NTree<AINode>(
             new AINode(
-              board.Tiles[board.Width / 2, board.Height / 2],
-              board,
+              game.Board[game.Width / 2, game.Height / 2],
+              game,
               0))
         };
       }
 
       // Get all the playable tiles
-      IEnumerable<Tile> playableTiles = GetPlayableTiles(board);
+      IEnumerable<Tile> playableTiles = GetPlayableTiles(game);
 
       // Get current player to determine which side to search for
-      Player player = board.GetCurrentPlayer();
-      var playerCount = board.Players.Count;
+      Player player = game.GetCurrentPlayer();
+      var playerCount = game.Players.Count;
 
       // Populate corresponding NTrees with each playable tile found.
       var nTrees = new List<NTree<AINode>>();
       foreach (Tile tile in playableTiles)
       {
         // Clone the current board to create a new state of NTree
-        var b = board.DeepCopy() as Board;
+        var g = game.DeepClone();
 
         // Play the new cloned board
-        b.Play(tile);
+        g.Play(tile);
 
         // Evalue this tile
-        AINode aiNode = EvaluatePoint(b, tile, player.Piece.Type);
+        AINode aiNode = EvaluatePoint(g, tile, player.Piece.Type);
 
         // Add to the list of NTrees
         var nTree = new NTree<AINode>(currentNode, aiNode);
@@ -235,7 +236,7 @@ namespace Gomoku.AI
         // If the current node's board's game is over, stop evaluating because
         // there is a chance this node will reach the end of game, so there is
         // no longer any need to continue evaluating
-        if (b.IsGameOver)
+        if (g.IsOver)
         {
           break;
         }
@@ -246,7 +247,7 @@ namespace Gomoku.AI
         if (level > 0 && level <= Level)
         {
           // Evaluate children nodes by recursion
-          nTree.Nodes = Search(b, nTree, level - 1);
+          nTree.Nodes = Search(g, nTree, level - 1);
 
           if (nTree.Nodes.Count > 0)
           {
@@ -294,14 +295,14 @@ namespace Gomoku.AI
 
     protected class AINode : IComparable<AINode>
     {
-      public Board Board;
+      public Game Game;
       public double Point;
       public Tile Tile;
 
-      public AINode(Tile tile, Board board, double point)
+      public AINode(Tile tile, Game game, double point)
       {
         Tile = tile;
-        Board = board;
+        Game = game;
         Point = point;
       }
 

@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Gomoku
+namespace Gomoku.ViewModels
 {
   public abstract class VMBase :
     INotifyPropertyChanging,
@@ -13,7 +13,7 @@ namespace Gomoku
     public event PropertyChangingEventHandler PropertyChanging;
 
     public void NotifyPropertyChanged(
-      [CallerMemberName]string propertyName = null)
+      [CallerMemberName] string propertyName = null)
     {
       if (propertyName != null)
       {
@@ -23,7 +23,7 @@ namespace Gomoku
     }
 
     public void NotifyPropertyChanging(
-       [CallerMemberName]string propertyName = null)
+       [CallerMemberName] string propertyName = null)
     {
       if (propertyName != null)
       {
@@ -35,7 +35,7 @@ namespace Gomoku
     protected void SetProperty<T>(
       ref T field,
       T newValue,
-      [CallerMemberName]string propertyName = null)
+      [CallerMemberName] string propertyName = null)
     {
       if (propertyName != null)
       {

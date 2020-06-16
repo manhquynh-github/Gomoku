@@ -1,6 +1,4 @@
-﻿using Gomoku.AI;
-using Gomoku.BoardNS;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,6 +7,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
+using Gomoku.AI;
+using Gomoku.Logic;
+using Gomoku.ViewModels;
+
 namespace Gomoku
 {
   /// <summary>
@@ -16,8 +18,6 @@ namespace Gomoku
   /// </summary>
   public partial class MainWindow : Window
   {
-    public readonly Board Board;
-    public readonly Dictionary<Tile, Button> Buttons;
     private List<Tile> Choices;
 
     public MainWindow() :
@@ -34,15 +34,18 @@ namespace Gomoku
     {
       InitializeComponent();
 
-      Board = new Board(boardWidth, boardHeight, players);
-      Buttons = new Dictionary<Tile, Button>();
-      InitializeBoard(boardWidth, boardHeight);
+      Game = new Game(boardWidth, boardHeight, players);
+      BoardVM = new BoardVM(Game.Board);
       Choices = new List<Tile>();
+      InitializeBoard(boardWidth, boardHeight);
     }
+
+    public BoardVM BoardVM { get; }
+    public Game Game { get; }
 
     private async Task<Tile> AIPlayAsync()
     {
-      Player player = Board.GetCurrentPlayer();
+      Player player = Game.GetCurrentPlayer();
 
       if (player == null)
       {
@@ -57,7 +60,7 @@ namespace Gomoku
       BoardBorder.IsEnabled = false;
 
       var sw = Stopwatch.StartNew();
-      Tuple<Tile, IEnumerable<Tile>> result = await player.AI.PlayAsync(Board);
+      Tuple<Tile, IEnumerable<Tile>> result = await player.AI.PlayAsync(Game);
       sw.Stop();
       if (sw.ElapsedMilliseconds < 500)
       {
@@ -74,7 +77,7 @@ namespace Gomoku
 
     private async void AnalyzeButton_Click(object sender, RoutedEventArgs e)
     {
-      if (Board.IsGameOver)
+      if (Game.IsOver)
       {
         return;
       }
@@ -83,7 +86,7 @@ namespace Gomoku
       CleanAnalyze();
       foreach (Tile tile in Choices)
       {
-        tile.IsHighlighted = true;
+        BoardVM[tile].IsHighlighted = true;
       }
     }
 
@@ -91,11 +94,11 @@ namespace Gomoku
     {
       if (e.Tile != null)
       {
-        e.Tile.IsHighlighted = true;
+        BoardVM.Set(e.Tile);
       }
 
       // AI
-      if (!Board.IsGameOver && e.Player.IsAuto && UseAIToggleButton.IsChecked == true)
+      if (!Game.IsOver && e.Player.IsAuto && UseAIToggleButton.IsChecked == true)
       {
         await RunAI();
       }
@@ -105,7 +108,7 @@ namespace Gomoku
     {
       if (e.Tile != null)
       {
-        e.Tile.IsHighlighted = false;
+        BoardVM[e.Tile].IsHighlighted = false;
       }
     }
 
@@ -120,14 +123,14 @@ namespace Gomoku
         ShowMessage($"{e.Winner.Name} wins!");
       }
 
-      List<Player> players = Board.Players;
+      List<Player> players = Game.Players;
       Player last = players[players.Count - 1];
       players.RemoveAt(players.Count - 1);
       players.Insert(0, last);
 
       foreach (Tile tile in e.WinningLine.SameTiles)
       {
-        tile.IsHighlighted = true;
+        BoardVM[tile].IsHighlighted = true;
         Choices.Add(tile);
       }
 
@@ -140,20 +143,20 @@ namespace Gomoku
       {
         foreach (Tile tile in Choices)
         {
-          tile.IsHighlighted = false;
+          BoardVM[tile].IsHighlighted = false;
         }
       }
     }
 
     private async void DemoToggleButton_Checked(object sender, RoutedEventArgs e)
     {
-      if (Board.IsGameOver)
+      if (Game.IsOver)
       {
         CleanAnalyze();
-        Board.Restart();
+        Game.Restart();
       }
 
-      foreach (Player player in Board.Players)
+      foreach (Player player in Game.Players)
       {
         player.IsAuto = true;
       }
@@ -169,7 +172,7 @@ namespace Gomoku
     {
       UseAIToggleButton.IsChecked = false;
       UseAIToggleButton.IsEnabled = true;
-      Board.Players.First().IsAuto = false;
+      Game.Players.First().IsAuto = false;
     }
 
     private void InitializeBoard(int width, int height)
@@ -213,19 +216,18 @@ namespace Gomoku
         {
           var tileButton = new Button
           {
-            DataContext = Board.Tiles[j, i],
+            DataContext = BoardVM[j, i],
             Style = tileStyle
           };
-          Buttons.Add(Board.Tiles[j, i], tileButton);
           widthStackPanel.Children.Add(tileButton);
         }
 
         HeightStackPanel.Children.Add(widthStackPanel);
       }
 
-      Board.BoardChanging += Board_BoardChanging;
-      Board.BoardChanged += Board_BoardChangedAsync;
-      Board.GameOver += Board_GameOver;
+      Game.BoardChanging += Board_BoardChanging;
+      Game.BoardChanged += Board_BoardChangedAsync;
+      Game.GameOver += Board_GameOver;
     }
 
     private void MessageGrid_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -236,7 +238,13 @@ namespace Gomoku
     private void RestartButton_Click(object sender, RoutedEventArgs e)
     {
       CleanAnalyze();
-      Board.Restart();
+      foreach (var tile in Game.History)
+      {
+        BoardVM.Clear(tile);
+      }
+
+      Game.Restart();
+
       DemoToggleButton.IsChecked = false;
     }
 
@@ -248,7 +256,8 @@ namespace Gomoku
         return;
       }
 
-      TileButton_Click(Buttons[tile], null);
+      CleanAnalyze();
+      Game.Play(BoardVM[tile].Tile);
     }
 
     private void ShowMessage(string message)
@@ -259,31 +268,32 @@ namespace Gomoku
 
     private void TileButton_Click(object sender, RoutedEventArgs e)
     {
-      if (sender == null || Board.IsGameOver)
+      if (sender == null || Game.IsOver)
       {
         return;
       }
 
-      var button = sender as Button;
-      if (button.DataContext != null)
+      if (sender is Button button
+        && button.DataContext != null)
       {
-        var tile = button.DataContext as Tile;
+        var tileVM = button.DataContext as TileVM;
         CleanAnalyze();
-        Board.Play(tile);
+        Game.Play(tileVM.Tile);
       }
     }
 
     private void UndoButton_Click(object sender, RoutedEventArgs e)
     {
       CleanAnalyze();
-      Board.Undo();
+      BoardVM.Clear(Game.LastPlayedTile);
+      Game.Undo();
     }
 
     private async void UseAIToggleButton_Checked(object sender, RoutedEventArgs e)
     {
       // AI
       if (DemoToggleButton.IsChecked == false
-        && Board.GetCurrentPlayer().IsAuto
+        && Game.GetCurrentPlayer().IsAuto
         && UseAIToggleButton.IsChecked == true)
       {
         await RunAI();

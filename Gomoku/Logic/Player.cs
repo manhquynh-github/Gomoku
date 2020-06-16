@@ -1,6 +1,6 @@
 ﻿using Gomoku.AI;
 
-namespace Gomoku.BoardNS
+namespace Gomoku.Logic
 {
   /// <summary>
   /// Defines a player in the game.

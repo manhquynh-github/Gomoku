@@ -11,461 +11,465 @@
         d:DesignWidth="1400"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
-  <Window.Resources>
-    <Style x:Key="TileButtonStyle"
-           TargetType="Button">
-      <Setter Property="Background"
-              Value="Transparent" />
-      <Setter Property="BorderBrush"
-              Value="#FFBFBFBF" />
-      <Setter Property="BorderThickness"
-              Value="1,1,0,0" />
-      <Setter Property="ContentTemplate">
-        <Setter.Value>
-          <DataTemplate />
-        </Setter.Value>
-      </Setter>
-      <Setter Property="Height"
-              Value="30" />
-      <Setter Property="Template">
-        <Setter.Value>
-          <ControlTemplate TargetType="{x:Type Button}">
-            <Border x:Name="border"
-                    Background="{TemplateBinding Background}"
-                    BorderBrush="{TemplateBinding BorderBrush}"
-                    BorderThickness="{TemplateBinding BorderThickness}"
-                    SnapsToDevicePixels="True">
-              <ContentPresenter x:Name="contentPresenter"
-                                Margin="{TemplateBinding Padding}"
-                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                Content="{TemplateBinding Content}"
-                                ContentStringFormat="{TemplateBinding ContentStringFormat}"
-                                ContentTemplate="{TemplateBinding ContentTemplate}"
-                                Focusable="False"
-                                RecognizesAccessKey="True"
-                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-            </Border>
-          </ControlTemplate>
-        </Setter.Value>
-      </Setter>
-      <Setter Property="Width"
-              Value="30" />
-      <EventSetter Event="Click"
-                   Handler="TileButton_Click" />
-      <Style.Triggers>
-        <DataTrigger Binding="{Binding IsHighlighted}"
-                     Value="True">
-          <Setter Property="Background"
-                  Value="#3FFFFF00" />
-        </DataTrigger>
-        <MultiDataTrigger>
-          <MultiDataTrigger.Conditions>
-            <Condition Binding="{Binding IsHighlighted}"
-                       Value="False" />
-            <Condition Binding="{Binding RelativeSource={RelativeSource Mode=Self},
-                                         Path=IsMouseOver}"
-                       Value="True" />
-          </MultiDataTrigger.Conditions>
-          <Setter Property="Background"
-                  Value="#07000000" />
-        </MultiDataTrigger>
-        <DataTrigger Binding="{Binding Piece.TypeIndex}"
-                     Value="1">
-          <Setter Property="ContentTemplate">
-            <Setter.Value>
-              <DataTemplate>
-                <Viewbox>
-                  <Path Margin="10"
-                        Data="M 0,0 L 100,100 M 100,0 L 0,100"
-                        RenderOptions.CachingHint="Cache"
-                        Stroke="Red"
-                        StrokeEndLineCap="Round"
-                        StrokeStartLineCap="Round"
-                        StrokeThickness="10" />
-                </Viewbox>
-              </DataTemplate>
-            </Setter.Value>
-          </Setter>
-        </DataTrigger>
-        <DataTrigger Binding="{Binding Piece.TypeIndex}"
-                     Value="2">
-          <Setter Property="ContentTemplate">
-            <Setter.Value>
-              <DataTemplate>
-                <Viewbox>
-                  <Ellipse Width="100"
-                           Height="100"
-                           Margin="10"
-                           RenderOptions.CachingHint="Cache"
-                           Stroke="Blue"
-                           StrokeThickness="10" />
-                </Viewbox>
-              </DataTemplate>
-            </Setter.Value>
-          </Setter>
-        </DataTrigger>
-        <DataTrigger Binding="{Binding Piece.TypeIndex}"
-                     Value="3">
-          <Setter Property="ContentTemplate">
-            <Setter.Value>
-              <DataTemplate>
-                <Viewbox>
-                  <Path Margin="10"
-                        Data="M 50,0 L 0,100 100,100 Z"
-                        RenderOptions.CachingHint="Cache"
-                        Stroke="Green"
-                        StrokeEndLineCap="Round"
-                        StrokeStartLineCap="Round"
-                        StrokeThickness="10" />
-                </Viewbox>
-              </DataTemplate>
-            </Setter.Value>
-          </Setter>
-        </DataTrigger>
-      </Style.Triggers>
-    </Style>
-    <Style x:Key="CoordinateTileButtonStyle"
-           TargetType="Button">
-      <Setter Property="Background"
-              Value="Transparent" />
-      <Setter Property="BorderBrush"
-              Value="#FFBFBFBF" />
-      <Setter Property="BorderThickness"
-              Value="1,1,0,0" />
-      <Setter Property="Height"
-              Value="30" />
-      <Setter Property="IsEnabled"
-              Value="False" />
-      <Setter Property="Template">
-        <Setter.Value>
-          <ControlTemplate TargetType="{x:Type Button}">
-            <Border x:Name="border"
-                    Background="{TemplateBinding Background}"
-                    BorderBrush="{TemplateBinding BorderBrush}"
-                    BorderThickness="{TemplateBinding BorderThickness}"
-                    SnapsToDevicePixels="True">
-              <ContentPresenter x:Name="contentPresenter"
-                                Margin="{TemplateBinding Padding}"
-                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                Content="{TemplateBinding Content}"
-                                ContentStringFormat="{TemplateBinding ContentStringFormat}"
-                                ContentTemplate="{TemplateBinding ContentTemplate}"
-                                Focusable="False"
-                                RecognizesAccessKey="True"
-                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-            </Border>
-          </ControlTemplate>
-        </Setter.Value>
-      </Setter>
-      <Setter Property="Width"
-              Value="30" />
-      <Style.Triggers>
-        <DataTrigger Binding="{Binding IsHighlighted}"
-                     Value="True">
-          <Setter Property="Background"
-                  Value="#3FFFFF00" />
-        </DataTrigger>
-        <MultiDataTrigger>
-          <MultiDataTrigger.Conditions>
-            <Condition Binding="{Binding IsHighlighted}"
-                       Value="False" />
-            <Condition Binding="{Binding RelativeSource={RelativeSource Mode=Self},
-                                         Path=IsMouseOver}"
-                       Value="True" />
-          </MultiDataTrigger.Conditions>
-          <Setter Property="Background"
-                  Value="#07000000" />
-        </MultiDataTrigger>
-      </Style.Triggers>
-    </Style>
-    <Style x:Key="BoardStackPanelStyle"
-           TargetType="StackPanel">
-      <Setter Property="Background"
-              Value="{x:Null}" />
-    </Style>
-    <Style x:Key="WidthStackPanelStyle"
-           BasedOn="{StaticResource BoardStackPanelStyle}"
-           TargetType="StackPanel">
-      <Setter Property="Orientation"
-              Value="Horizontal" />
-    </Style>
-    <Style x:Key="ButtonStyle"
-           TargetType="{x:Type Button}">
-      <Setter Property="Background">
-        <Setter.Value>
-          <ImageBrush ImageSource="Resources\button_texture.jpg"
-                      Stretch="UniformToFill" />
-        </Setter.Value>
-      </Setter>
-      <Setter Property="BorderThickness"
-              Value="0" />
-      <!--<Setter Property="BorderBrush"
+    <Window.Resources>
+        <Style x:Key="TileButtonStyle"
+               TargetType="Button">
+            <Setter Property="Background"
+                    Value="Transparent" />
+            <Setter Property="BorderBrush"
+                    Value="#FFBFBFBF" />
+            <Setter Property="BorderThickness"
+                    Value="1,1,0,0" />
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Height"
+                    Value="30" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter x:Name="contentPresenter"
+                                              Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Content="{TemplateBinding Content}"
+                                              ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              Focusable="False"
+                                              RecognizesAccessKey="True"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Width"
+                    Value="30" />
+            <EventSetter Event="Click"
+                         Handler="TileButton_Click" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsHighlighted}"
+                             Value="True">
+                    <Setter Property="Background"
+                            Value="#3FFFFF00" />
+                </DataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsHighlighted}"
+                                   Value="False" />
+                        <Condition Binding="{Binding RelativeSource={RelativeSource Mode=Self},
+                                                     Path=IsMouseOver}"
+                                   Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Background"
+                            Value="#07000000" />
+                </MultiDataTrigger>
+                <DataTrigger Binding="{Binding Piece.TypeIndex}"
+                             Value="1">
+                    <Setter Property="ContentTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <Viewbox>
+                                    <Path Margin="10"
+                                          Data="M 0,0 L 100,100 M 100,0 L 0,100"
+                                          RenderOptions.CachingHint="Cache"
+                                          Stroke="Red"
+                                          StrokeEndLineCap="Round"
+                                          StrokeStartLineCap="Round"
+                                          StrokeThickness="10" />
+                                </Viewbox>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Piece.TypeIndex}"
+                             Value="2">
+                    <Setter Property="ContentTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <Viewbox>
+                                    <Ellipse Width="100"
+                                             Height="100"
+                                             Margin="10"
+                                             RenderOptions.CachingHint="Cache"
+                                             Stroke="Blue"
+                                             StrokeThickness="10" />
+                                </Viewbox>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Piece.TypeIndex}"
+                             Value="3">
+                    <Setter Property="ContentTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <Viewbox>
+                                    <Path Margin="10"
+                                          Data="M 50,0 L 0,100 100,100 Z"
+                                          RenderOptions.CachingHint="Cache"
+                                          Stroke="Green"
+                                          StrokeEndLineCap="Round"
+                                          StrokeStartLineCap="Round"
+                                          StrokeThickness="10" />
+                                </Viewbox>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="CoordinateTileButtonStyle"
+               TargetType="Button">
+            <Setter Property="Background"
+                    Value="Transparent" />
+            <Setter Property="BorderBrush"
+                    Value="#FFBFBFBF" />
+            <Setter Property="BorderThickness"
+                    Value="1,1,0,0" />
+            <Setter Property="Height"
+                    Value="30" />
+            <Setter Property="IsEnabled"
+                    Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter x:Name="contentPresenter"
+                                              Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Content="{TemplateBinding Content}"
+                                              ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              Focusable="False"
+                                              RecognizesAccessKey="True"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Width"
+                    Value="30" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsHighlighted}"
+                             Value="True">
+                    <Setter Property="Background"
+                            Value="#3FFFFF00" />
+                </DataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsHighlighted}"
+                                   Value="False" />
+                        <Condition Binding="{Binding RelativeSource={RelativeSource Mode=Self},
+                                                     Path=IsMouseOver}"
+                                   Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Background"
+                            Value="#07000000" />
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="BoardStackPanelStyle"
+               TargetType="StackPanel">
+            <Setter Property="Background"
+                    Value="{x:Null}" />
+        </Style>
+        <Style x:Key="WidthStackPanelStyle"
+               BasedOn="{StaticResource BoardStackPanelStyle}"
+               TargetType="StackPanel">
+            <Setter Property="Orientation"
+                    Value="Horizontal" />
+        </Style>
+        <Style x:Key="ButtonStyle"
+               TargetType="{x:Type Button}">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <ImageBrush ImageSource="Resources\button_texture.jpg"
+                                Stretch="UniformToFill" />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <!--<Setter Property="BorderBrush"
               Value="#FFC7814C" />-->
-      <Setter Property="ContentTemplate">
-        <Setter.Value>
-          <DataTemplate>
-            <TextBlock Text="{Binding}">
-              <TextBlock.Effect>
-                <DropShadowEffect BlurRadius="3"
-                                  Direction="270"
-                                  ShadowDepth="1" />
-              </TextBlock.Effect></TextBlock>
-          </DataTemplate>
-        </Setter.Value>
-      </Setter>
-      <Setter Property="Effect">
-        <Setter.Value>
-          <DropShadowEffect BlurRadius="6"
-                            Direction="270"
-                            ShadowDepth="2" />
-        </Setter.Value>
-      </Setter>
-      <Setter Property="FontFamily"
-              Value="Comic Sans MS" />
-      <Setter Property="FontSize"
-              Value="24" />
-      <Setter Property="Foreground"
-              Value="#FFF9F8F5" />
-      <Setter Property="Height"
-              Value="50" />
-      <Setter Property="Margin"
-              Value="0,5" />
-      <Setter Property="Template">
-        <Setter.Value>
-          <ControlTemplate TargetType="{x:Type ButtonBase}">
-            <Border x:Name="border"
-                    Background="{TemplateBinding Background}"
-                    BorderBrush="{TemplateBinding BorderBrush}"
-                    BorderThickness="{TemplateBinding BorderThickness}"
-                    CornerRadius="20"
-                    SnapsToDevicePixels="True">
-              <ContentPresenter x:Name="contentPresenter"
-                                Margin="{TemplateBinding Padding}"
-                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                Content="{TemplateBinding Content}"
-                                ContentStringFormat="{TemplateBinding ContentStringFormat}"
-                                ContentTemplate="{TemplateBinding ContentTemplate}"
-                                Focusable="False"
-                                RecognizesAccessKey="True"
-                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-            </Border>
-          </ControlTemplate>
-        </Setter.Value>
-      </Setter>
-      <Setter Property="Width"
-              Value="125" />
-      <Style.Triggers>
-        <Trigger Property="IsMouseOver"
-                 Value="True">
-          <Setter Property="Foreground"
-                  Value="#FFFFFFBF" />
-        </Trigger>
-        <Trigger Property="IsPressed"
-                 Value="True">
-          <Setter Property="Foreground"
-                  Value="Yellow" />
-        </Trigger>
-      </Style.Triggers>
-    </Style>
-    <Style x:Key="ToggleButtonStyle"
-           TargetType="{x:Type ToggleButton}">
-      <Setter Property="Background">
-        <Setter.Value>
-          <ImageBrush ImageSource="Resources\button_texture.jpg"
-                      Stretch="UniformToFill" />
-        </Setter.Value>
-      </Setter>
-      <Setter Property="BorderThickness"
-              Value="0" />
-      <!--<Setter Property="BorderBrush"
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}">
+                            <TextBlock.Effect>
+                                <DropShadowEffect BlurRadius="3"
+                                                  Direction="270"
+                                                  ShadowDepth="1" />
+                            </TextBlock.Effect>
+                        </TextBlock>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="6"
+                                      Direction="270"
+                                      ShadowDepth="2" />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="FontFamily"
+                    Value="Comic Sans MS" />
+            <Setter Property="FontSize"
+                    Value="24" />
+            <Setter Property="Foreground"
+                    Value="#FFF9F8F5" />
+            <Setter Property="Height"
+                    Value="50" />
+            <Setter Property="Margin"
+                    Value="0,5" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ButtonBase}">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="20"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter x:Name="contentPresenter"
+                                              Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Content="{TemplateBinding Content}"
+                                              ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              Focusable="False"
+                                              RecognizesAccessKey="True"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Width"
+                    Value="125" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver"
+                         Value="True">
+                    <Setter Property="Foreground"
+                            Value="#FFFFFFBF" />
+                </Trigger>
+                <Trigger Property="IsPressed"
+                         Value="True">
+                    <Setter Property="Foreground"
+                            Value="Yellow" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ToggleButtonStyle"
+               TargetType="{x:Type ToggleButton}">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <ImageBrush ImageSource="Resources\button_texture.jpg"
+                                Stretch="UniformToFill" />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderThickness"
+                    Value="0" />
+            <!--<Setter Property="BorderBrush"
               Value="#FFC7814C" />-->
-      <Setter Property="ContentTemplate">
-        <Setter.Value>
-          <DataTemplate>
-            <TextBlock Text="{Binding}">
-              <TextBlock.Effect>
-                <DropShadowEffect BlurRadius="3"
-                                  Direction="270"
-                                  ShadowDepth="1" />
-              </TextBlock.Effect></TextBlock>
-          </DataTemplate>
-        </Setter.Value>
-      </Setter>
-      <Setter Property="Effect">
-        <Setter.Value>
-          <DropShadowEffect BlurRadius="6"
-                            Direction="270"
-                            ShadowDepth="2" />
-        </Setter.Value>
-      </Setter>
-      <Setter Property="FontFamily"
-              Value="Comic Sans MS" />
-      <Setter Property="FontSize"
-              Value="24" />
-      <Setter Property="Foreground"
-              Value="#FFF9F8F5" />
-      <Setter Property="Height"
-              Value="50" />
-      <Setter Property="Margin"
-              Value="0,5" />
-      <Setter Property="Template">
-        <Setter.Value>
-          <ControlTemplate TargetType="{x:Type ToggleButton}">
-            <Border x:Name="border"
-                    Background="{TemplateBinding Background}"
-                    BorderBrush="{TemplateBinding BorderBrush}"
-                    BorderThickness="{TemplateBinding BorderThickness}"
-                    CornerRadius="20"
-                    SnapsToDevicePixels="true">
-              <ContentPresenter x:Name="contentPresenter"
-                                Margin="{TemplateBinding Padding}"
-                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                Focusable="False"
-                                RecognizesAccessKey="True"
-                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-            </Border>
-          </ControlTemplate>
-        </Setter.Value>
-      </Setter>
-      <Setter Property="Width"
-              Value="125" />
-      <Style.Triggers>
-        <Trigger Property="IsMouseOver"
-                 Value="True">
-          <Setter Property="Foreground"
-                  Value="#FFFFFFBF" />
-        </Trigger>
-        <Trigger Property="IsPressed"
-                 Value="True">
-          <Setter Property="Foreground"
-                  Value="Yellow" />
-        </Trigger>
-        <Trigger Property="IsChecked"
-                 Value="True">
-          <Setter Property="Foreground"
-                  Value="GreenYellow" />
-        </Trigger>
-      </Style.Triggers>
-    </Style>
-  </Window.Resources>
-  <Grid>
-    <Grid.Background>
-      <ImageBrush ImageSource="Resources/background.jpg"
-                  Stretch="UniformToFill" />
-      <!--<RadialGradientBrush Center="0.5,1"
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}">
+                            <TextBlock.Effect>
+                                <DropShadowEffect BlurRadius="3"
+                                                  Direction="270"
+                                                  ShadowDepth="1" />
+                            </TextBlock.Effect>
+                        </TextBlock>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="6"
+                                      Direction="270"
+                                      ShadowDepth="2" />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="FontFamily"
+                    Value="Comic Sans MS" />
+            <Setter Property="FontSize"
+                    Value="24" />
+            <Setter Property="Foreground"
+                    Value="#FFF9F8F5" />
+            <Setter Property="Height"
+                    Value="50" />
+            <Setter Property="Margin"
+                    Value="0,5" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="20"
+                                SnapsToDevicePixels="true">
+                            <ContentPresenter x:Name="contentPresenter"
+                                              Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Focusable="False"
+                                              RecognizesAccessKey="True"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Width"
+                    Value="125" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver"
+                         Value="True">
+                    <Setter Property="Foreground"
+                            Value="#FFFFFFBF" />
+                </Trigger>
+                <Trigger Property="IsPressed"
+                         Value="True">
+                    <Setter Property="Foreground"
+                            Value="Yellow" />
+                </Trigger>
+                <Trigger Property="IsChecked"
+                         Value="True">
+                    <Setter Property="Foreground"
+                            Value="GreenYellow" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="Resources/background.jpg"
+                        Stretch="UniformToFill" />
+            <!--<RadialGradientBrush Center="0.5,1"
                            RadiusY="1">
         <GradientStop Offset="1"
                       Color="#FFD4D4D4" />
         <GradientStop Color="White" />
       </RadialGradientBrush>-->
-    </Grid.Background>
-    <Grid MaxWidth="900">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="3*"
-                          MinWidth="750" />
-        <ColumnDefinition Width="*" />
-      </Grid.ColumnDefinitions>
-      <Border x:Name="BoardBorder">
-        <Border.Background>
-          <ImageBrush ImageSource="Resources/paper.png"
-                      Stretch="Uniform" />
-        </Border.Background>
-        <Grid>
-          <ScrollViewer HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        HorizontalScrollBarVisibility="Auto"
-                        VerticalScrollBarVisibility="Auto">
-            <Border BorderBrush="#FFBFBFBF"
-                    BorderThickness="0,0,1,1">
-              <StackPanel x:Name="HeightStackPanel"
-                          Orientation="Vertical"
-                          Style="{StaticResource BoardStackPanelStyle}" />
+        </Grid.Background>
+        <Grid MaxWidth="900">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"
+                                  MinWidth="750" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border x:Name="BoardBorder">
+                <Border.Background>
+                    <ImageBrush ImageSource="Resources/paper.png"
+                                Stretch="Uniform" />
+                </Border.Background>
+                <Grid>
+                    <ScrollViewer HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto">
+                        <Border BorderBrush="#FFBFBFBF"
+                                BorderThickness="0,0,1,1">
+                            <StackPanel x:Name="HeightStackPanel"
+                                        Orientation="Vertical"
+                                        Style="{StaticResource BoardStackPanelStyle}" />
+                        </Border>
+                    </ScrollViewer>
+                    <Grid x:Name="MessageGrid"
+                          Background="Transparent"
+                          Cursor="Hand"
+                          PreviewMouseDown="MessageGrid_PreviewMouseDown"
+                          Visibility="Collapsed">
+                        <TextBlock x:Name="MessageTextBlock"
+                                   Margin="50,100"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontFamily="Comic Sans MS"
+                                   FontSize="56"
+                                   FontWeight="Bold"
+                                   Text="Wins!"
+                                   TextAlignment="Center"
+                                   TextTrimming="WordEllipsis">
+                            <TextBlock.Foreground>
+                                <ImageBrush ImageSource="Resources/button_texture.jpg"
+                                            Stretch="UniformToFill" />
+                            </TextBlock.Foreground>
+                            <TextBlock.Effect>
+                                <DropShadowEffect BlurRadius="6"
+                                                  Direction="270"
+                                                  ShadowDepth="3" />
+                            </TextBlock.Effect>
+                        </TextBlock>
+                    </Grid>
+                </Grid>
             </Border>
-          </ScrollViewer>
-          <Grid x:Name="MessageGrid"
-                Background="Transparent"
-                Cursor="Hand"
-                PreviewMouseDown="MessageGrid_PreviewMouseDown"
-                Visibility="Collapsed">
-            <TextBlock x:Name="MessageTextBlock"
-                       Margin="50,100"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       FontFamily="Comic Sans MS"
-                       FontSize="56"
-                       FontWeight="Bold"
-                       Text="Wins!"
-                       TextAlignment="Center"
-                       TextTrimming="WordEllipsis">
-              <TextBlock.Foreground>
-                <ImageBrush ImageSource="Resources/button_texture.jpg"
-                            Stretch="UniformToFill" />
-              </TextBlock.Foreground>
-              <TextBlock.Effect>
-                <DropShadowEffect BlurRadius="6"
-                                  Direction="270"
-                                  ShadowDepth="3" />
-              </TextBlock.Effect></TextBlock>
-          </Grid>
+            <ScrollViewer Grid.Column="1"
+                          Margin="0,150,0,0"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="10"
+                            Orientation="Vertical">
+                    <StackPanel.Resources>
+                        <Style BasedOn="{StaticResource {x:Type ToolTip}}"
+                               TargetType="{x:Type ToolTip}">
+                            <Setter Property="ContentTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}">
+                                            <TextBlock.Effect>
+                                                <DropShadowEffect BlurRadius="3"
+                                                                  Direction="270"
+                                                                  ShadowDepth="1" />
+                                            </TextBlock.Effect>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="Placement"
+                                    Value="Left" />
+                            <Setter Property="PlacementRectangle"
+                                    Value="-10,7,1,1" />
+                        </Style>
+                    </StackPanel.Resources>
+                    <ToggleButton x:Name="UseAIToggleButton"
+                                  Checked="UseAIToggleButton_Checked"
+                                  Content="UseAI"
+                                  Style="{DynamicResource ToggleButtonStyle}"
+                                  ToolTip="Turn on/off AI player" />
+                    <ToggleButton x:Name="DemoToggleButton"
+                                  Checked="DemoToggleButton_Checked"
+                                  Content="Demo"
+                                  Style="{DynamicResource ToggleButtonStyle}"
+                                  ToolTip="Turn on/off AI playing against each other"
+                                  Unchecked="DemoToggleButton_Unchecked" />
+                    <Button Click="AnalyzeButton_Click"
+                            Content="Analyze"
+                            Style="{StaticResource ButtonStyle}"
+                            ToolTip="Suggest good moves" />
+                    <Button Click="RestartButton_Click"
+                            Content="Restart"
+                            Style="{StaticResource ButtonStyle}"
+                            ToolTip="Start a new game" />
+                    <Button Click="UndoButton_Click"
+                            Content="Undo"
+                            Style="{StaticResource ButtonStyle}"
+                            ToolTip="Undo last move" />
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
-      </Border>
-      <ScrollViewer Grid.Column="1"
-                    Margin="0,150,0,0"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="10"
-                    Orientation="Vertical">
-          <StackPanel.Resources>
-            <Style BasedOn="{StaticResource {x:Type ToolTip}}"
-                   TargetType="{x:Type ToolTip}">
-              <Setter Property="ContentTemplate">
-                <Setter.Value>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding}">
-                      <TextBlock.Effect>
-                        <DropShadowEffect BlurRadius="3"
-                                          Direction="270"
-                                          ShadowDepth="1" />
-                      </TextBlock.Effect></TextBlock>
-                  </DataTemplate>
-                </Setter.Value>
-              </Setter>
-              <Setter Property="Placement"
-                      Value="Left" />
-              <Setter Property="PlacementRectangle"
-                      Value="-10,7,1,1" />
-            </Style>
-          </StackPanel.Resources>
-          <ToggleButton x:Name="UseAIToggleButton"
-                        Checked="UseAIToggleButton_Checked"
-                        Content="UseAI"
-                        Style="{DynamicResource ToggleButtonStyle}"
-                        ToolTip="Turn on/off AI player" />
-          <ToggleButton x:Name="DemoToggleButton"
-                        Checked="DemoToggleButton_Checked"
-                        Content="Demo"
-                        Style="{DynamicResource ToggleButtonStyle}"
-                        ToolTip="Turn on/off AI playing against each other"
-                        Unchecked="DemoToggleButton_Unchecked" />
-          <Button Click="AnalyzeButton_Click"
-                  Content="Analyze"
-                  Style="{StaticResource ButtonStyle}"
-                  ToolTip="Suggest good moves" />
-          <Button Click="RestartButton_Click"
-                  Content="Restart"
-                  Style="{StaticResource ButtonStyle}"
-                  ToolTip="Start a new game" />
-          <Button Click="UndoButton_Click"
-                  Content="Undo"
-                  Style="{StaticResource ButtonStyle}"
-                  ToolTip="Undo last move" />
-        </StackPanel>
-      </ScrollViewer>
     </Grid>
-  </Grid>
 </Window>
