@@ -12,17 +12,11 @@ namespace Gomoku.AI
   /// Disadvantage: Very slow when n &gt;= 2
   /// </summary>
   /// <remarks>written by https://github.com/manhquynh-github</remarks>
-  public class GomokuAIv2 : AbstractGomokuAI
+  public class GomokuAIv2 : GomokuAIv1
   {
-    public GomokuAIv2(int level = 3)
+    public GomokuAIv2(int level = 3) : base(level)
     {
-      Level = level;
     }
-
-    /// <summary>
-    /// The level of the AI, or more specifically, depth of AI
-    /// </summary>
-    public int Level { get; set; }
 
     /// <summary>
     /// Searches for a suitable tile for the current turn of the board.
@@ -78,107 +72,6 @@ namespace Gomoku.AI
         var choice = App.Random.Next(choices.Count);
         return new Tuple<Tile, IEnumerable<Tile>>(choices[choice], choices);
       }
-    }
-
-    protected AINode EvaluatePoint(Game game, Tile tile, Pieces type)
-    {
-      // Evaluate the point of the current node
-      var point = 0.0;
-
-      // If game is over the point should be high enough so that this node is
-      // more likely to get noticed
-      if (game.IsOver)
-      {
-        point = 1000.0;
-      }
-
-      // Otherwise evaluate the point matching lines and other information
-      else
-      {
-        // Retrieve line group of each orientation to fully evaluate a tile
-        for (var i = 0; i <= 3; i++)
-        {
-          // Get LineGroup within 5-tile range
-          LineGroup lineGroup =
-            game.Board.GetLineGroup(
-              tile, (Orientation)i,
-              type,
-              Game.WINPIECES);
-
-          // Calculate points
-          var sameTilesCount = lineGroup.SameTileCount;
-          var blockTilesCount = lineGroup.BlockTileCount;
-
-          // When the line is not blocked
-          if (blockTilesCount == 0)
-          {
-            // If the line chain has more tiles than win pieces, then this tile
-            // is less worth.
-            if (sameTilesCount + 1 >= Game.WINPIECES)
-            {
-              point += sameTilesCount;
-            }
-
-            // Otherwise
-            else
-            {
-              // Calculate point using Geometric series of 2.0 so that the more
-              // chain it has, the more valuable the line
-              var _point =
-                  1.0 * (1.0 - Math.Pow(2.0, sameTilesCount)) / (1.0 - 2.0);
-
-              // Finally the point is added with the power of itself
-              point += Math.Pow(_point, lineGroup.IsChained ? 2.0 : 1.5);
-            }
-          }
-
-          // When the line is partially blocked, only add the point which equals
-          // to the same count
-          else if (blockTilesCount == 1)
-          {
-            point += sameTilesCount;
-          }
-
-          // Otherwise, add no point.
-
-          //point += (1.0 * (1.0 - Math.Pow(2.0, lineGroup.CountChainTiles())) / (1.0 - 2.0));
-          //point += 0.25 * lineGroup.CountBlankTiles();
-          //point -= 1.0 * lineGroup.BlockTileCount;
-        }
-      }
-
-      // Instatiate an AINode containing all of the above information
-      return new AINode(tile, game, point);
-    }
-
-    protected IEnumerable<Tile> GetPlayableTiles(Game game)
-    {
-      // Get all the placed tiles to determine all the correct playable tiles
-      Stack<Tile> placedTiles = game.History;
-
-      // Get all the playable tiles using a HashSet where only distinct tiles
-      // are added
-      var playableTiles = new HashSet<Tile>();
-      foreach (Tile tile in placedTiles)
-      {
-        // Loop all 4 Orientation enumeration
-        for (var i = 0; i <= 3; i++)
-        {
-          // Retrieve LineGroup of each orientation within 2-tile range where
-          // the tiles are empty
-          foreach (Tile t in
-            game.Board.GetLineGroup(
-              tile,
-              (Orientation)i,
-              Pieces.None,
-              2).SameTiles)
-          {
-            playableTiles.Add(t);
-          }
-        }
-      }
-
-      return playableTiles;
     }
 
     protected IEnumerable<AINode> Search(Game game, int level)
@@ -283,37 +176,6 @@ namespace Gomoku.AI
       candidateNodes.RemoveAll((x) => x.Point < maxNode2.Point);
 
       return candidateNodes;
-    }
-
-    protected class AINode : IComparable<AINode>
-    {
-      public Game Game;
-      public double Point;
-      public Tile Tile;
-
-      public AINode(Tile tile, Game game, double point)
-      {
-        Tile = tile;
-        Game = game;
-        Point = point;
-      }
-
-      public int CompareTo(AINode other)
-      {
-        var diff = Point - other.Point;
-        if (diff == 0.0)
-        {
-          return 0;
-        }
-        else if (diff > 0.0)
-        {
-          return 1;
-        }
-        else
-        {
-          return -1;
-        }
-      }
     }
   }
 }
