@@ -15,9 +15,9 @@ namespace Gomoku.Logic
       Width = width;
       Height = height;
       Tiles = new Tile[Width, Height];
-      for (var i = 0; i < Width; i++)
+      for (int i = 0; i < Width; i++)
       {
-        for (var j = 0; j < Height; j++)
+        for (int j = 0; j < Height; j++)
         {
           Tiles[i, j] = new Tile(i, j)
           {
@@ -32,9 +32,9 @@ namespace Gomoku.Logic
       Width = b.Width;
       Height = b.Height;
       Tiles = new Tile[Width, Height];
-      for (var i = 0; i < Width; i++)
+      for (int i = 0; i < Width; i++)
       {
-        for (var j = 0; j < Height; j++)
+        for (int j = 0; j < Height; j++)
         {
           Tiles[i, j] = new Tile(i, j)
           {
@@ -59,19 +59,19 @@ namespace Gomoku.Logic
         throw new FormatException($"{nameof(s)} must not be empty.");
       }
 
-      var heightSplit = s.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+      string[] heightSplit = s.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
       if (heightSplit.Length == 0)
       {
         throw new FormatException($"{nameof(s)} is not format compliant. (misformatted rows)");
       }
 
-      var widthSplit = heightSplit[0].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+      string[] widthSplit = heightSplit[0].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
       if (widthSplit.Length == 0)
       {
         throw new FormatException($"{nameof(s)} is not format compliant. (misformatted columns)");
       }
 
-      var b = new Board(widthSplit.Length, heightSplit.Length);
+      Board b = new Board(widthSplit.Length, heightSplit.Length);
 
       for (int j = 0; j < heightSplit.Length; j++)
       {
@@ -118,13 +118,13 @@ namespace Gomoku.Logic
       Pieces type,
       int max)
     {
-      var sameTiles = new List<Tile>();
-      var blankTiles = new List<Tile>();
-      var blockTiles = new List<Tile>();
+      List<Tile> sameTiles = new List<Tile>();
+      List<Tile> blankTiles = new List<Tile>();
+      List<Tile> blockTiles = new List<Tile>();
 
-      var count = 0;
-      var chainBreak = false;
-      var previouslyBlank = false;
+      int count = 0;
+      bool chainBreak = false;
+      bool previouslyBlank = false;
 
       RunTilesFunction(
         tile,
@@ -181,30 +181,22 @@ namespace Gomoku.Logic
       Pieces type,
       int max)
     {
-      switch (orientation)
+      return orientation switch
       {
-        case Orientation.Horizontal:
-          return new LineGroup(
-              GetLine(tile, Direction.Left, type, max),
-              GetLine(tile, Direction.Right, type, max));
-
-        case Orientation.Vertical:
-          return new LineGroup(
-              GetLine(tile, Direction.Up, type, max),
-              GetLine(tile, Direction.Down, type, max));
-
-        case Orientation.Diagonal:
-          return new LineGroup(
-              GetLine(tile, Direction.UpLeft, type, max),
-              GetLine(tile, Direction.DownRight, type, max));
-
-        case Orientation.RvDiagonal:
-          return new LineGroup(
-              GetLine(tile, Direction.UpRight, type, max),
-              GetLine(tile, Direction.DownLeft, type, max));
-      }
-
-      return new LineGroup();
+        Orientation.Horizontal => new LineGroup(
+          GetLine(tile, Direction.Left, type, max),
+          GetLine(tile, Direction.Right, type, max)),
+        Orientation.Vertical => new LineGroup(
+          GetLine(tile, Direction.Up, type, max),
+          GetLine(tile, Direction.Down, type, max)),
+        Orientation.Diagonal => new LineGroup(
+          GetLine(tile, Direction.UpLeft, type, max),
+          GetLine(tile, Direction.DownRight, type, max)),
+        Orientation.RvDiagonal => new LineGroup(
+          GetLine(tile, Direction.UpRight, type, max),
+          GetLine(tile, Direction.DownLeft, type, max)),
+        _ => throw new InvalidOperationException("Unexpected value"),
+      };
     }
 
     public void RunTilesFunction(
@@ -291,19 +283,19 @@ namespace Gomoku.Logic
 
     public override string ToString()
     {
-      var res = string.Empty;
+      string res = string.Empty;
 
-      for (var j = 0; j < Height; j++)
+      for (int j = 0; j < Height; j++)
       {
-        for (var i = 0; i < Width; i++)
+        for (int i = 0; i < Width; i++)
         {
           res += Tiles[i, j].Piece.TypeIndex.ToString() + ",";
         }
 
-        res = res.Substring(0, res.Length - 1);
+        res = res[0..^1];
         res += ";";
       }
-      res = res.Substring(0, res.Length - 1);
+      res = res[0..^1];
 
       return res;
     }

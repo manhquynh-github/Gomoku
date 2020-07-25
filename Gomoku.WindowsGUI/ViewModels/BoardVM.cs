@@ -2,7 +2,7 @@
 
 using Gomoku.Logic;
 
-namespace Gomoku.ViewModels
+namespace Gomoku.WindowsGUI.ViewModels
 {
   public class BoardVM
   {
@@ -27,14 +27,14 @@ namespace Gomoku.ViewModels
 
     public void Clear(Tile tile)
     {
-      var tileVM = this[tile];
+      TileVM tileVM = this[tile];
       tileVM.IsHighlighted = false;
       tileVM.Piece = (Piece)Pieces.None;
     }
 
     public void Set(Tile tile)
     {
-      var tileVM = this[tile];
+      TileVM tileVM = this[tile];
       tileVM.IsHighlighted = true;
       tileVM.Piece = tile.Piece;
     }

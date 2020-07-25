@@ -8,19 +8,23 @@ namespace Gomoku.Logic
   {
     public static readonly int WINPIECES = 5;
 
-    public Game(int width, int height, IList<Player> players)
+    private readonly List<Player> _players;
+
+    public Game(int width, int height, IEnumerable<Player> players)
     {
-      if (height <= 5 || width <= 5)
+      if (height <= WINPIECES || width <= WINPIECES)
       {
-        throw new ArgumentException($"{nameof(Game)} must have at least 5x5 board.");
+        throw new ArgumentException(
+          $"{nameof(Game)} must have at least {WINPIECES}x{WINPIECES} board.");
       }
 
       Board = new Board(width, height);
       MaxMove = width * height;
-      Players = new List<Player>(players);
+      _players = new List<Player>(players);
       Turn = 0;
       History = new Stack<Tile>();
       IsOver = false;
+      ShiftPlayersOnGameOver = true;
     }
 
     public Game(Game g)
@@ -32,10 +36,11 @@ namespace Gomoku.Logic
 
       Board = g.Board.DeepClone();
       MaxMove = g.MaxMove;
-      Players = new List<Player>(g.Players);
+      _players = new List<Player>(g._players);
       Turn = g.Turn;
       History = new Stack<Tile>(g.History);
       IsOver = g.IsOver;
+      ShiftPlayersOnGameOver = g.ShiftPlayersOnGameOver;
     }
 
     public event BoardChangedEventHandler BoardChanged;
@@ -45,12 +50,14 @@ namespace Gomoku.Logic
     public event GameOverEventHandler GameOver;
 
     public Board Board { get; }
+    public Player CurrentPlayer => _players[Turn];
     public Stack<Tile> History { get; set; }
     public bool IsOver { get; private set; }
     public bool IsTie => History.Count == MaxMove;
     public Tile LastPlayedTile => History.Count == 0 ? null : History.Peek();
     public int MaxMove { get; }
-    public List<Player> Players { get; }
+    public IReadOnlyList<Player> Players => _players;
+    public bool ShiftPlayersOnGameOver { get; set; }
     public int Turn { get; set; }
     public int Height => Board.Height;
     public int Width => Board.Width;
@@ -105,19 +112,14 @@ namespace Gomoku.Logic
       return new Game(this);
     }
 
-    public Player GetCurrentPlayer()
-    {
-      return Players[Turn];
-    }
-
-    public int getPlayersTurn(Player player)
+    public int GetPlayersTurn(Player player)
     {
       if (player == null)
       {
         throw new ArgumentNullException(nameof(player));
       }
 
-      return Players.FindIndex(p => p == player);
+      return _players.FindIndex(p => p == player);
     }
 
     public bool IsPlayersTurn(Player player)
@@ -127,7 +129,7 @@ namespace Gomoku.Logic
         throw new ArgumentNullException(nameof(player));
       }
 
-      return GetCurrentPlayer() == player;
+      return CurrentPlayer == player;
     }
 
     public void Play(Tile tile)
@@ -146,7 +148,7 @@ namespace Gomoku.Logic
         return;
       }
 
-      Player oldPlayer = GetCurrentPlayer();
+      Player oldPlayer = CurrentPlayer;
       BoardChanging?.Invoke(new BoardChangingEventArgs(Turn, oldPlayer, LastPlayedTile));
 
       _tile.Piece = oldPlayer.Piece;
@@ -157,24 +159,34 @@ namespace Gomoku.Logic
       {
         IsOver = true;
         GameOver?.Invoke(new GameOverEventArgs(true, Turn, null, Line.EMPTY));
+
+        if (ShiftPlayersOnGameOver)
+        {
+          ShiftPlayers();
+        }
       }
-      else if (CheckGameOver(_tile, out var winningLine))
+      else if (CheckGameOver(_tile, out Line winningLine))
       {
         IsOver = true;
         GameOver?.Invoke(new GameOverEventArgs(true, Turn, oldPlayer, winningLine));
+
+        if (ShiftPlayersOnGameOver)
+        {
+          ShiftPlayers();
+        }
       }
       else
       {
         // Increment turn
-        Turn = (Turn + 1) % Players.Count;
+        Turn = (Turn + 1) % _players.Count;
       }
 
-      BoardChanged?.Invoke(new BoardChangedEventArgs(Turn, GetCurrentPlayer(), _tile));
+      BoardChanged?.Invoke(new BoardChangedEventArgs(Turn, CurrentPlayer, _tile));
     }
 
     public void Restart()
     {
-      BoardChanging?.Invoke(new BoardChangingEventArgs(Turn, GetCurrentPlayer(), LastPlayedTile));
+      BoardChanging?.Invoke(new BoardChangingEventArgs(Turn, CurrentPlayer, LastPlayedTile));
 
       foreach (Tile tile in History)
       {
@@ -185,7 +197,7 @@ namespace Gomoku.Logic
       History.Clear();
       IsOver = false;
 
-      BoardChanged?.Invoke(new BoardChangedEventArgs(Turn, GetCurrentPlayer(), null));
+      BoardChanged?.Invoke(new BoardChangedEventArgs(Turn, CurrentPlayer, null));
     }
 
     public void Undo()
@@ -196,16 +208,29 @@ namespace Gomoku.Logic
       }
 
       Tile tile = History.Pop();
-      BoardChanging?.Invoke(new BoardChangingEventArgs(Turn, GetCurrentPlayer(), tile));
+      BoardChanging?.Invoke(new BoardChangingEventArgs(Turn, CurrentPlayer, tile));
 
       tile.Piece = new Piece(Pieces.None);
-      Turn = (Turn - 1 + Players.Count) % Players.Count;
+      Turn = (Turn - 1 + _players.Count) % _players.Count;
       if (IsOver)
       {
         IsOver = false;
       }
 
-      BoardChanged?.Invoke(new BoardChangedEventArgs(Turn, GetCurrentPlayer(), LastPlayedTile));
+      BoardChanged?.Invoke(new BoardChangedEventArgs(Turn, CurrentPlayer, LastPlayedTile));
+    }
+
+    private void ShiftPlayers()
+    {
+      if (_players is null
+        || !_players.Any())
+      {
+        throw new InvalidOperationException("Player list is null or empty");
+      }
+
+      Player last = _players[^1];
+      _players.RemoveAt(_players.Count - 1);
+      _players.Insert(0, last);
     }
   }
 }

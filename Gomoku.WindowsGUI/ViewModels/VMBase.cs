@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Gomoku.ViewModels
+namespace Gomoku.WindowsGUI.ViewModels
 {
   public abstract class VMBase :
     INotifyPropertyChanging,

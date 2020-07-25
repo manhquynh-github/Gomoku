@@ -2,7 +2,7 @@
 
 using Gomoku.Logic;
 
-namespace Gomoku.ViewModels
+namespace Gomoku.WindowsGUI.ViewModels
 {
   /// <summary>
   /// Defines a tile in the board

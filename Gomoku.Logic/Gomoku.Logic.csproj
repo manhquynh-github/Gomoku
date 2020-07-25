@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Description>https://github.com/manhquynh-github/Gomoku</Description>
+    <Company>https://github.com/manhquynh-github/Gomoku</Company>
+    <Authors>https://github.com/manhquynh-github/Gomoku</Authors>
+    <RepositoryUrl>https://github.com/manhquynh-github/Gomoku</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <Copyright>Copyright © 2018</Copyright>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Copyright>Copyright © 2018</Copyright>
+    <Company>https://github.com/manhquynh-github/Gomoku</Company>
+    <Authors>https://github.com/manhquynh-github/Gomoku</Authors>
+    <Description>https://github.com/manhquynh-github/Gomoku</Description>
+    <RepositoryUrl>https://github.com/manhquynh-github/Gomoku</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Gomoku.Logic\Gomoku.Logic.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -9,16 +9,17 @@ using System.Windows.Input;
 
 using Gomoku.AI;
 using Gomoku.Logic;
-using Gomoku.ViewModels;
+using Gomoku.Logic.AI;
+using Gomoku.WindowsGUI.ViewModels;
 
-namespace Gomoku
+namespace Gomoku.WindowsGUI
 {
   /// <summary>
   /// Interaction logic for MainWindow.xaml
   /// </summary>
   public partial class MainWindow : Window
   {
-    private List<Tile> Choices;
+    private List<Tile> _choices;
 
     public MainWindow() :
       this(15, 15,
@@ -36,7 +37,7 @@ namespace Gomoku
 
       Game = new Game(boardWidth, boardHeight, players);
       BoardVM = new BoardVM(Game.Board);
-      Choices = new List<Tile>();
+      _choices = new List<Tile>();
       InitializeBoard(boardWidth, boardHeight);
     }
 
@@ -45,7 +46,7 @@ namespace Gomoku
 
     private async Task<Tile> AIPlayAsync()
     {
-      Player player = Game.GetCurrentPlayer();
+      Player player = Game.CurrentPlayer;
 
       if (player == null)
       {
@@ -60,7 +61,7 @@ namespace Gomoku
       BoardBorder.IsEnabled = false;
 
       var sw = Stopwatch.StartNew();
-      Tuple<Tile, IEnumerable<Tile>> result = await player.AI.PlayAsync(Game);
+      AnalysisResult result = await Task.Run(() => player.AI.Analyze(Game));
       sw.Stop();
       if (sw.ElapsedMilliseconds < 500)
       {
@@ -68,11 +69,11 @@ namespace Gomoku
         await Task.Delay((int)delay);
       }
 
-      Choices = result.Item2.ToList();
+      _choices = result.PossibleChoices.ToList();
 
       BoardBorder.IsEnabled = true;
 
-      return result.Item1;
+      return result.SelectedChoice;
     }
 
     private async void AnalyzeButton_Click(object sender, RoutedEventArgs e)
@@ -84,7 +85,7 @@ namespace Gomoku
 
       await AIPlayAsync();
       CleanAnalyze();
-      foreach (Tile tile in Choices)
+      foreach (Tile tile in _choices)
       {
         BoardVM[tile].IsHighlighted = true;
       }
@@ -123,15 +124,10 @@ namespace Gomoku
         ShowMessage($"{e.Winner.Name} wins!");
       }
 
-      List<Player> players = Game.Players;
-      Player last = players[players.Count - 1];
-      players.RemoveAt(players.Count - 1);
-      players.Insert(0, last);
-
       foreach (Tile tile in e.WinningLine.SameTiles)
       {
         BoardVM[tile].IsHighlighted = true;
-        Choices.Add(tile);
+        _choices.Add(tile);
       }
 
       DemoToggleButton.IsChecked = false;
@@ -139,9 +135,9 @@ namespace Gomoku
 
     private void CleanAnalyze()
     {
-      if (Choices != null && Choices.Count() > 0)
+      if (_choices != null && _choices.Count > 0)
       {
-        foreach (Tile tile in Choices)
+        foreach (Tile tile in _choices)
         {
           BoardVM[tile].IsHighlighted = false;
         }
@@ -238,7 +234,7 @@ namespace Gomoku
     private void RestartButton_Click(object sender, RoutedEventArgs e)
     {
       CleanAnalyze();
-      foreach (var tile in Game.History)
+      foreach (Tile tile in Game.History)
       {
         BoardVM.Clear(tile);
       }
@@ -293,7 +289,7 @@ namespace Gomoku
     {
       // AI
       if (DemoToggleButton.IsChecked == false
-        && Game.GetCurrentPlayer().IsAuto
+        && Game.CurrentPlayer.IsAuto
         && UseAIToggleButton.IsChecked == true)
       {
         await RunAI();

@@ -1,4 +1,4 @@
-﻿using Gomoku.AI;
+﻿using Gomoku.Logic.AI;
 
 namespace Gomoku.Logic
 {
@@ -9,7 +9,7 @@ namespace Gomoku.Logic
   {
     public readonly Piece Piece;
 
-    public Player(string name, Piece piece, AbstractGomokuAI ai, bool isAuto = false)
+    public Player(string name, Piece piece, GomokuAIBase ai, bool isAuto = false)
     {
       Name = name;
       Piece = piece;
@@ -17,7 +17,7 @@ namespace Gomoku.Logic
       IsAuto = isAuto;
     }
 
-    public AbstractGomokuAI AI { get; set; }
+    public GomokuAIBase AI { get; set; }
 
     /// <summary>
     /// If this <see cref="Player"/> will use AI.

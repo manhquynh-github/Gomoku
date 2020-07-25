@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Gomoku.Logic;
+using Gomoku.Logic.AI;
 
 namespace Gomoku.AI
 {
@@ -12,7 +13,7 @@ namespace Gomoku.AI
   /// Disadvantage: Very slow when n &gt;= 2
   /// </summary>
   /// <remarks>written by https://github.com/manhquynh-github</remarks>
-  public class GomokuAIv1 : AbstractGomokuAI
+  public class GomokuAIv1 : GomokuAIBase
   {
     public GomokuAIv1(int level = 1)
     {
@@ -29,7 +30,7 @@ namespace Gomoku.AI
     /// </summary>
     /// <param name="game">the game used for searching</param>
     /// <returns>a <see cref="Tile"/> that the AI selects.</returns>
-    public override Tuple<Tile, IEnumerable<Tile>> Play(Game game)
+    public override AnalysisResult Analyze(Game game)
     {
       // Initialize the choices
       var choices = new List<Tile>();
@@ -48,14 +49,15 @@ namespace Gomoku.AI
       // If found no result, return null
       if (result.Count == 0)
       {
-        return new Tuple<Tile, IEnumerable<Tile>>(null, choices);
+        // TODO Play a random tile
+        throw new NotImplementedException();
       }
 
       // If found one result, return the first
       else if (result.Count == 1)
       {
         choices.Add(result[0].Value.Tile);
-        return new Tuple<Tile, IEnumerable<Tile>>(choices[0], choices);
+        return new AnalysisResult(choices, choices[0]);
       }
 
       // Otherwise
@@ -76,8 +78,8 @@ namespace Gomoku.AI
         GC.WaitForPendingFinalizers();
 
         // Randomly pick one result from the choices
-        var choice = App.Random.Next(choices.Count);
-        return new Tuple<Tile, IEnumerable<Tile>>(choices[choice], choices);
+        var choice = Random.Next(choices.Count);
+        return new AnalysisResult(choices, choices[choice]);
       }
     }
 
@@ -213,7 +215,7 @@ namespace Gomoku.AI
       IEnumerable<Tile> playableTiles = GetPlayableTiles(game);
 
       // Get current player to determine which side to search for
-      Player player = game.GetCurrentPlayer();
+      Player player = game.CurrentPlayer;
       var playerCount = game.Players.Count;
 
       // Populate corresponding NTrees with each playable tile found.
@@ -221,7 +223,7 @@ namespace Gomoku.AI
       foreach (Tile tile in playableTiles)
       {
         // Clone the current board to create a new state of NTree
-        var g = game.DeepClone();
+        Game g = game.DeepClone();
 
         // Play the new cloned board
         g.Play(tile);

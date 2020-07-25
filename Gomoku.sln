@@ -1,9 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2026
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gomoku", "Gomoku\Gomoku.csproj", "{885593DB-D0BF-4F3E-BB2C-B2F31BFBE510}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gomoku.Logic", "Gomoku.Logic\Gomoku.Logic.csproj", "{8B7EE5BD-BFC4-4CD2-86F2-DC7BBAC25487}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gomoku.AI", "Gomoku.AI\Gomoku.AI.csproj", "{174F5C95-96A4-4348-80FD-AF6780E39DCA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B080B8BD-4A75-4B35-BAE2-4AA3788C9065}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gomoku.WindowsGUI", "Gomoku.WindowsGUI\Gomoku.WindowsGUI.csproj", "{A3E65CB3-FD50-4D6D-954C-A224E1C18241}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +21,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{885593DB-D0BF-4F3E-BB2C-B2F31BFBE510}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{885593DB-D0BF-4F3E-BB2C-B2F31BFBE510}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{885593DB-D0BF-4F3E-BB2C-B2F31BFBE510}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{885593DB-D0BF-4F3E-BB2C-B2F31BFBE510}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B7EE5BD-BFC4-4CD2-86F2-DC7BBAC25487}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B7EE5BD-BFC4-4CD2-86F2-DC7BBAC25487}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B7EE5BD-BFC4-4CD2-86F2-DC7BBAC25487}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B7EE5BD-BFC4-4CD2-86F2-DC7BBAC25487}.Release|Any CPU.Build.0 = Release|Any CPU
+		{174F5C95-96A4-4348-80FD-AF6780E39DCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{174F5C95-96A4-4348-80FD-AF6780E39DCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{174F5C95-96A4-4348-80FD-AF6780E39DCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{174F5C95-96A4-4348-80FD-AF6780E39DCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3E65CB3-FD50-4D6D-954C-A224E1C18241}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3E65CB3-FD50-4D6D-954C-A224E1C18241}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3E65CB3-FD50-4D6D-954C-A224E1C18241}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3E65CB3-FD50-4D6D-954C-A224E1C18241}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
