@@ -3,16 +3,17 @@
 namespace Gomoku.Logic
 {
   [Flags]
-  public enum Direction
+  public enum Directions
   {
-    Left = 1,
-    Up = 2,
-    Right = 4,
-    Down = 8,
+    None = 0,
+    Left = 1 << 0,
+    Up = 1 << 1,
+    Right = 1 << 2,
+    Down = 1 << 3,
     UpLeft = Left | Up,
     UpRight = Right | Up,
     DownLeft = Left | Down,
     DownRight = Right | Down,
-    All = Left | Up | Right | Down
+    All = Left | Up | Right | Down,
   }
 }

@@ -11,9 +11,9 @@ namespace Gomoku.WindowsGUI.ViewModels
       Board = board ?? throw new ArgumentNullException(nameof(board));
 
       TileVMs = new TileVM[board.Width, board.Height];
-      for (int i = 0; i < board.Width; i++)
+      for (var i = 0; i < board.Width; i++)
       {
-        for (int j = 0; j < board.Height; j++)
+        for (var j = 0; j < board.Height; j++)
         {
           TileVMs[i, j] = new TileVM(board[i, j]);
         }
@@ -23,20 +23,39 @@ namespace Gomoku.WindowsGUI.ViewModels
     public Board Board { get; }
     private TileVM[,] TileVMs { get; }
     public TileVM this[int x, int y] => TileVMs[x, y];
-    public TileVM this[Tile t] => this[t.X, t.Y];
 
-    public void Clear(Tile tile)
+    public void Clear(int x, int y)
     {
-      TileVM tileVM = this[tile];
+      if (x < 0 || x > Board.Width)
+      {
+        throw new ArgumentException("Value is out of range", nameof(x));
+      }
+
+      if (y < 0 || y > Board.Height)
+      {
+        throw new ArgumentException("Value is out of range", nameof(y));
+      }
+
+      TileVM tileVM = this[x, y];
       tileVM.IsHighlighted = false;
       tileVM.Piece = (Piece)Pieces.None;
     }
 
-    public void Set(Tile tile)
+    public void Set(int x, int y, Piece piece)
     {
-      TileVM tileVM = this[tile];
+      if (x < 0 || x > Board.Width)
+      {
+        throw new ArgumentException("Value is out of range", nameof(x));
+      }
+
+      if (y < 0 || y > Board.Height)
+      {
+        throw new ArgumentException("Value is out of range", nameof(y));
+      }
+
+      TileVM tileVM = this[x, y];
       tileVM.IsHighlighted = true;
-      tileVM.Piece = tile.Piece;
+      tileVM.Piece = piece;
     }
   }
 }

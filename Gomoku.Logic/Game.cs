@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Serialization;
 
 namespace Gomoku.Logic
 {
+  /// <summary>
+  /// Defines a Gomoku game
+  /// </summary>
   public class Game : ICloneable
   {
     public static readonly int WINPIECES = 5;
@@ -62,43 +66,54 @@ namespace Gomoku.Logic
     public int Height => Board.Height;
     public int Width => Board.Width;
 
-    public bool CheckGameOver(Tile tile, out Line winningLine)
+    public bool CheckGameOver(int x, int y, out IEnumerable<Tile> winningTiles)
     {
-      if (tile is null)
+      if (x < 0 || x > Board.Width)
       {
-        throw new ArgumentNullException(nameof(tile));
+        throw new ArgumentException("Value is out of range", nameof(x));
       }
+
+      if (y < 0 || y > Board.Height)
+      {
+        throw new ArgumentException("Value is out of range", nameof(y));
+      }
+
+      Tile tile = Board[x, y];
 
       if (tile.Piece.Type != Pieces.None)
       {
-        Tile _tile = Board[tile.X, tile.Y];
-
-        for (var i = 0; i <= 3; i++)
+        Orientations[] orientations = new[]
         {
-          LineGroup lineGroup = Board.GetLineGroup(
-            _tile,
-            (Orientation)i,
-            _tile.Piece.Type,
-            WINPIECES);
+          Orientations.Horizontal,
+          Orientations.Vertical,
+          Orientations.Diagonal,
+          Orientations.RvDiagonal
+        };
 
-          if (lineGroup.IsChained
-            && lineGroup.SameTileCount + 1 == WINPIECES
-            && lineGroup.BlockTileCount < 2)
+        foreach (Orientations orientation in orientations)
+        {
+          var line = OrientedlLine.FromBoard(
+            Board,
+            tile.X,
+            tile.Y,
+            tile.Piece,
+            orientation,
+            maxTile: WINPIECES,
+            blankTolerance: 0);
+
+          if (line.IsChained
+            && line.SameTileCount + 1 == WINPIECES
+            && line.BlockTilesCount < 2)
           {
-            var winningTiles =
-              (from line in lineGroup.Lines
-               from t in line.SameTiles
-               select t)
-              .ToList();
-
-            winningTiles.Add(tile);
-            winningLine = new Line(winningTiles);
+            var result = line.Tiles.ToList();
+            result.Add(tile);
+            winningTiles = result;
             return true;
           }
         }
       }
 
-      winningLine = Line.EMPTY;
+      winningTiles = new List<Tile>();
       return false;
     }
 
@@ -132,7 +147,7 @@ namespace Gomoku.Logic
       return CurrentPlayer == player;
     }
 
-    public void Play(Tile tile)
+    public void Play(int x, int y)
     {
       // Check if game is over
       if (IsOver)
@@ -140,10 +155,20 @@ namespace Gomoku.Logic
         return;
       }
 
-      Tile _tile = Board[tile.X, tile.Y];
+      if (x < 0 || x > Board.Width)
+      {
+        throw new ArgumentException("Value is out of range", nameof(x));
+      }
+
+      if (y < 0 || y > Board.Height)
+      {
+        throw new ArgumentException("Value is out of range", nameof(y));
+      }
+
+      Tile tile = Board[x, y];
 
       // Check for already placed tile
-      if (_tile.Piece.Type != Pieces.None)
+      if (tile.Piece.Type != Pieces.None)
       {
         return;
       }
@@ -151,21 +176,21 @@ namespace Gomoku.Logic
       Player oldPlayer = CurrentPlayer;
       BoardChanging?.Invoke(new BoardChangingEventArgs(Turn, oldPlayer, LastPlayedTile));
 
-      _tile.Piece = oldPlayer.Piece;
-      History.Push(_tile);
+      tile.Piece = oldPlayer.Piece;
+      History.Push(tile);
 
       // Check for game over
       if (IsTie)
       {
         IsOver = true;
-        GameOver?.Invoke(new GameOverEventArgs(true, Turn, null, Line.EMPTY));
+        GameOver?.Invoke(new GameOverEventArgs(true, Turn, null, new List<Tile>()));
 
         if (ShiftPlayersOnGameOver)
         {
           ShiftPlayers();
         }
       }
-      else if (CheckGameOver(_tile, out Line winningLine))
+      else if (CheckGameOver(x, y, out IEnumerable<Tile> winningLine))
       {
         IsOver = true;
         GameOver?.Invoke(new GameOverEventArgs(true, Turn, oldPlayer, winningLine));
@@ -181,7 +206,7 @@ namespace Gomoku.Logic
         Turn = (Turn + 1) % _players.Count;
       }
 
-      BoardChanged?.Invoke(new BoardChangedEventArgs(Turn, CurrentPlayer, _tile));
+      BoardChanged?.Invoke(new BoardChangedEventArgs(Turn, CurrentPlayer, tile));
     }
 
     public void Restart()

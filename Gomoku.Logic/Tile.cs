@@ -26,5 +26,10 @@
     /// The Y coordinate of the <see cref="Tile"/>
     /// </summary>
     public int Y { get; }
+
+    public override string ToString()
+    {
+      return Piece.ToString();
+    }
   }
 }

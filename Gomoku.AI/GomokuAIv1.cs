@@ -83,7 +83,7 @@ namespace Gomoku.AI
       }
     }
 
-    protected AINode EvaluatePoint(Game game, Tile tile, Pieces type)
+    protected AINode EvaluatePoint(Game game, Tile tile, Piece piece)
     {
       // Evaluate the point of the current node
       var point = 0.0;
@@ -99,18 +99,30 @@ namespace Gomoku.AI
       else
       {
         // Retrieve line group of each orientation to fully evaluate a tile
-        for (var i = 0; i <= 3; i++)
+        Orientations[] orientations = new[]
         {
-          // Get LineGroup within 5-tile range
-          LineGroup lineGroup =
-            game.Board.GetLineGroup(
-              tile, (Orientation)i,
-              type,
-              Game.WINPIECES);
+          Orientations.Horizontal,
+          Orientations.Vertical,
+          Orientations.Diagonal,
+          Orientations.RvDiagonal
+        };
+
+        foreach (Orientations orientation in orientations)
+        {
+          // Get line within 5-tile range
+          var line =
+            OrientedlLine.FromBoard(
+              game.Board,
+              tile.X,
+              tile.Y,
+              piece,
+              orientation,
+              maxTile: Game.WINPIECES,
+              blankTolerance: 1);
 
           // Calculate points
-          var sameTilesCount = lineGroup.SameTileCount;
-          var blockTilesCount = lineGroup.BlockTileCount;
+          var sameTilesCount = line.SameTileCount;
+          var blockTilesCount = line.BlockTilesCount;
 
           // When the line is not blocked
           if (blockTilesCount == 0)
@@ -131,7 +143,7 @@ namespace Gomoku.AI
                   1.0 * (1.0 - Math.Pow(2.0, sameTilesCount)) / (1.0 - 2.0);
 
               // Finally the point is added with the power of itself
-              point += Math.Pow(_point, lineGroup.IsChained ? 2.0 : 1.5);
+              point += Math.Pow(_point, line.IsChained ? 2.0 : 1.5);
             }
           }
 
@@ -144,9 +156,9 @@ namespace Gomoku.AI
 
           // Otherwise, add no point.
 
-          //point += (1.0 * (1.0 - Math.Pow(2.0, lineGroup.CountChainTiles())) / (1.0 - 2.0));
-          //point += 0.25 * lineGroup.CountBlankTiles();
-          //point -= 1.0 * lineGroup.BlockTileCount;
+          //point += (1.0 * (1.0 - Math.Pow(2.0, line.CountChainTiles())) / (1.0 - 2.0));
+          //point += 0.25 * line.CountBlankTiles();
+          //point -= 1.0 * line.BlockTileCount;
         }
       }
 
@@ -165,16 +177,28 @@ namespace Gomoku.AI
       foreach (Tile tile in placedTiles)
       {
         // Loop all 4 Orientation enumeration
-        for (var i = 0; i <= 3; i++)
+        Orientations[] orientations = new[]
         {
-          // Retrieve LineGroup of each orientation within 2-tile range where
-          // the tiles are empty
+          Orientations.Horizontal,
+          Orientations.Vertical,
+          Orientations.Diagonal,
+          Orientations.RvDiagonal
+        };
+
+        foreach (Orientations orientation in orientations)
+        {
+          // Retrieve line of each orientation within 2-tile range where the
+          // tiles are empty
           foreach (Tile t in
-            game.Board.GetLineGroup(
-              tile,
-              (Orientation)i,
-              Pieces.None,
-              2).SameTiles)
+            OrientedlLine.FromBoard(
+              game.Board,
+              tile.X,
+              tile.Y,
+              (Piece)Pieces.None,
+              orientation,
+              maxTile: 2,
+              blankTolerance: 1)
+            .SameTiles)
           {
             playableTiles.Add(t);
           }
@@ -226,10 +250,10 @@ namespace Gomoku.AI
         Game g = game.DeepClone();
 
         // Play the new cloned board
-        g.Play(tile);
+        g.Play(tile.X, tile.Y);
 
         // Evalue this tile
-        AINode aiNode = EvaluatePoint(g, tile, player.Piece.Type);
+        AINode aiNode = EvaluatePoint(g, tile, player.Piece);
 
         // Add to the list of NTrees
         var nTree = new NTree<AINode>(currentNode, aiNode);
@@ -310,19 +334,7 @@ namespace Gomoku.AI
 
       public int CompareTo(AINode other)
       {
-        var diff = Point - other.Point;
-        if (diff == 0.0)
-        {
-          return 0;
-        }
-        else if (diff > 0.0)
-        {
-          return 1;
-        }
-        else
-        {
-          return -1;
-        }
+        return (int)(Point - other.Point);
       }
     }
   }

@@ -87,15 +87,17 @@ namespace Gomoku.WindowsGUI
       CleanAnalyze();
       foreach (Tile tile in _choices)
       {
-        BoardVM[tile].IsHighlighted = true;
+        BoardVM[tile.X, tile.Y].IsHighlighted = true;
       }
     }
 
     private async void Board_BoardChangedAsync(BoardChangedEventArgs e)
     {
-      if (e.Tile != null)
+      Tile tile = e.Tile;
+
+      if (tile != null)
       {
-        BoardVM.Set(e.Tile);
+        BoardVM.Set(tile.X, tile.Y, tile.Piece);
       }
 
       // AI
@@ -107,9 +109,11 @@ namespace Gomoku.WindowsGUI
 
     private void Board_BoardChanging(BoardChangingEventArgs e)
     {
-      if (e.Tile != null)
+      Tile tile = e.Tile;
+
+      if (tile != null)
       {
-        BoardVM[e.Tile].IsHighlighted = false;
+        BoardVM[tile.X, tile.Y].IsHighlighted = false;
       }
     }
 
@@ -124,9 +128,9 @@ namespace Gomoku.WindowsGUI
         ShowMessage($"{e.Winner.Name} wins!");
       }
 
-      foreach (Tile tile in e.WinningLine.SameTiles)
+      foreach (Tile tile in e.WinningTiles)
       {
-        BoardVM[tile].IsHighlighted = true;
+        BoardVM[tile.X, tile.Y].IsHighlighted = true;
         _choices.Add(tile);
       }
 
@@ -139,7 +143,7 @@ namespace Gomoku.WindowsGUI
       {
         foreach (Tile tile in _choices)
         {
-          BoardVM[tile].IsHighlighted = false;
+          BoardVM[tile.X, tile.Y].IsHighlighted = false;
         }
       }
     }
@@ -236,7 +240,7 @@ namespace Gomoku.WindowsGUI
       CleanAnalyze();
       foreach (Tile tile in Game.History)
       {
-        BoardVM.Clear(tile);
+        BoardVM.Clear(tile.X, tile.Y);
       }
 
       Game.Restart();
@@ -253,7 +257,7 @@ namespace Gomoku.WindowsGUI
       }
 
       CleanAnalyze();
-      Game.Play(BoardVM[tile].Tile);
+      Game.Play(tile.X, tile.Y);
     }
 
     private void ShowMessage(string message)
@@ -274,21 +278,22 @@ namespace Gomoku.WindowsGUI
       {
         var tileVM = button.DataContext as TileVM;
         CleanAnalyze();
-        Game.Play(tileVM.Tile);
+        Game.Play(tileVM.Tile.X, tileVM.Tile.Y);
       }
     }
 
     private void UndoButton_Click(object sender, RoutedEventArgs e)
     {
       CleanAnalyze();
-      BoardVM.Clear(Game.LastPlayedTile);
+      BoardVM.Clear(Game.LastPlayedTile.X, Game.LastPlayedTile.Y);
       Game.Undo();
     }
 
     private async void UseAIToggleButton_Checked(object sender, RoutedEventArgs e)
     {
       // AI
-      if (DemoToggleButton.IsChecked == false
+      if (!Game.IsOver
+        && DemoToggleButton.IsChecked == false
         && Game.CurrentPlayer.IsAuto
         && UseAIToggleButton.IsChecked == true)
       {

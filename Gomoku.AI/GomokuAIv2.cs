@@ -107,10 +107,10 @@ namespace Gomoku.AI
         Game g = game.DeepClone();
 
         // Play the new cloned board
-        g.Play(tile);
+        g.Play(tile.X, tile.Y);
 
         // Evaluate this tile
-        AINode aiNode = EvaluatePoint(g, tile, player.Piece.Type);
+        AINode aiNode = EvaluatePoint(g, tile, player.Piece);
 
         if (level < Level)
         {

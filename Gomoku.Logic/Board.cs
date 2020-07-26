@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Gomoku.Logic
 {
+  /// <summary>
+  /// Defines a Gomoku board
+  /// </summary>
   public class Board : ICloneable
   {
     public Board(int width, int height)
@@ -15,9 +18,9 @@ namespace Gomoku.Logic
       Width = width;
       Height = height;
       Tiles = new Tile[Width, Height];
-      for (int i = 0; i < Width; i++)
+      for (var i = 0; i < Width; i++)
       {
-        for (int j = 0; j < Height; j++)
+        for (var j = 0; j < Height; j++)
         {
           Tiles[i, j] = new Tile(i, j)
           {
@@ -32,9 +35,9 @@ namespace Gomoku.Logic
       Width = b.Width;
       Height = b.Height;
       Tiles = new Tile[Width, Height];
-      for (int i = 0; i < Width; i++)
+      for (var i = 0; i < Width; i++)
       {
-        for (int j = 0; j < Height; j++)
+        for (var j = 0; j < Height; j++)
         {
           Tiles[i, j] = new Tile(i, j)
           {
@@ -59,21 +62,21 @@ namespace Gomoku.Logic
         throw new FormatException($"{nameof(s)} must not be empty.");
       }
 
-      string[] heightSplit = s.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+      var heightSplit = s.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
       if (heightSplit.Length == 0)
       {
         throw new FormatException($"{nameof(s)} is not format compliant. (misformatted rows)");
       }
 
-      string[] widthSplit = heightSplit[0].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+      var widthSplit = heightSplit[0].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
       if (widthSplit.Length == 0)
       {
         throw new FormatException($"{nameof(s)} is not format compliant. (misformatted columns)");
       }
 
-      Board b = new Board(widthSplit.Length, heightSplit.Length);
+      var b = new Board(widthSplit.Length, heightSplit.Length);
 
-      for (int j = 0; j < heightSplit.Length; j++)
+      for (var j = 0; j < heightSplit.Length; j++)
       {
         widthSplit = heightSplit[j].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
         if (widthSplit.Length != b.Width)
@@ -81,9 +84,9 @@ namespace Gomoku.Logic
           throw new FormatException($"{nameof(s)} is not format compliant. (jagged array)");
         }
 
-        for (int i = 0; i < widthSplit.Length; i++)
+        for (var i = 0; i < widthSplit.Length; i++)
         {
-          string pieceStr = widthSplit[i];
+          var pieceStr = widthSplit[i];
           int piece;
 
           try
@@ -112,102 +115,43 @@ namespace Gomoku.Logic
       return new Board(this);
     }
 
-    public Line GetLine(
-      Tile tile,
-      Direction direction,
-      Pieces type,
-      int max)
-    {
-      List<Tile> sameTiles = new List<Tile>();
-      List<Tile> blankTiles = new List<Tile>();
-      List<Tile> blockTiles = new List<Tile>();
-
-      int count = 0;
-      bool chainBreak = false;
-      bool previouslyBlank = false;
-
-      RunTilesFunction(
-        tile,
-        direction,
-        t =>
-        {
-          if (count++ == max)
-          {
-            return false;
-          }
-
-          if (t.Piece.Type == type)
-          {
-            if (previouslyBlank)
-            {
-              chainBreak = true;
-            }
-
-            previouslyBlank = false;
-
-            sameTiles.Add(t);
-            return true;
-          }
-          else if (t.Piece.Type == Pieces.None)
-          {
-            if (previouslyBlank || chainBreak)
-            {
-              return false;
-            }
-
-            previouslyBlank = true;
-
-            blankTiles.Add(t);
-            return true;
-          }
-          else
-          {
-            if (previouslyBlank)
-            {
-              return false;
-            }
-
-            blockTiles.Add(t);
-            return false;
-          }
-        });
-
-      return new Line(sameTiles, blankTiles, blockTiles, !chainBreak);
-    }
-
-    public LineGroup GetLineGroup(
-      Tile tile,
-      Orientation orientation,
-      Pieces type,
-      int max)
-    {
-      return orientation switch
-      {
-        Orientation.Horizontal => new LineGroup(
-          GetLine(tile, Direction.Left, type, max),
-          GetLine(tile, Direction.Right, type, max)),
-        Orientation.Vertical => new LineGroup(
-          GetLine(tile, Direction.Up, type, max),
-          GetLine(tile, Direction.Down, type, max)),
-        Orientation.Diagonal => new LineGroup(
-          GetLine(tile, Direction.UpLeft, type, max),
-          GetLine(tile, Direction.DownRight, type, max)),
-        Orientation.RvDiagonal => new LineGroup(
-          GetLine(tile, Direction.UpRight, type, max),
-          GetLine(tile, Direction.DownLeft, type, max)),
-        _ => throw new InvalidOperationException("Unexpected value"),
-      };
-    }
-
-    public void RunTilesFunction(
-      Tile tile,
-      Direction direction,
+    /// <summary>
+    /// Iterates through the <see cref="Board"/> starting at position
+    /// <paramref name="x"/>, <paramref name="y"/> towards
+    /// <paramref name="direction"/> until <paramref name="predicate"/> returns
+    /// <see cref="false"/> or the iteration goes out of <see cref="Width"/> or <see cref="Height"/>.
+    /// </summary>
+    /// <param name="x">the starting <see cref="Tile.X"/></param>
+    /// <param name="y">the starting <see cref="Tile.Y"/></param>
+    /// <param name="direction">the <see cref="Directions"/> to iterate</param>
+    /// <param name="predicate">
+    /// the <see cref="Predicate{T}"/> that determines whether to stop iterating
+    /// </param>
+    public void IterateTiles(
+      int x,
+      int y,
+      Directions direction,
       Predicate<Tile> predicate)
     {
+      if (x < 0 || x > Width)
+      {
+        throw new ArgumentException("Value is out of range", nameof(x));
+      }
+
+      if (y < 0 || y > Height)
+      {
+        throw new ArgumentException("Value is out of range", nameof(y));
+      }
+
+      if (predicate is null)
+      {
+        throw new ArgumentNullException(nameof(predicate));
+      }
+
       switch (direction)
       {
-        case Direction.Left:
-          for (int i = tile.X - 1, j = tile.Y;
+        case Directions.Left:
+          for (int i = x - 1, j = y;
               i >= 0 && predicate(Tiles[i, j]);
               i--)
           {
@@ -215,8 +159,8 @@ namespace Gomoku.Logic
 
           break;
 
-        case Direction.Right:
-          for (int i = tile.X + 1, j = tile.Y;
+        case Directions.Right:
+          for (int i = x + 1, j = y;
               i < Width && predicate(Tiles[i, j]);
               i++)
           {
@@ -224,8 +168,8 @@ namespace Gomoku.Logic
 
           break;
 
-        case Direction.Up:
-          for (int i = tile.X, j = tile.Y - 1;
+        case Directions.Up:
+          for (int i = x, j = y - 1;
               j >= 0 && predicate(Tiles[i, j]);
               j--)
           {
@@ -233,8 +177,8 @@ namespace Gomoku.Logic
 
           break;
 
-        case Direction.Down:
-          for (int i = tile.X, j = tile.Y + 1;
+        case Directions.Down:
+          for (int i = x, j = y + 1;
               j < Height && predicate(Tiles[i, j]);
               j++)
           {
@@ -242,8 +186,8 @@ namespace Gomoku.Logic
 
           break;
 
-        case Direction.UpLeft:
-          for (int i = tile.X - 1, j = tile.Y - 1;
+        case Directions.UpLeft:
+          for (int i = x - 1, j = y - 1;
               i >= 0 && j >= 0 && predicate(Tiles[i, j]);
               i--, j--)
           {
@@ -251,8 +195,8 @@ namespace Gomoku.Logic
 
           break;
 
-        case Direction.DownRight:
-          for (int i = tile.X + 1, j = tile.Y + 1;
+        case Directions.DownRight:
+          for (int i = x + 1, j = y + 1;
               i < Width && j < Height && predicate(Tiles[i, j]);
               i++, j++)
           {
@@ -261,8 +205,8 @@ namespace Gomoku.Logic
 
           break;
 
-        case Direction.UpRight:
-          for (int i = tile.X + 1, j = tile.Y - 1;
+        case Directions.UpRight:
+          for (int i = x + 1, j = y - 1;
               i < Width && j >= 0 && predicate(Tiles[i, j]);
               i++, j--)
           {
@@ -270,24 +214,27 @@ namespace Gomoku.Logic
 
           break;
 
-        case Direction.DownLeft:
-          for (int i = tile.X - 1, j = tile.Y + 1;
+        case Directions.DownLeft:
+          for (int i = x - 1, j = y + 1;
               i >= 0 && j < Height && predicate(Tiles[i, j]);
               i--, j++)
           {
           }
 
           break;
+
+        default:
+          throw new ArgumentException("Value is not supported.", nameof(direction));
       }
     }
 
     public override string ToString()
     {
-      string res = string.Empty;
+      var res = string.Empty;
 
-      for (int j = 0; j < Height; j++)
+      for (var j = 0; j < Height; j++)
       {
-        for (int i = 0; i < Width; i++)
+        for (var i = 0; i < Width; i++)
         {
           res += Tiles[i, j].Piece.TypeIndex.ToString() + ",";
         }
