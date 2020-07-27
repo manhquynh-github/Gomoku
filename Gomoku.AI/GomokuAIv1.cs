@@ -169,7 +169,7 @@ namespace Gomoku.AI
     protected IEnumerable<Tile> GetPlayableTiles(Game game)
     {
       // Get all the placed tiles to determine all the correct playable tiles
-      Stack<Tile> placedTiles = game.History;
+      IReadOnlyCollection<Tile> placedTiles = game.History;
 
       // Get all the playable tiles using a HashSet where only distinct tiles
       // are added
@@ -220,7 +220,7 @@ namespace Gomoku.AI
     protected List<NTree<AINode>> Search(Game game, NTree<AINode> currentNode, int level)
     {
       // Get all the placed tiles to determine all the correct playable tiles
-      Stack<Tile> placedTiles = game.History;
+      IReadOnlyCollection<Tile> placedTiles = game.History;
 
       // If it is a new game, select the center most
       if (placedTiles.Count == 0)
@@ -229,7 +229,7 @@ namespace Gomoku.AI
         {
           new NTree<AINode>(
             new AINode(
-              game.Board[game.Width / 2, game.Height / 2],
+              game.Board[game.Board.Width / 2, game.Board.Height / 2],
               game,
               0))
         };

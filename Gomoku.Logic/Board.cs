@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Gomoku.Logic
 {
@@ -17,12 +18,12 @@ namespace Gomoku.Logic
 
       Width = width;
       Height = height;
-      Tiles = new Tile[Width, Height];
+      _tiles = new Tile[Width, Height];
       for (var i = 0; i < Width; i++)
       {
         for (var j = 0; j < Height; j++)
         {
-          Tiles[i, j] = new Tile(i, j)
+          _tiles[i, j] = new Tile(i, j)
           {
             Piece = (Piece)Pieces.None,
           };
@@ -34,12 +35,12 @@ namespace Gomoku.Logic
     {
       Width = b.Width;
       Height = b.Height;
-      Tiles = new Tile[Width, Height];
+      _tiles = new Tile[Width, Height];
       for (var i = 0; i < Width; i++)
       {
         for (var j = 0; j < Height; j++)
         {
-          Tiles[i, j] = new Tile(i, j)
+          _tiles[i, j] = new Tile(i, j)
           {
             Piece = b[i, j].Piece,
           };
@@ -47,14 +48,27 @@ namespace Gomoku.Logic
       }
     }
 
+    /// <summary>
+    /// Maximum y-axis index, exclusively
+    /// </summary>
     public int Height { get; }
 
+    /// <summary>
+    /// Maximum x-axis index, exclusively
+    /// </summary>
     public int Width { get; }
 
-    private Tile[,] Tiles { get; }
+    private Tile[,] _tiles { get; }
 
-    public Tile this[int x, int y] => Tiles[x, y];
+    public Tile this[int x, int y] => _tiles[x, y];
 
+    /// <summary>
+    /// Creates a <see cref="Board"/> from a <see cref="string"/> where rows are
+    /// semi-colon-separated and columns are comma-separated.
+    /// </summary>
+    /// <param name="s">the <see cref="string"/> to parse</param>
+    /// <returns>a <see cref="Board"/></returns>
+    /// <exception cref="FormatException"></exception>
     public static Board Parse(string s)
     {
       if (string.IsNullOrWhiteSpace(s))
@@ -95,7 +109,7 @@ namespace Gomoku.Logic
           }
           catch (Exception ex)
           {
-            throw new FormatException($"{nameof(s)} is not format compliant. (unable to parse piece)", ex);
+            throw new FormatException($"{nameof(s)} is not format compliant. (unable to parse '{pieceStr}' to piece)", ex);
           }
 
           b[piece, j].Piece = (Piece)piece;
@@ -127,6 +141,8 @@ namespace Gomoku.Logic
     /// <param name="predicate">
     /// the <see cref="Predicate{T}"/> that determines whether to stop iterating
     /// </param>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
     public void IterateTiles(
       int x,
       int y,
@@ -152,7 +168,7 @@ namespace Gomoku.Logic
       {
         case Directions.Left:
           for (int i = x - 1, j = y;
-              i >= 0 && predicate(Tiles[i, j]);
+              i >= 0 && predicate(_tiles[i, j]);
               i--)
           {
           }
@@ -161,7 +177,7 @@ namespace Gomoku.Logic
 
         case Directions.Right:
           for (int i = x + 1, j = y;
-              i < Width && predicate(Tiles[i, j]);
+              i < Width && predicate(_tiles[i, j]);
               i++)
           {
           }
@@ -170,7 +186,7 @@ namespace Gomoku.Logic
 
         case Directions.Up:
           for (int i = x, j = y - 1;
-              j >= 0 && predicate(Tiles[i, j]);
+              j >= 0 && predicate(_tiles[i, j]);
               j--)
           {
           }
@@ -179,7 +195,7 @@ namespace Gomoku.Logic
 
         case Directions.Down:
           for (int i = x, j = y + 1;
-              j < Height && predicate(Tiles[i, j]);
+              j < Height && predicate(_tiles[i, j]);
               j++)
           {
           }
@@ -188,7 +204,7 @@ namespace Gomoku.Logic
 
         case Directions.UpLeft:
           for (int i = x - 1, j = y - 1;
-              i >= 0 && j >= 0 && predicate(Tiles[i, j]);
+              i >= 0 && j >= 0 && predicate(_tiles[i, j]);
               i--, j--)
           {
           }
@@ -197,7 +213,7 @@ namespace Gomoku.Logic
 
         case Directions.DownRight:
           for (int i = x + 1, j = y + 1;
-              i < Width && j < Height && predicate(Tiles[i, j]);
+              i < Width && j < Height && predicate(_tiles[i, j]);
               i++, j++)
           {
             ;
@@ -207,7 +223,7 @@ namespace Gomoku.Logic
 
         case Directions.UpRight:
           for (int i = x + 1, j = y - 1;
-              i < Width && j >= 0 && predicate(Tiles[i, j]);
+              i < Width && j >= 0 && predicate(_tiles[i, j]);
               i++, j--)
           {
           }
@@ -216,7 +232,7 @@ namespace Gomoku.Logic
 
         case Directions.DownLeft:
           for (int i = x - 1, j = y + 1;
-              i >= 0 && j < Height && predicate(Tiles[i, j]);
+              i >= 0 && j < Height && predicate(_tiles[i, j]);
               i--, j++)
           {
           }
@@ -228,6 +244,11 @@ namespace Gomoku.Logic
       }
     }
 
+    /// <summary>
+    /// Gets a representative <see cref="string"/> of the <see cref="Board"/>
+    /// where rows are semi-colon-separated and columns are comma-separated.
+    /// </summary>
+    /// <returns></returns>
     public override string ToString()
     {
       var res = string.Empty;
@@ -236,7 +257,7 @@ namespace Gomoku.Logic
       {
         for (var i = 0; i < Width; i++)
         {
-          res += Tiles[i, j].Piece.TypeIndex.ToString() + ",";
+          res += _tiles[i, j].Piece.TypeIndex.ToString() + ",";
         }
 
         res = res[0..^1];

@@ -91,7 +91,7 @@ namespace Gomoku.WindowsGUI
       }
     }
 
-    private async void Board_BoardChangedAsync(BoardChangedEventArgs e)
+    private async void Board_BoardChangedAsync(object sender, BoardChangedEventArgs e)
     {
       Tile tile = e.Tile;
 
@@ -107,7 +107,7 @@ namespace Gomoku.WindowsGUI
       }
     }
 
-    private void Board_BoardChanging(BoardChangingEventArgs e)
+    private void Board_BoardChanging(object sender, BoardChangingEventArgs e)
     {
       Tile tile = e.Tile;
 
@@ -117,7 +117,7 @@ namespace Gomoku.WindowsGUI
       }
     }
 
-    private void Board_GameOver(GameOverEventArgs e)
+    private void Board_GameOver(object sender, GameOverEventArgs e)
     {
       if (e.Winner == null)
       {

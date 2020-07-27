@@ -12,6 +12,7 @@ namespace Gomoku.Logic
   {
     public static readonly int WINPIECES = 5;
 
+    private readonly Stack<Tile> _history;
     private readonly List<Player> _players;
 
     public Game(int width, int height, IEnumerable<Player> players)
@@ -26,7 +27,7 @@ namespace Gomoku.Logic
       MaxMove = width * height;
       _players = new List<Player>(players);
       Turn = 0;
-      History = new Stack<Tile>();
+      _history = new Stack<Tile>();
       IsOver = false;
       ShiftPlayersOnGameOver = true;
     }
@@ -42,30 +43,68 @@ namespace Gomoku.Logic
       MaxMove = g.MaxMove;
       _players = new List<Player>(g._players);
       Turn = g.Turn;
-      History = new Stack<Tile>(g.History);
+      _history = new Stack<Tile>(g._history);
       IsOver = g.IsOver;
       ShiftPlayersOnGameOver = g.ShiftPlayersOnGameOver;
     }
 
-    public event BoardChangedEventHandler BoardChanged;
+    /// <summary>
+    /// Fires when the <see cref="Game"/> has successfully changed its
+    /// <see cref="Board"/> state.
+    /// </summary>
+    public event EventHandler<BoardChangedEventArgs> BoardChanged;
 
-    public event BoardChangingEventHandler BoardChanging;
+    /// <summary>
+    /// Fires when the <see cref="Game"/> is going to change its
+    /// <see cref="Board"/> state.
+    /// </summary>
+    public event EventHandler<BoardChangingEventArgs> BoardChanging;
 
-    public event GameOverEventHandler GameOver;
+    /// <summary>
+    /// Fires when the <see cref="Game"/> is over or tie.
+    /// </summary>
+    public event EventHandler<GameOverEventArgs> GameOver;
 
     public Board Board { get; }
-    public Player CurrentPlayer => _players[Turn];
-    public Stack<Tile> History { get; set; }
-    public bool IsOver { get; private set; }
-    public bool IsTie => History.Count == MaxMove;
-    public Tile LastPlayedTile => History.Count == 0 ? null : History.Peek();
-    public int MaxMove { get; }
-    public IReadOnlyList<Player> Players => _players;
-    public bool ShiftPlayersOnGameOver { get; set; }
-    public int Turn { get; set; }
-    public int Height => Board.Height;
-    public int Width => Board.Width;
 
+    public Player CurrentPlayer => _players[Turn];
+    public IReadOnlyCollection<Tile> History => _history;
+    public bool IsOver { get; private set; }
+    public bool IsTie => _history.Count == MaxMove;
+
+    /// <summary>
+    /// The last <see cref="Tile"/> that was put on the <see cref="Board"/> chronologically.
+    /// </summary>
+    public Tile LastPlayedTile => _history.Count == 0 ? null : _history.Peek();
+
+    /// <summary>
+    /// Max number of moves the <see cref="Game"/> can make.
+    /// </summary>
+    public int MaxMove { get; }
+
+    public IReadOnlyList<Player> Players => _players;
+
+    /// <summary>
+    /// Shift the players' orders when the <see cref="Game"/> is over. For
+    /// example, the first <see cref="Player"/> will be the second
+    /// <see cref="Player"/> in the next <see cref="Game"/>.
+    /// </summary>
+    public bool ShiftPlayersOnGameOver { get; set; }
+
+    public int Turn { get; set; }
+
+    /// <summary>
+    /// Checks if <see cref="Game"/> is over at position <paramref name="x"/>,
+    /// <paramref name="y"/> and outputs the <paramref name="winningTiles"/>.
+    /// </summary>
+    /// <param name="x">x-axis position to check</param>
+    /// <param name="y">y-axis position to check</param>
+    /// <param name="winningTiles">
+    /// a collection of <see cref="Tile"/> if <see cref="true"/>, otherwise an
+    /// empty collection is returned.
+    /// </param>
+    /// <returns>a <see cref="bool"/></returns>
+    /// <exception cref="ArgumentException"></exception>
     public bool CheckGameOver(int x, int y, out IEnumerable<Tile> winningTiles)
     {
       if (x < 0 || x > Board.Width)
@@ -113,7 +152,7 @@ namespace Gomoku.Logic
         }
       }
 
-      winningTiles = new List<Tile>();
+      winningTiles = Enumerable.Empty<Tile>();
       return false;
     }
 
@@ -127,6 +166,14 @@ namespace Gomoku.Logic
       return new Game(this);
     }
 
+    /// <summary>
+    /// Gets the <paramref name="player"/>'s turn.
+    /// </summary>
+    /// <param name="player">a <see cref="Player"/></param>
+    /// <returns>
+    /// an <see cref="int"/> that represents the <paramref name="player"/>'s turn
+    /// </returns>
+    /// <exception cref="ArgumentNullException"></exception>
     public int GetPlayersTurn(Player player)
     {
       if (player == null)
@@ -137,6 +184,12 @@ namespace Gomoku.Logic
       return _players.FindIndex(p => p == player);
     }
 
+    /// <summary>
+    /// Checks if the <see cref="CurrentPlayer"/> is <paramref name="player"/>
+    /// </summary>
+    /// <param name="player">a <see cref="Player"/></param>
+    /// <returns>a <see cref="bool"/></returns>
+    /// <exception cref="ArgumentNullException"></exception>
     public bool IsPlayersTurn(Player player)
     {
       if (player == null)
@@ -147,6 +200,14 @@ namespace Gomoku.Logic
       return CurrentPlayer == player;
     }
 
+    /// <summary>
+    /// Puts a <see cref="Tile"/> corresponding to <see cref="CurrentPlayer"/>
+    /// and advances the <see cref="Game"/> to the next state. at position
+    /// <paramref name="x"/>, <paramref name="y"/>.
+    /// </summary>
+    /// <param name="x">x-axis position</param>
+    /// <param name="y">y-axis position</param>
+    /// <exception cref="ArgumentException"></exception>
     public void Play(int x, int y)
     {
       // Check if game is over
@@ -174,16 +235,16 @@ namespace Gomoku.Logic
       }
 
       Player oldPlayer = CurrentPlayer;
-      BoardChanging?.Invoke(new BoardChangingEventArgs(Turn, oldPlayer, LastPlayedTile));
+      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Turn, oldPlayer, LastPlayedTile));
 
       tile.Piece = oldPlayer.Piece;
-      History.Push(tile);
+      _history.Push(tile);
 
       // Check for game over
       if (IsTie)
       {
         IsOver = true;
-        GameOver?.Invoke(new GameOverEventArgs(true, Turn, null, new List<Tile>()));
+        GameOver?.Invoke(this, new GameOverEventArgs(true, Turn, null, new List<Tile>()));
 
         if (ShiftPlayersOnGameOver)
         {
@@ -193,7 +254,7 @@ namespace Gomoku.Logic
       else if (CheckGameOver(x, y, out IEnumerable<Tile> winningLine))
       {
         IsOver = true;
-        GameOver?.Invoke(new GameOverEventArgs(true, Turn, oldPlayer, winningLine));
+        GameOver?.Invoke(this, new GameOverEventArgs(true, Turn, oldPlayer, winningLine));
 
         if (ShiftPlayersOnGameOver)
         {
@@ -206,34 +267,41 @@ namespace Gomoku.Logic
         Turn = (Turn + 1) % _players.Count;
       }
 
-      BoardChanged?.Invoke(new BoardChangedEventArgs(Turn, CurrentPlayer, tile));
+      BoardChanged?.Invoke(this, new BoardChangedEventArgs(Turn, CurrentPlayer, tile));
     }
 
+    /// <summary>
+    /// Resets the <see cref="Game"/> to its original state.
+    /// </summary>
     public void Restart()
     {
-      BoardChanging?.Invoke(new BoardChangingEventArgs(Turn, CurrentPlayer, LastPlayedTile));
+      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Turn, CurrentPlayer, LastPlayedTile));
 
-      foreach (Tile tile in History)
+      foreach (Tile tile in _history)
       {
         tile.Piece = new Piece(Pieces.None);
       }
 
       Turn = 0;
-      History.Clear();
+      _history.Clear();
       IsOver = false;
 
-      BoardChanged?.Invoke(new BoardChangedEventArgs(Turn, CurrentPlayer, null));
+      BoardChanged?.Invoke(this, new BoardChangedEventArgs(Turn, CurrentPlayer, null));
     }
 
+    /// <summary>
+    /// Reverts the <see cref="Game"/> back to the
+    /// <see cref="LastPlayedTile"/>'s state.
+    /// </summary>
     public void Undo()
     {
-      if (History.Count == 0)
+      if (_history.Count == 0)
       {
         return;
       }
 
-      Tile tile = History.Pop();
-      BoardChanging?.Invoke(new BoardChangingEventArgs(Turn, CurrentPlayer, tile));
+      Tile tile = _history.Pop();
+      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Turn, CurrentPlayer, tile));
 
       tile.Piece = new Piece(Pieces.None);
       Turn = (Turn - 1 + _players.Count) % _players.Count;
@@ -242,7 +310,7 @@ namespace Gomoku.Logic
         IsOver = false;
       }
 
-      BoardChanged?.Invoke(new BoardChangedEventArgs(Turn, CurrentPlayer, LastPlayedTile));
+      BoardChanged?.Invoke(this, new BoardChangedEventArgs(Turn, CurrentPlayer, LastPlayedTile));
     }
 
     private void ShiftPlayers()

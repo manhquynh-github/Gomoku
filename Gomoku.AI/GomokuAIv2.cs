@@ -79,7 +79,7 @@ namespace Gomoku.AI
     protected IEnumerable<AINode> Search(Game game, int level)
     {
       // Get all the placed tiles to determine all the correct playable tiles
-      Stack<Tile> placedTiles = game.History;
+      IReadOnlyCollection<Tile> placedTiles = game.History;
 
       // If it is a new game, select the center most
       if (placedTiles.Count == 0)
@@ -87,7 +87,7 @@ namespace Gomoku.AI
         return new List<AINode>()
         {
           new AINode(
-            game.Board[game.Width / 2, game.Height / 2],
+            game.Board[game.Board.Width / 2, game.Board.Height / 2],
             game,
             0)
         };
