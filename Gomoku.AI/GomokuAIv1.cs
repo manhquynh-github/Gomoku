@@ -334,7 +334,13 @@ namespace Gomoku.AI
 
       public int CompareTo(AINode other)
       {
-        return (int)(Point - other.Point);
+        var value = Point - other.Point;
+
+        return value == 0.0
+          ? 0
+          : value > 0.0
+          ? 1
+          : -1;
       }
     }
   }
