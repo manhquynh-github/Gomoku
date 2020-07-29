@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using System.Xml.Serialization;
 
 namespace Gomoku.Logic
 {
   /// <summary>
   /// Defines a Gomoku game
   /// </summary>
-  public class Game : ICloneable
+  public class Game : IDeepCloneable<Game>, IShallowCloneable<Game>
   {
     public static readonly int WINPIECES = 5;
 
@@ -32,7 +32,7 @@ namespace Gomoku.Logic
       ShiftPlayersOnGameOver = true;
     }
 
-    public Game(Game g)
+    private Game(Game g)
     {
       if (g is null)
       {
@@ -68,21 +68,21 @@ namespace Gomoku.Logic
     public Board Board { get; }
 
     public Player CurrentPlayer => _players[Turn];
-    public IReadOnlyCollection<Tile> History => _history;
+    public IReadOnlyList<Tile> History => _history.ToImmutableList();
     public bool IsOver { get; private set; }
     public bool IsTie => _history.Count == MaxMove;
 
     /// <summary>
     /// The last <see cref="Tile"/> that was put on the <see cref="Board"/> chronologically.
     /// </summary>
-    public Tile LastPlayedTile => _history.Count == 0 ? null : _history.Peek();
+    public Tile LastMove => _history.Count == 0 ? null : _history.Peek();
 
     /// <summary>
     /// Max number of moves the <see cref="Game"/> can make.
     /// </summary>
     public int MaxMove { get; }
 
-    public IReadOnlyList<Player> Players => _players;
+    public IReadOnlyList<Player> Players => _players.AsReadOnly();
 
     /// <summary>
     /// Shift the players' orders when the <see cref="Game"/> is over. For
@@ -115,6 +115,12 @@ namespace Gomoku.Logic
       if (y < 0 || y > Board.Height)
       {
         throw new ArgumentException("Value is out of range", nameof(y));
+      }
+
+      if (_history.Count < 9)
+      {
+        winningTiles = Enumerable.Empty<Tile>();
+        return false;
       }
 
       Tile tile = Board[x, y];
@@ -156,11 +162,6 @@ namespace Gomoku.Logic
       return false;
     }
 
-    public object Clone()
-    {
-      return MemberwiseClone();
-    }
-
     public Game DeepClone()
     {
       return new Game(this);
@@ -176,7 +177,7 @@ namespace Gomoku.Logic
     /// <exception cref="ArgumentNullException"></exception>
     public int GetPlayersTurn(Player player)
     {
-      if (player == null)
+      if (player is null)
       {
         throw new ArgumentNullException(nameof(player));
       }
@@ -192,7 +193,7 @@ namespace Gomoku.Logic
     /// <exception cref="ArgumentNullException"></exception>
     public bool IsPlayersTurn(Player player)
     {
-      if (player == null)
+      if (player is null)
       {
         throw new ArgumentNullException(nameof(player));
       }
@@ -210,12 +211,6 @@ namespace Gomoku.Logic
     /// <exception cref="ArgumentException"></exception>
     public void Play(int x, int y)
     {
-      // Check if game is over
-      if (IsOver)
-      {
-        return;
-      }
-
       if (x < 0 || x > Board.Width)
       {
         throw new ArgumentException("Value is out of range", nameof(x));
@@ -224,6 +219,12 @@ namespace Gomoku.Logic
       if (y < 0 || y > Board.Height)
       {
         throw new ArgumentException("Value is out of range", nameof(y));
+      }
+
+      // Check if game is over
+      if (IsOver)
+      {
+        return;
       }
 
       Tile tile = Board[x, y];
@@ -235,7 +236,7 @@ namespace Gomoku.Logic
       }
 
       Player oldPlayer = CurrentPlayer;
-      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Turn, oldPlayer, LastPlayedTile));
+      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Turn, oldPlayer, LastMove));
 
       tile.Piece = oldPlayer.Piece;
       _history.Push(tile);
@@ -275,7 +276,7 @@ namespace Gomoku.Logic
     /// </summary>
     public void Restart()
     {
-      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Turn, CurrentPlayer, LastPlayedTile));
+      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Turn, CurrentPlayer, LastMove));
 
       foreach (Tile tile in _history)
       {
@@ -289,9 +290,13 @@ namespace Gomoku.Logic
       BoardChanged?.Invoke(this, new BoardChangedEventArgs(Turn, CurrentPlayer, null));
     }
 
+    public Game ShallowClone()
+    {
+      return (Game)MemberwiseClone();
+    }
+
     /// <summary>
-    /// Reverts the <see cref="Game"/> back to the
-    /// <see cref="LastPlayedTile"/>'s state.
+    /// Reverts the <see cref="Game"/> back to the <see cref="LastMove"/>'s state.
     /// </summary>
     public void Undo()
     {
@@ -310,7 +315,17 @@ namespace Gomoku.Logic
         IsOver = false;
       }
 
-      BoardChanged?.Invoke(this, new BoardChangedEventArgs(Turn, CurrentPlayer, LastPlayedTile));
+      BoardChanged?.Invoke(this, new BoardChangedEventArgs(Turn, CurrentPlayer, LastMove));
+    }
+
+    object IDeepCloneable.DeepClone()
+    {
+      return DeepClone();
+    }
+
+    object IShallowCloneable.ShallowClone()
+    {
+      return ShallowClone();
     }
 
     private void ShiftPlayers()

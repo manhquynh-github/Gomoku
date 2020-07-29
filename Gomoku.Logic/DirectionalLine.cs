@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Gomoku.Logic
@@ -181,10 +182,10 @@ namespace Gomoku.Logic
       return new DirectionalLine(
         piece,
         direction,
-        tiles,
-        sameTiles,
-        blankTiles,
-        blockTiles,
+        tiles.ToImmutableList(),
+        sameTiles.ToImmutableList(),
+        blankTiles.ToImmutableList(),
+        blockTiles.ToImmutableList(),
         !chainBreak);
     }
 

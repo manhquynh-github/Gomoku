@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Gomoku.Logic
 {
   /// <summary>
   /// Defines a Gomoku board
   /// </summary>
-  public class Board : ICloneable
+  public class Board : IDeepCloneable<Board>, IShallowCloneable<Board>
   {
+    private readonly Tile[,] _tiles;
+
     public Board(int width, int height)
     {
       if (height < 0 || width < 0)
@@ -31,7 +31,7 @@ namespace Gomoku.Logic
       }
     }
 
-    public Board(Board b)
+    private Board(Board b)
     {
       Width = b.Width;
       Height = b.Height;
@@ -57,8 +57,6 @@ namespace Gomoku.Logic
     /// Maximum x-axis index, exclusively
     /// </summary>
     public int Width { get; }
-
-    private Tile[,] _tiles { get; }
 
     public Tile this[int x, int y] => _tiles[x, y];
 
@@ -117,11 +115,6 @@ namespace Gomoku.Logic
       }
 
       return b;
-    }
-
-    public object Clone()
-    {
-      return MemberwiseClone();
     }
 
     public Board DeepClone()
@@ -244,6 +237,11 @@ namespace Gomoku.Logic
       }
     }
 
+    public Board ShallowClone()
+    {
+      return (Board)MemberwiseClone();
+    }
+
     /// <summary>
     /// Gets a representative <see cref="string"/> of the <see cref="Board"/>
     /// where rows are semi-colon-separated and columns are comma-separated.
@@ -266,6 +264,16 @@ namespace Gomoku.Logic
       res = res[0..^1];
 
       return res;
+    }
+
+    object IDeepCloneable.DeepClone()
+    {
+      return DeepClone();
+    }
+
+    object IShallowCloneable.ShallowClone()
+    {
+      return ShallowClone();
     }
   }
 }

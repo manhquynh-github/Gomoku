@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Gomoku.Logic;
-
 namespace Gomoku.Logic.AI
 {
   public class AnalysisResult

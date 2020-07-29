@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-
-using Gomoku.Logic;
 
 namespace Gomoku.Logic.AI
 {

@@ -48,12 +48,12 @@ namespace Gomoku.WindowsGUI
     {
       Player player = Game.CurrentPlayer;
 
-      if (player == null)
+      if (player is null)
       {
         throw new InvalidOperationException($"{nameof(player)} is null.");
       }
 
-      if (player.AI == null)
+      if (player.AI is null)
       {
         throw new InvalidOperationException($"{nameof(player.AI)} is null.");
       }
@@ -95,7 +95,7 @@ namespace Gomoku.WindowsGUI
     {
       Tile tile = e.Tile;
 
-      if (tile != null)
+      if (!(tile is null))
       {
         BoardVM.Set(tile.X, tile.Y, tile.Piece);
       }
@@ -111,7 +111,7 @@ namespace Gomoku.WindowsGUI
     {
       Tile tile = e.Tile;
 
-      if (tile != null)
+      if (!(tile is null))
       {
         BoardVM[tile.X, tile.Y].IsHighlighted = false;
       }
@@ -119,7 +119,7 @@ namespace Gomoku.WindowsGUI
 
     private void Board_GameOver(object sender, GameOverEventArgs e)
     {
-      if (e.Winner == null)
+      if (e.Winner is null)
       {
         ShowMessage("Tie!");
       }
@@ -139,7 +139,7 @@ namespace Gomoku.WindowsGUI
 
     private void CleanAnalyze()
     {
-      if (_choices != null && _choices.Count > 0)
+      if (!(_choices is null) && _choices.Count > 0)
       {
         foreach (Tile tile in _choices)
         {
@@ -251,7 +251,7 @@ namespace Gomoku.WindowsGUI
     private async Task RunAI()
     {
       Tile tile = await AIPlayAsync();
-      if (tile == null)
+      if (tile is null)
       {
         return;
       }
@@ -268,13 +268,13 @@ namespace Gomoku.WindowsGUI
 
     private void TileButton_Click(object sender, RoutedEventArgs e)
     {
-      if (sender == null || Game.IsOver)
+      if (sender is null || Game.IsOver)
       {
         return;
       }
 
       if (sender is Button button
-        && button.DataContext != null)
+        && !(button.DataContext is null))
       {
         var tileVM = button.DataContext as TileVM;
         CleanAnalyze();
@@ -285,7 +285,7 @@ namespace Gomoku.WindowsGUI
     private void UndoButton_Click(object sender, RoutedEventArgs e)
     {
       CleanAnalyze();
-      BoardVM.Clear(Game.LastPlayedTile.X, Game.LastPlayedTile.Y);
+      BoardVM.Clear(Game.LastMove.X, Game.LastMove.Y);
       Game.Undo();
     }
 

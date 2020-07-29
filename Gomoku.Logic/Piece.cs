@@ -26,13 +26,25 @@
     public Pieces Type => this;
     public int TypeIndex { get; }
 
-    public static explicit operator Piece(int i) => new Piece(i);
+    public static explicit operator Piece(int i)
+    {
+      return new Piece(i);
+    }
 
-    public static explicit operator Piece(Pieces p) => new Piece(p);
+    public static explicit operator Piece(Pieces p)
+    {
+      return new Piece(p);
+    }
 
-    public static implicit operator int(Piece p) => p.TypeIndex;
+    public static implicit operator int(Piece p)
+    {
+      return p.TypeIndex;
+    }
 
-    public static implicit operator Pieces(Piece p) => (Pieces)p.TypeIndex;
+    public static implicit operator Pieces(Piece p)
+    {
+      return (Pieces)p.TypeIndex;
+    }
 
     public static bool operator !=(Piece p1, Piece p2)
     {

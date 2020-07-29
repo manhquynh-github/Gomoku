@@ -169,7 +169,7 @@ namespace Gomoku.AI
     protected IEnumerable<Tile> GetPlayableTiles(Game game)
     {
       // Get all the placed tiles to determine all the correct playable tiles
-      IReadOnlyCollection<Tile> placedTiles = game.History;
+      IReadOnlyList<Tile> placedTiles = game.History;
 
       // Get all the playable tiles using a HashSet where only distinct tiles
       // are added
@@ -220,7 +220,7 @@ namespace Gomoku.AI
     protected List<NTree<AINode>> Search(Game game, NTree<AINode> currentNode, int level)
     {
       // Get all the placed tiles to determine all the correct playable tiles
-      IReadOnlyCollection<Tile> placedTiles = game.History;
+      IReadOnlyList<Tile> placedTiles = game.History;
 
       // If it is a new game, select the center most
       if (placedTiles.Count == 0)
@@ -287,7 +287,7 @@ namespace Gomoku.AI
             // selected. use j as a factor for the point as it goes shallower
             // back to its parent right before the original player's turn again
             NTree<AINode> traverseNode = nTree;
-            for (var j = 1; j < playerCount && traverseNode != null; j++)
+            for (var j = 1; j < playerCount && !(traverseNode is null); j++)
             {
               traverseNode.Value.Point -= j * maxPoint;
               traverseNode = traverseNode.ParentNode;
@@ -305,7 +305,7 @@ namespace Gomoku.AI
             // shallower back to its parent right before the original player's
             // turn again use 0.01 as a small factor to penalize same nodes left
             traverseNode = nTree;
-            for (var j = 1; j < playerCount && traverseNode != null; j++)
+            for (var j = 1; j < playerCount && !(traverseNode is null); j++)
             {
               traverseNode.Value.Point -= j * nTree.Nodes.Count * 0.01;
               traverseNode = traverseNode.ParentNode;

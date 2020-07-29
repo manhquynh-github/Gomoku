@@ -1,15 +1,25 @@
-﻿namespace Gomoku.Logic
+﻿using System;
+using System.Collections.Generic;
+
+namespace Gomoku.Logic
 {
   /// <summary>
   /// Defines a tile in the board
   /// </summary>
-  public class Tile
+  public class Tile : IDeepCloneable<Tile>, IShallowCloneable<Tile>
   {
     public Tile(int x, int y)
     {
       X = x;
       Y = y;
       Piece = new Piece(Pieces.None);
+    }
+
+    private Tile(int x, int y, Piece piece)
+    {
+      X = x;
+      Y = y;
+      Piece = piece;
     }
 
     /// <summary>
@@ -27,9 +37,56 @@
     /// </summary>
     public int Y { get; }
 
+    public static bool operator !=(Tile t1, Tile t2)
+    {
+      return !(t1 == t2);
+    }
+
+    public static bool operator ==(Tile t1, Tile t2)
+    {
+      return !(t1 is null)
+        && !(t2 is null)
+        && t1.X == t2.X
+        && t1.Y == t2.Y
+        && t1.Piece == t2.Piece;
+    }
+
+    public Tile DeepClone()
+    {
+      return new Tile(X, Y, Piece);
+    }
+
+    public override bool Equals(object obj)
+    {
+      return obj is Tile tile
+        && EqualityComparer<Piece>.Default.Equals(Piece, tile.Piece)
+        && X == tile.X
+        && Y == tile.Y;
+    }
+
+    public override int GetHashCode()
+    {
+      return HashCode.Combine(Piece, X, Y);
+    }
+
+    public Tile ShallowClone()
+    {
+      return (Tile)MemberwiseClone();
+    }
+
     public override string ToString()
     {
       return Piece.ToString();
+    }
+
+    object IDeepCloneable.DeepClone()
+    {
+      return DeepClone();
+    }
+
+    object IShallowCloneable.ShallowClone()
+    {
+      return ShallowClone();
     }
   }
 }
