@@ -13,8 +13,7 @@ namespace Gomoku.Logic
     {
       IsGameOver = isGameOver;
       Turn = turn;
-      Winner = winner
-        ?? throw new ArgumentNullException(nameof(winner));
+      Winner = winner;
       WinningTiles = winningTiles
         ?? throw new ArgumentNullException(nameof(winningTiles));
     }
