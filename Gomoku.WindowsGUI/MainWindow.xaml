@@ -265,6 +265,13 @@
         </Trigger>
         <Trigger Property="IsPressed"
                  Value="True">
+          <Setter Property="Effect">
+            <Setter.Value>
+              <DropShadowEffect BlurRadius="3"
+                                Direction="270"
+                                ShadowDepth="1" />
+            </Setter.Value>
+          </Setter>
           <Setter Property="Foreground"
                   Value="Yellow" />
         </Trigger>
