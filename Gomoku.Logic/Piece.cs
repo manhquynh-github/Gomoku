@@ -13,20 +13,20 @@
   /// </summary>
   public struct Piece
   {
-    public Piece(int typeIndex)
+    public Piece(byte typeIndex)
     {
       TypeIndex = typeIndex;
     }
 
     public Piece(Pieces pieces) :
-      this((int)pieces)
+      this((byte)pieces)
     {
     }
 
     public Pieces Type => this;
-    public int TypeIndex { get; }
+    public byte TypeIndex { get; }
 
-    public static explicit operator Piece(int i)
+    public static explicit operator Piece(byte i)
     {
       return new Piece(i);
     }
@@ -36,7 +36,7 @@
       return new Piece(p);
     }
 
-    public static implicit operator int(Piece p)
+    public static implicit operator byte(Piece p)
     {
       return p.TypeIndex;
     }
@@ -53,7 +53,7 @@
 
     public static bool operator !=(Piece p1, Pieces p2)
     {
-      return p1.TypeIndex != (int)p2;
+      return p1.TypeIndex != (byte)p2;
     }
 
     public static bool operator ==(Piece p1, Piece p2)
@@ -63,7 +63,7 @@
 
     public static bool operator ==(Piece p1, Pieces p2)
     {
-      return p1.TypeIndex == (int)p2;
+      return p1.TypeIndex == (byte)p2;
     }
 
     public override bool Equals(object obj)
