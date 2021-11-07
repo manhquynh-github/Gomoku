@@ -6,12 +6,18 @@ namespace Gomoku.Logic.AI
   {
     protected static readonly Random Random = new Random();
 
-    public abstract AnalysisResult Analyze(Game game);
+    public AnalysisResult Analyze(Game game)
+    {
+      Game clonedGame = game.DeepClone();
+      return DoAnalyze(clonedGame);
+    }
 
-    public Tile Play(Game game)
+    public void Play(Game game)
     {
       AnalysisResult result = Analyze(game);
-      return result.SelectedChoice;
+      game.Play(result.SelectedChoice);
     }
+
+    protected abstract AnalysisResult DoAnalyze(Game clonedGame);
   }
 }

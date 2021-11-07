@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-using Gomoku.AI;
+using Gomoku.AI.Custom.Algorithms;
 using Gomoku.Logic;
 using Gomoku.Logic.AI;
 using Gomoku.WindowsGUI.ViewModels;
@@ -19,7 +19,7 @@ namespace Gomoku.WindowsGUI
   /// </summary>
   public partial class MainWindow : Window
   {
-    private List<Tile> _choices;
+    private readonly List<IPositional> _choices;
 
     public MainWindow() :
       this(15, 15,
@@ -37,14 +37,14 @@ namespace Gomoku.WindowsGUI
 
       Game = new Game(boardWidth, boardHeight, players);
       BoardVM = new BoardVM(Game.Board);
-      _choices = new List<Tile>();
+      _choices = new List<IPositional>();
       InitializeBoard(boardWidth, boardHeight);
     }
 
     public BoardVM BoardVM { get; }
     public Game Game { get; }
 
-    private async Task<Tile> AIPlayAsync()
+    private async Task<IPositional> AIPlayAsync()
     {
       Player player = Game.CurrentPlayer;
 
@@ -69,7 +69,8 @@ namespace Gomoku.WindowsGUI
         await Task.Delay((int)delay);
       }
 
-      _choices = result.PossibleChoices.ToList();
+      _choices.Clear();
+      _choices.AddRange(result.PossibleChoices);
 
       BoardBorder.IsEnabled = true;
 
@@ -250,7 +251,7 @@ namespace Gomoku.WindowsGUI
 
     private async Task RunAI()
     {
-      Tile tile = await AIPlayAsync();
+      IPositional tile = await AIPlayAsync();
       if (tile is null)
       {
         return;
@@ -285,7 +286,11 @@ namespace Gomoku.WindowsGUI
     private void UndoButton_Click(object sender, RoutedEventArgs e)
     {
       CleanAnalyze();
-      BoardVM.Clear(Game.LastMove.X, Game.LastMove.Y);
+      if (Game.LastMove != null)
+      {
+        BoardVM.Clear(Game.LastMove.X, Game.LastMove.Y);
+      }
+
       Game.Undo();
     }
 

@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Gomoku.AI.Common.DataStructures;
+using Gomoku.AI.Custom.CandidateSearcher;
+using Gomoku.AI.Custom.Evaluator;
 using Gomoku.Logic;
 using Gomoku.Logic.AI;
 
-namespace Gomoku.AI
+namespace Gomoku.AI.Custom.Algorithms
 {
   /// <summary>
   /// An algorithm used for playing Gomoku version 1, based on N-Tree.
@@ -18,6 +21,8 @@ namespace Gomoku.AI
     public GomokuAIv1(int level = 1)
     {
       Level = level;
+      TileEvaluator = new WeightedPointBasedEvaluator();
+      CandidateSearcher = new LineBasedCandidates();
     }
 
     /// <summary>
@@ -25,23 +30,26 @@ namespace Gomoku.AI
     /// </summary>
     public int Level { get; set; }
 
+    protected ICandidateSearcher CandidateSearcher { get; private set; }
+    protected ITileEvaluator TileEvaluator { get; private set; }
+
     /// <summary>
     /// Searches for a suitable tile for the current turn of the board.
     /// </summary>
-    /// <param name="game">the game used for searching</param>
+    /// <param name="clonedGame">the game used for searching</param>
     /// <returns>a <see cref="Tile"/> that the AI selects.</returns>
-    public override AnalysisResult Analyze(Game game)
+    protected override AnalysisResult DoAnalyze(Game clonedGame)
     {
-      // Initialize the choices
-      var choices = new List<Tile>();
-
       // If game is over then stop
-      if (game.IsOver)
+      if (clonedGame.IsOver)
       {
         return null;
       }
 
-      List<NTree<AINode>> result = Search(game, null, Level);
+      // Initialize the choices
+      var choices = new List<IPositional>();
+
+      List<NTree<AINode>> result = Search(clonedGame, null, Level);
 
       // Print out to console for debugging
       //PrintSearchResult(result);
@@ -56,8 +64,7 @@ namespace Gomoku.AI
       // If found one result, return the first
       else if (result.Count == 1)
       {
-        choices.Add(result[0].Value.Tile);
-        return new AnalysisResult(choices, choices[0]);
+        return new AnalysisResult(result[0].Value.Tile);
       }
 
       // Otherwise
@@ -79,133 +86,8 @@ namespace Gomoku.AI
 
         // Randomly pick one result from the choices
         var choice = Random.Next(choices.Count);
-        return new AnalysisResult(choices, choices[choice]);
+        return new AnalysisResult(choices[choice], choices);
       }
-    }
-
-    protected AINode EvaluatePoint(Game game, Tile tile, Piece piece)
-    {
-      // Evaluate the point of the current node
-      var point = 0.0;
-
-      // If game is over the point should be high enough so that this node is
-      // more likely to get noticed
-      if (game.IsOver)
-      {
-        point = 1000.0;
-      }
-
-      // Otherwise evaluate the point matching lines and other information
-      else
-      {
-        // Retrieve line group of each orientation to fully evaluate a tile
-        Orientations[] orientations = new[]
-        {
-          Orientations.Horizontal,
-          Orientations.Vertical,
-          Orientations.Diagonal,
-          Orientations.RvDiagonal
-        };
-
-        foreach (Orientations orientation in orientations)
-        {
-          // Get line within 5-tile range
-          var line =
-            OrientedlLine.FromBoard(
-              game.Board,
-              tile.X,
-              tile.Y,
-              piece,
-              orientation,
-              maxTile: Game.WINPIECES,
-              blankTolerance: 1);
-
-          // Calculate points
-          var sameTilesCount = line.SameTileCount;
-          var blockTilesCount = line.BlockTilesCount;
-
-          // When the line is not blocked
-          if (blockTilesCount == 0)
-          {
-            // If the line chain has more tiles than win pieces, then this tile
-            // is less worth.
-            if (sameTilesCount + 1 >= Game.WINPIECES)
-            {
-              point += sameTilesCount;
-            }
-
-            // Otherwise
-            else
-            {
-              // Calculate point using Geometric series of 2.0 so that the more
-              // chain it has, the more valuable the line
-              var _point =
-                  1.0 * (1.0 - Math.Pow(2.0, sameTilesCount)) / (1.0 - 2.0);
-
-              // Finally the point is added with the power of itself
-              point += Math.Pow(_point, line.IsChained ? 2.0 : 1.5);
-            }
-          }
-
-          // When the line is partially blocked, only add the point which equals
-          // to the same count
-          else if (blockTilesCount == 1)
-          {
-            point += sameTilesCount;
-          }
-
-          // Otherwise, add no point.
-
-          //point += (1.0 * (1.0 - Math.Pow(2.0, line.CountChainTiles())) / (1.0 - 2.0));
-          //point += 0.25 * line.CountBlankTiles();
-          //point -= 1.0 * line.BlockTileCount;
-        }
-      }
-
-      // Instatiate an AINode containing all of the above information
-      return new AINode(tile, game, point);
-    }
-
-    protected IEnumerable<Tile> GetPlayableTiles(Game game)
-    {
-      // Get all the placed tiles to determine all the correct playable tiles
-      IReadOnlyList<Tile> placedTiles = game.History;
-
-      // Get all the playable tiles using a HashSet where only distinct tiles
-      // are added
-      var playableTiles = new HashSet<Tile>();
-      foreach (Tile tile in placedTiles)
-      {
-        // Loop all 4 Orientation enumeration
-        Orientations[] orientations = new[]
-        {
-          Orientations.Horizontal,
-          Orientations.Vertical,
-          Orientations.Diagonal,
-          Orientations.RvDiagonal
-        };
-
-        foreach (Orientations orientation in orientations)
-        {
-          // Retrieve line of each orientation within 2-tile range where the
-          // tiles are empty
-          foreach (Tile t in
-            OrientedlLine.FromBoard(
-              game.Board,
-              tile.X,
-              tile.Y,
-              (Piece)Pieces.None,
-              orientation,
-              maxTile: 2,
-              blankTolerance: 1)
-            .SameTiles)
-          {
-            playableTiles.Add(t);
-          }
-        }
-      }
-
-      return playableTiles;
     }
 
     protected void PrintSearchResult(List<NTree<AINode>> nTrees)
@@ -230,13 +112,12 @@ namespace Gomoku.AI
           new NTree<AINode>(
             new AINode(
               game.Board[game.Board.Width / 2, game.Board.Height / 2],
-              game,
               0))
         };
       }
 
       // Get all the playable tiles
-      IEnumerable<Tile> playableTiles = GetPlayableTiles(game);
+      IEnumerable<IPositional> playableTiles = CandidateSearcher.Search(game);
 
       // Get current player to determine which side to search for
       Player player = game.CurrentPlayer;
@@ -246,14 +127,13 @@ namespace Gomoku.AI
       var nTrees = new List<NTree<AINode>>();
       foreach (Tile tile in playableTiles)
       {
-        // Clone the current board to create a new state of NTree
-        Game g = game.DeepClone();
-
-        // Play the new cloned board
-        g.Play(tile.X, tile.Y);
+        // Play the board
+        game.Play(tile.X, tile.Y);
 
         // Evalue this tile
-        AINode aiNode = EvaluatePoint(g, tile, player.Piece);
+        var point = TileEvaluator.Evaluate(game, tile, player.Piece);
+        point = Math.Abs(point);
+        var aiNode = new AINode(tile, point);
 
         // Add to the list of NTrees
         var nTree = new NTree<AINode>(currentNode, aiNode);
@@ -262,8 +142,9 @@ namespace Gomoku.AI
         // If the current node's board's game is over, stop evaluating because
         // there is a chance this node will reach the end of game, so there is
         // no longer any need to continue evaluating
-        if (g.IsOver)
+        if (game.IsOver)
         {
+          game.Undo();
           break;
         }
 
@@ -273,7 +154,7 @@ namespace Gomoku.AI
         if (level > 0 && level <= Level)
         {
           // Evaluate children nodes by recursion
-          nTree.Nodes = Search(g, nTree, level - 1);
+          nTree.Nodes = Search(game, nTree, level - 1);
 
           if (nTree.Nodes.Count > 0)
           {
@@ -312,6 +193,9 @@ namespace Gomoku.AI
             }
           }
         }
+
+        // Evaludation is done, undo the step
+        game.Undo();
       }
 
       // Sort the NTrees list by descending where the first item has the largest point
@@ -321,14 +205,12 @@ namespace Gomoku.AI
 
     protected class AINode : IComparable<AINode>
     {
-      public Game Game;
       public double Point;
       public Tile Tile;
 
-      public AINode(Tile tile, Game game, double point)
+      public AINode(Tile tile, double point)
       {
         Tile = tile;
-        Game = game;
         Point = point;
       }
 

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Gomoku.AI
+namespace Gomoku.AI.Common.DataStructures
 {
   public class NTree<T>
   {

@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Gomoku.AI.Custom.CandidateSearcher;
 using Gomoku.Logic;
 using Gomoku.Logic.AI;
 
-namespace Gomoku.AI
+namespace Gomoku.AI.Custom.Algorithms
 {
   /// <summary>
   /// An algorithm used for playing Gomoku version 1, based on N-Tree.
@@ -22,20 +23,20 @@ namespace Gomoku.AI
     /// <summary>
     /// Searches for a suitable tile for the current turn of the board.
     /// </summary>
-    /// <param name="game">the game used for searching</param>
+    /// <param name="clonedGame">the game used for searching</param>
     /// <returns>a <see cref="Tile"/> that the AI selects.</returns>
-    public override AnalysisResult Analyze(Game game)
+    protected override AnalysisResult DoAnalyze(Game clonedGame)
     {
       // Initialize the choices
-      var choices = new List<Tile>();
+      var choices = new List<IPositional>();
 
       // If game is over then stop
-      if (game.IsOver)
+      if (clonedGame.IsOver)
       {
         return null;
       }
 
-      var result = Search(game, Level).ToList();
+      var result = Search(clonedGame, Level).ToList();
 
       // If found no result, return null
       if (result.Count == 0)
@@ -47,8 +48,7 @@ namespace Gomoku.AI
       // If found one result, return the first
       else if (result.Count == 1)
       {
-        choices.Add(result[0].Tile);
-        return new AnalysisResult(choices, choices[0]);
+        return new AnalysisResult(result[0].Tile);
       }
 
       // Otherwise
@@ -72,7 +72,7 @@ namespace Gomoku.AI
 
         // Randomly pick one result from the choices
         var choice = Random.Next(choices.Count);
-        return new AnalysisResult(choices, choices[choice]);
+        return new AnalysisResult(choices[choice], choices);
       }
     }
 
@@ -88,7 +88,6 @@ namespace Gomoku.AI
         {
           new AINode(
             game.Board[game.Board.Width / 2, game.Board.Height / 2],
-            game,
             0)
         };
       }
@@ -100,17 +99,19 @@ namespace Gomoku.AI
       var maxPoint = double.MinValue;
       var candidateNodes = new List<AINode>();
 
-      // Populate corresponding NTrees with each playable tile found.
-      foreach (Tile tile in GetPlayableTiles(game))
-      {
-        // Clone the current board to create a new state of NTree
-        Game g = game.DeepClone();
+      // Get all the playable tiles
+      IEnumerable<IPositional> playableTiles = CandidateSearcher.Search(game);
 
+      // Populate corresponding NTrees with each playable tile found.
+      foreach (Tile tile in playableTiles)
+      {
         // Play the new cloned board
-        g.Play(tile.X, tile.Y);
+        game.Play(tile.X, tile.Y);
 
         // Evaluate this tile
-        AINode aiNode = EvaluatePoint(g, tile, player.Piece);
+        var point = TileEvaluator.Evaluate(game, tile, player.Piece);
+        point = Math.Abs(point);
+        var aiNode = new AINode(tile, point);
 
         if (level < Level)
         {
@@ -133,6 +134,8 @@ namespace Gomoku.AI
         {
           candidateNodes.Add(aiNode);
         }
+
+        game.Undo();
       }
 
       if (level == Level && placedTiles.Count <= 2)
@@ -152,7 +155,7 @@ namespace Gomoku.AI
           return candidateNodes;
         }
 
-        var childNodes = Search(node.Game, level - 1).ToList();
+        var childNodes = Search(game, level - 1).ToList();
 
         childNodes.Sort((x, y) => -1 * x.CompareTo(y));
         AINode maxNode = childNodes.First();
