@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Gomoku.Logic.AI;
+
 namespace Gomoku.Logic
 {
   /// <summary>
   /// Defines a tile in the board
   /// </summary>
-  public class Tile : IDeepCloneable<Tile>, IShallowCloneable<Tile>
+  public class Tile : IPositional, IDeepCloneable<Tile>, IShallowCloneable<Tile>
   {
-    public Tile(int x, int y)
+    public Tile(int x, int y) : this(x, y, (Piece)Pieces.None)
     {
-      X = x;
-      Y = y;
-      Piece = new Piece(Pieces.None);
     }
 
     private Tile(int x, int y, Piece piece)
@@ -44,9 +43,17 @@ namespace Gomoku.Logic
 
     public static bool operator ==(Tile t1, Tile t2)
     {
-      return !(t1 is null)
-        && !(t2 is null)
-        && t1.X == t2.X
+      if (t1 is null && t2 is null)
+      {
+        return true;
+      }
+
+      if (t1 is null || t2 is null)
+      {
+        return false;
+      }
+
+      return t1.X == t2.X
         && t1.Y == t2.Y
         && t1.Piece == t2.Piece;
     }
