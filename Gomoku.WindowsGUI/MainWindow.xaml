@@ -53,11 +53,26 @@
       <EventSetter Event="Click"
                    Handler="TileButton_Click" />
       <Style.Triggers>
-        <DataTrigger Binding="{Binding IsHighlighted}"
-                     Value="True">
+        <MultiDataTrigger>
+          <MultiDataTrigger.Conditions>
+            <Condition Binding="{Binding IsHighlighted}"
+                       Value="True" />
+            <Condition Binding="{Binding IsSelected}"
+                       Value="False" />
+          </MultiDataTrigger.Conditions>
           <Setter Property="Background"
                   Value="#3FFFFF00" />
-        </DataTrigger>
+        </MultiDataTrigger>
+        <MultiDataTrigger>
+          <MultiDataTrigger.Conditions>
+            <Condition Binding="{Binding IsHighlighted}"
+                       Value="True" />
+            <Condition Binding="{Binding IsSelected}"
+                       Value="True" />
+          </MultiDataTrigger.Conditions>
+          <Setter Property="Background"
+                  Value="#7FFFFF00" />
+        </MultiDataTrigger>
         <MultiDataTrigger>
           <MultiDataTrigger.Conditions>
             <Condition Binding="{Binding IsHighlighted}"

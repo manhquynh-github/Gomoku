@@ -11,6 +11,8 @@ namespace Gomoku.WindowsGUI.ViewModels
   {
     private bool _isHighlighted;
 
+    private bool _isSelected;
+
     public TileVM(Tile tile)
     {
       Tile = tile ?? throw new ArgumentNullException(nameof(tile));
@@ -19,7 +21,20 @@ namespace Gomoku.WindowsGUI.ViewModels
     public bool IsHighlighted
     {
       get => _isHighlighted;
-      set => SetProperty(ref _isHighlighted, value);
+      set
+      {
+        if (IsSelected == true && value == false)
+        {
+          IsSelected = false;
+        }
+        SetProperty(ref _isHighlighted, value);
+      }
+    }
+
+    public bool IsSelected
+    {
+      get => _isSelected;
+      set => SetProperty(ref _isSelected, value);
     }
 
     public Piece Piece

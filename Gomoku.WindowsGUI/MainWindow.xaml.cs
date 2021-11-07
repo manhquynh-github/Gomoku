@@ -84,12 +84,13 @@ namespace Gomoku.WindowsGUI
         return;
       }
 
-      await AIPlayAsync();
+      IPositional selectedTile = await AIPlayAsync();
       CleanAnalyze();
       foreach (Tile tile in _choices)
       {
         BoardVM[tile.X, tile.Y].IsHighlighted = true;
       }
+      BoardVM[selectedTile.X, selectedTile.Y].IsSelected = true;
     }
 
     private async void Board_BoardChangedAsync(object sender, BoardChangedEventArgs e)
