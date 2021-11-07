@@ -6,25 +6,27 @@ namespace Gomoku.Logic.AI
 {
   public class AnalysisResult
   {
-    public AnalysisResult(IEnumerable<Tile> possibleChoices, Tile selectedChoice)
+    public AnalysisResult(IPositional selectedChoice)
+    {
+      SelectedChoice = selectedChoice;
+      PossibleChoices = new List<IPositional>()
+      {
+        selectedChoice
+      };
+    }
+
+    public AnalysisResult(IPositional selectedChoice, IEnumerable<IPositional> possibleChoices)
     {
       if (possibleChoices is null)
       {
         throw new ArgumentNullException(nameof(possibleChoices));
       }
 
-      if (!possibleChoices.Any())
-      {
-        throw new ArgumentException("Collection must not be empty", nameof(possibleChoices));
-      }
-
       PossibleChoices = possibleChoices;
-
-      SelectedChoice = selectedChoice
-        ?? throw new ArgumentNullException(nameof(selectedChoice));
+      SelectedChoice = selectedChoice;
     }
 
-    public IEnumerable<Tile> PossibleChoices { get; }
-    public Tile SelectedChoice { get; }
+    public IEnumerable<IPositional> PossibleChoices { get; }
+    public IPositional SelectedChoice { get; }
   }
 }
