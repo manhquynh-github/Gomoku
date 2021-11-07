@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
+using Gomoku.Logic.AI;
+
 namespace Gomoku.Logic
 {
   /// <summary>
@@ -43,7 +45,7 @@ namespace Gomoku.Logic
       MaxMove = g.MaxMove;
       _players = new List<Player>(g._players);
       Turn = g.Turn;
-      _history = new Stack<Tile>(g._history);
+      _history = new Stack<Tile>(g._history.Reverse());
       IsOver = g.IsOver;
       ShiftPlayersOnGameOver = g.ShiftPlayersOnGameOver;
     }
@@ -68,7 +70,7 @@ namespace Gomoku.Logic
     public Board Board { get; }
 
     public Player CurrentPlayer => _players[Turn];
-    public IReadOnlyList<Tile> History => _history.ToImmutableList();
+    public IReadOnlyList<Tile> History => _history.ToArray();
     public bool IsOver { get; private set; }
     public bool IsTie => _history.Count == MaxMove;
 
@@ -82,7 +84,11 @@ namespace Gomoku.Logic
     /// </summary>
     public int MaxMove { get; }
 
+    public Player NextPlayer => _players[NextTurn];
+    public int NextTurn => (Turn + 1 + _players.Count) % _players.Count;
     public IReadOnlyList<Player> Players => _players.AsReadOnly();
+    public Player PreviousPlayer => _players[PreviousTurn];
+    public int PreviousTurn => (Turn - 1 + _players.Count) % _players.Count;
 
     /// <summary>
     /// Shift the players' orders when the <see cref="Game"/> is over. For
@@ -201,6 +207,11 @@ namespace Gomoku.Logic
       return CurrentPlayer == player;
     }
 
+    public void Play(IPositional positional)
+    {
+      Play(positional.X, positional.Y);
+    }
+
     /// <summary>
     /// Puts a <see cref="Tile"/> corresponding to <see cref="CurrentPlayer"/>
     /// and advances the <see cref="Game"/> to the next state. at position
@@ -265,7 +276,7 @@ namespace Gomoku.Logic
       else
       {
         // Increment turn
-        Turn = (Turn + 1) % _players.Count;
+        Turn = NextTurn;
       }
 
       BoardChanged?.Invoke(this, new BoardChangedEventArgs(Turn, CurrentPlayer, tile));
