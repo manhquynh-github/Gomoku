@@ -122,6 +122,11 @@ namespace Gomoku.Logic
       return new Board(this);
     }
 
+    public Tile GetTile(IPositional positional)
+    {
+      return this[positional.X, positional.Y];
+    }
+
     /// <summary>
     /// Iterates through the <see cref="Board"/> starting at position
     /// <paramref name="x"/>, <paramref name="y"/> towards
