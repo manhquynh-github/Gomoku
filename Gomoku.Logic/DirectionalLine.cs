@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -21,10 +22,10 @@ namespace Gomoku.Logic
     private DirectionalLine() : this(
       (Piece)Pieces.None,
       Directions.None,
-      new List<Tile>(),
-      new List<Tile>(),
-      new List<Tile>(),
-      new List<Tile>(),
+      new Tile[0],
+      new Tile[0],
+      new Tile[0],
+      new Tile[0],
       false)
     {
     }
@@ -32,10 +33,10 @@ namespace Gomoku.Logic
     private DirectionalLine(
       Piece piece,
       Directions diretion,
-      IReadOnlyList<Tile> tiles,
-      IReadOnlyList<Tile> sameTiles,
-      IReadOnlyList<Tile> blankTiles,
-      IReadOnlyList<Tile> blockTiles,
+      Tile[] tiles,
+      Tile[] sameTiles,
+      Tile[] blankTiles,
+      Tile[] blockTiles,
       bool isChained)
     {
       Piece = piece;
@@ -50,12 +51,12 @@ namespace Gomoku.Logic
     /// <summary>
     /// All the tiles that have <see cref="Pieces.None"/>.
     /// </summary>
-    public IReadOnlyList<Tile> BlankTiles { get; }
+    public Tile[] BlankTiles { get; }
 
     /// <summary>
     /// All the tiles that have a different <see cref="Logic.Piece"/> other than <see cref="Piece"/>.
     /// </summary>
-    public IReadOnlyList<Tile> BlockTiles { get; }
+    public Tile[] BlockTiles { get; }
 
     /// <summary>
     /// The <see cref="Directions"/> that this <see cref="DirectionalLine"/> traverses.
@@ -76,12 +77,12 @@ namespace Gomoku.Logic
     /// <summary>
     /// All the tiles that have <see cref="Piece"/>.
     /// </summary>
-    public IReadOnlyList<Tile> SameTiles { get; }
+    public Tile[] SameTiles { get; }
 
     /// <summary>
     /// All tiles
     /// </summary>
-    public IReadOnlyList<Tile> Tiles { get; }
+    public Tile[] Tiles { get; }
 
     /// <summary>
     /// Creates a new <see cref="DirectionalLine"/> by traversing the
@@ -129,10 +130,10 @@ namespace Gomoku.Logic
         throw new ArgumentException("Value is out of range", nameof(y));
       }
 
-      var tiles = new List<Tile>();
-      var sameTiles = new List<Tile>();
-      var blankTiles = new List<Tile>();
-      var blockTiles = new List<Tile>();
+      var tiles = new Queue<Tile>();
+      var sameTiles = new Queue<Tile>();
+      var blankTiles = new Queue<Tile>();
+      var blockTiles = new Queue<Tile>();
 
       var count = 0;
       var chainBreak = false;
@@ -156,8 +157,8 @@ namespace Gomoku.Logic
               chainBreak = true;
             }
 
-            tiles.Add(t);
-            sameTiles.Add(t);
+            tiles.Enqueue(t);
+            sameTiles.Enqueue(t);
             return true;
           }
           else if (t.Piece.Type == Pieces.None)
@@ -167,14 +168,14 @@ namespace Gomoku.Logic
               return false;
             }
 
-            tiles.Add(t);
-            blankTiles.Add(t);
+            tiles.Enqueue(t);
+            blankTiles.Enqueue(t);
             return true;
           }
           else
           {
-            tiles.Add(t);
-            blockTiles.Add(t);
+            tiles.Enqueue(t);
+            blockTiles.Enqueue(t);
             return false;
           }
         });
@@ -182,10 +183,10 @@ namespace Gomoku.Logic
       return new DirectionalLine(
         piece,
         direction,
-        tiles.ToImmutableList(),
-        sameTiles.ToImmutableList(),
-        blankTiles.ToImmutableList(),
-        blockTiles.ToImmutableList(),
+        tiles.ToArray(),
+        sameTiles.ToArray(),
+        blankTiles.ToArray(),
+        blockTiles.ToArray(),
         !chainBreak);
     }
 

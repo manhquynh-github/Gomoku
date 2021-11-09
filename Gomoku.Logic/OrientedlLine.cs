@@ -38,22 +38,18 @@ namespace Gomoku.Logic
       FirstLine = firstLine;
       SecondLine = secondLine;
 
-      Lines = new List<DirectionalLine>()
-      {
-        firstLine,
-        secondLine,
-      }.ToImmutableList();
+      Lines = ImmutableArray.Create(firstLine, secondLine);
     }
 
     /// <summary>
     /// Number of <see cref="BlankTiles"/>. (without iterating)
     /// </summary>
-    public int BlankTilesCount => Lines.Sum(l => l.BlankTiles.Count);
+    public int BlankTilesCount => Lines.Sum(l => l.BlankTiles.Length);
 
     /// <summary>
     /// Number of <see cref="BlockTiles"/>. (without iterating)
     /// </summary>
-    public int BlockTilesCount => Lines.Sum(l => l.BlockTiles.Count);
+    public int BlockTilesCount => Lines.Sum(l => l.BlockTiles.Length);
 
     /// <summary>
     /// The first <see cref="DirectionalLine"/> where <see cref="Directions"/>
@@ -65,7 +61,7 @@ namespace Gomoku.Logic
     /// <summary>
     /// Contains <see cref="FirstLine"/> and <see cref="SecondLine"/>.
     /// </summary>
-    public IReadOnlyList<DirectionalLine> Lines { get; }
+    public ImmutableArray<DirectionalLine> Lines { get; }
 
     /// <summary>
     /// The <see cref="Orientations"/> that this <see cref="OrientedlLine"/> traverses.
@@ -80,7 +76,7 @@ namespace Gomoku.Logic
     /// <summary>
     /// Number of <see cref="SameTiles"/>. (without iterating)
     /// </summary>
-    public int SameTileCount => Lines.Sum(l => l.SameTiles.Count);
+    public int SameTileCount => Lines.Sum(l => l.SameTiles.Length);
 
     /// <summary>
     /// The first <see cref="DirectionalLine"/> where <see cref="Directions"/>
@@ -92,7 +88,7 @@ namespace Gomoku.Logic
     /// <summary>
     /// Number of <see cref="Tiles"/>. (without iterating)
     /// </summary>
-    public int TilesCount => Lines.Sum(l => l.Tiles.Count);
+    public int TilesCount => Lines.Sum(l => l.Tiles.Length);
 
     /// <summary>
     /// All <see cref="DirectionalLine.BlankTiles"/> from <see cref="Lines"/>.
