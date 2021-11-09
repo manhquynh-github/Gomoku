@@ -7,8 +7,6 @@ namespace Gomoku.Logic
   /// </summary>
   public class Player
   {
-    public readonly Piece Piece;
-
     public Player(string name, Piece piece, GomokuAIBase ai, bool isAuto = false)
     {
       Name = name;
@@ -17,6 +15,9 @@ namespace Gomoku.Logic
       IsAuto = isAuto;
     }
 
+    /// <summary>
+    /// The AI used for this player.
+    /// </summary>
     public GomokuAIBase AI { get; set; }
 
     /// <summary>
@@ -24,6 +25,14 @@ namespace Gomoku.Logic
     /// </summary>
     public bool IsAuto { get; set; }
 
+    /// <summary>
+    /// Name of player.
+    /// </summary>
     public string Name { get; set; }
+
+    /// <summary>
+    /// The piece that this player will have
+    /// </summary>
+    public Piece Piece { get; }
   }
 }
