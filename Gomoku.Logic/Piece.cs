@@ -1,6 +1,6 @@
 ﻿namespace Gomoku.Logic
 {
-  public enum Pieces
+  public enum Pieces : byte
   {
     None,
     X,

@@ -3,7 +3,7 @@
 namespace Gomoku.Logic
 {
   [Flags]
-  public enum Orientations
+  public enum Orientations : byte
   {
     None = 0,
     Horizontal = 1 << 0,

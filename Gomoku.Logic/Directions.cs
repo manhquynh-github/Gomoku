@@ -3,7 +3,7 @@
 namespace Gomoku.Logic
 {
   [Flags]
-  public enum Directions
+  public enum Directions : byte
   {
     None = 0,
     Left = 1 << 0,
