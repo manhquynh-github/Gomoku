@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Runtime.Serialization;
 using System.Text;
 
 using Gomoku.Logic;
@@ -22,7 +23,14 @@ namespace Gomoku.AI.Custom.Evaluator
       // more likely to get noticed
       if (game.IsOver)
       {
-        point = double.MaxValue;
+        if (game.Manager.PreviousPlayer.Piece == piece)
+        {
+          point = double.MaxValue;
+        }
+        else
+        {
+          point = double.MinValue;
+        }
       }
 
       // Otherwise evaluate the point matching lines and other information
@@ -95,11 +103,6 @@ namespace Gomoku.AI.Custom.Evaluator
           //point += 0.25 * line.CountBlankTiles();
           //point -= 1.0 * line.BlockTileCount;
         }
-      }
-
-      if (piece != game.Manager.CurrentPlayer.Piece)
-      {
-        point = -point;
       }
 
       return point;
