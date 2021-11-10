@@ -290,6 +290,19 @@
           <Setter Property="Foreground"
                   Value="Yellow" />
         </Trigger>
+        <Trigger Property="IsEnabled"
+                 Value="False">
+          <Setter Property="Background">
+            <Setter.Value>
+              <ImageBrush>
+                <ImageBrush.ImageSource>
+                  <FormatConvertedBitmap DestinationFormat="Gray8"
+                                         Source="/Resources/button_texture.jpg" />
+                </ImageBrush.ImageSource>
+              </ImageBrush>
+            </Setter.Value>
+          </Setter>
+        </Trigger>
       </Style.Triggers>
     </Style>
     <Style x:Key="ToggleButtonStyle"
@@ -371,6 +384,19 @@
                  Value="True">
           <Setter Property="Foreground"
                   Value="GreenYellow" />
+        </Trigger>
+        <Trigger Property="IsEnabled"
+                 Value="False">
+          <Setter Property="Background">
+            <Setter.Value>
+              <ImageBrush>
+                <ImageBrush.ImageSource>
+                  <FormatConvertedBitmap DestinationFormat="Gray8"
+                                         Source="/Resources/button_texture.jpg" />
+                </ImageBrush.ImageSource>
+              </ImageBrush>
+            </Setter.Value>
+          </Setter>
         </Trigger>
       </Style.Triggers>
     </Style>
@@ -469,23 +495,28 @@
           <ToggleButton x:Name="UseAIToggleButton"
                         Checked="UseAIToggleButton_Checked"
                         Content="UseAI"
+                        IsThreeState="False"
                         Style="{DynamicResource ToggleButtonStyle}"
                         ToolTip="Turn on/off AI player" />
           <ToggleButton x:Name="DemoToggleButton"
                         Checked="DemoToggleButton_Checked"
                         Content="Demo"
+                        IsThreeState="False"
                         Style="{DynamicResource ToggleButtonStyle}"
                         ToolTip="Turn on/off AI playing against each other"
                         Unchecked="DemoToggleButton_Unchecked" />
-          <Button Click="AnalyzeButton_Click"
+          <Button x:Name="AnalyzeButton"
+                  Click="AnalyzeButton_Click"
                   Content="Analyze"
                   Style="{StaticResource ButtonStyle}"
                   ToolTip="Suggest good moves" />
-          <Button Click="RestartButton_Click"
+          <Button x:Name="RestartButton"
+                  Click="RestartButton_Click"
                   Content="Restart"
                   Style="{StaticResource ButtonStyle}"
                   ToolTip="Start a new game" />
-          <Button Click="UndoButton_Click"
+          <Button x:Name="UndoButton"
+                  Click="UndoButton_Click"
                   Content="Undo"
                   Style="{StaticResource ButtonStyle}"
                   ToolTip="Undo last move" />
