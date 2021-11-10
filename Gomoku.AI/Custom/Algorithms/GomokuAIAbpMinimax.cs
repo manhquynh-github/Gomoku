@@ -103,6 +103,12 @@ namespace Gomoku.AI.Custom.Algorithms
     private double EvaluateGame(Game game, IPositional positional, Player forPlayer, Player againstPlayer)
     {
       var value = TileEvaluator.Evaluate(game, positional, againstPlayer.Piece);
+
+      if (forPlayer != againstPlayer)
+      {
+        value = -value;
+      }
+
       return value;
     }
 
@@ -115,7 +121,7 @@ namespace Gomoku.AI.Custom.Algorithms
       double beta = double.MaxValue,
       bool isMaximizing = true)
     {
-      // If is leaf node or game is over, evaluate it
+      // If is leaf node, evaluate it
       if (depth == 0)
       {
         // The leaf node is effectively created by the previous player so it
@@ -123,6 +129,7 @@ namespace Gomoku.AI.Custom.Algorithms
         return EvaluateGame(game, positional, forPlayer, game.Manager.PreviousPlayer);
       }
 
+      // If game is over, but not leaf node, evaluate for the current player instead
       if (game.IsOver)
       {
         return EvaluateGame(game, positional, forPlayer, game.Manager.CurrentPlayer);
@@ -130,6 +137,8 @@ namespace Gomoku.AI.Custom.Algorithms
 
       // Get all the playable tiles
       IEnumerable<IPositional> playableTiles = CandidateSearcher.Search(game);
+
+      double value;
 
       if (isMaximizing)
       {
@@ -143,7 +152,7 @@ namespace Gomoku.AI.Custom.Algorithms
 
           // Prepare to evaluate the next state by getting the next position and
           // recursively evaluate it
-          var value = EvaluateMinimax(game, childTile, forPlayer, depth - 1, alpha, beta, false);
+          var childValue = EvaluateMinimax(game, childTile, forPlayer, depth - 1, alpha, beta, false);
 
           // Evaluation is done, undo the game state
           game.Undo();
@@ -151,20 +160,21 @@ namespace Gomoku.AI.Custom.Algorithms
           // Negative inifity signifies a lose to our team. Marking this node as
           // negative infinity so that the previous minimizing phase will not
           // pick this node
-          if (value == double.MinValue)
+          if (childValue == double.MinValue)
           {
-            return value;
+            maxValue = childValue;
+            break;
           }
 
           // Perform algorithmic updates
-          maxValue = Math.Max(maxValue, value);
-          alpha = Math.Max(alpha, value);
+          maxValue = Math.Max(maxValue, childValue);
+          alpha = Math.Max(alpha, childValue);
           if (beta <= alpha)
           {
-            return maxValue;
+            break;
           }
         }
-        return maxValue;
+        value = maxValue;
       }
       else
       {
@@ -178,7 +188,7 @@ namespace Gomoku.AI.Custom.Algorithms
 
           // Prepare to evaluate the next state by getting the next position and
           // recursively evaluate it
-          var value = EvaluateMinimax(game, childTile, forPlayer, depth - 1, alpha, beta, true);
+          var childValue = EvaluateMinimax(game, childTile, forPlayer, depth - 1, alpha, beta, true);
 
           // Evaluation is done, undo the game state
           game.Undo();
@@ -186,21 +196,28 @@ namespace Gomoku.AI.Custom.Algorithms
           // Positive inifity signifies a win to our team. Marking this node as
           // positive infinity so that the previous maximizing phase will pick
           // this node
-          if (value == double.MaxValue)
+          if (childValue == double.MaxValue)
           {
-            return value;
+            minValue = childValue;
+            break;
           }
 
           // Perform algorithmic updates
-          minValue = Math.Min(minValue, value);
-          beta = Math.Min(beta, value);
+          minValue = Math.Min(minValue, childValue);
+          beta = Math.Min(beta, childValue);
           if (beta <= alpha)
           {
-            return minValue;
+            break;
           }
         }
-        return minValue;
+        value = minValue;
       }
+
+      // Merging current state's value to child's value. Because the current
+      // state is effectively created by the previous player so it makes sense
+      // to evaluate it for the previous player
+      value += EvaluateGame(game, positional, forPlayer, game.Manager.PreviousPlayer);
+      return value;
     }
   }
 }
