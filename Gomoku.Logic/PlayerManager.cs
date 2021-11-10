@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
 
 namespace Gomoku.Logic
 {
+  /// <summary>
+  /// Represents the game's manager for players and order.
+  /// </summary>
   public class PlayerManager : IDeepCloneable<PlayerManager>
   {
     public PlayerManager(IEnumerable<Player> collection)
@@ -37,14 +36,44 @@ namespace Gomoku.Logic
       Turn = playerManager.Turn.ShallowClone();
     }
 
+    /// <summary>
+    /// Gets the <see cref="Player"/> in the current turn.
+    /// </summary>
     public Player CurrentPlayer => Players[Turn.Current];
+
+    /// <summary>
+    /// Gets the <see cref="Player"/> in the next turn.
+    /// </summary>
     public Player NextPlayer => Players[Turn.Next];
+
+    /// <summary>
+    /// Gets the array of <see cref="Player"/> s this
+    /// <see cref="PlayerManager"/> holds.
+    /// </summary>
     public ImmutableArray<Player> Players { get; }
+
+    /// <summary>
+    /// Gets the <see cref="Player"/> in the previous turn.
+    /// </summary>
     public Player PreviousPlayer => Players[Turn.Previous];
+
+    /// <summary>
+    /// Gets the <see cref="Logic.Turn"/> object.
+    /// </summary>
     public Turn Turn { get; }
 
+    /// <summary>
+    /// Gets the <see cref="Player"/> at <paramref name="index"/>.
+    /// </summary>
+    /// <param name="index">the zero-based index to get.</param>
+    /// <returns>the <see cref="Player"/> at <paramref name="index"/>.</returns>
+    /// <exception cref="IndexOutOfRangeException"></exception>
     public Player this[int index] => Players[index];
 
+    /// <summary>
+    /// Returns a new deep clone.
+    /// </summary>
+    /// <returns></returns>
     public PlayerManager DeepClone()
     {
       return new PlayerManager(this);
@@ -77,6 +106,7 @@ namespace Gomoku.Logic
     /// An <see cref="int"/> that represents the <paramref name="player"/>'s
     /// turn. If not found, returns -1.
     /// </returns>
+    /// <exception cref="ArgumentNullException"></exception>
     public int GetPlayersTurn(string name)
     {
       if (name is null)
@@ -110,6 +140,11 @@ namespace Gomoku.Logic
       }
 
       return CurrentPlayer == player;
+    }
+
+    public override string ToString()
+    {
+      return $"{nameof(CurrentPlayer)}={CurrentPlayer.Name}";
     }
 
     object IDeepCloneable.DeepClone()
