@@ -37,6 +37,11 @@ namespace Gomoku.Logic
     /// </summary>
     public Piece Piece { get; }
 
+    /// <summary>
+    /// Sets a non-null or whitespace name for <see cref="Player"/>.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <exception cref="ArgumentException"></exception>
     public void SetName(string name)
     {
       if (string.IsNullOrWhiteSpace(name))
@@ -49,7 +54,7 @@ namespace Gomoku.Logic
 
     public override string ToString()
     {
-      return $"{nameof(Name)}={Name}, {nameof(Piece)}={Piece}, {nameof(IsAuto)}={IsAuto}, {nameof(AI)}={AI}";
+      return $"{nameof(Name)}={Name}, {nameof(Piece)}={Piece}, {nameof(IsAuto)}={IsAuto}";
     }
   }
 }
