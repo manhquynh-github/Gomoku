@@ -14,7 +14,7 @@ namespace Gomoku.Logic
     {
     }
 
-    private Tile(int x, int y, Piece piece)
+    public Tile(int x, int y, Piece piece)
     {
       X = x;
       Y = y;
@@ -83,7 +83,7 @@ namespace Gomoku.Logic
 
     public override string ToString()
     {
-      return Piece.ToString();
+      return $"({X},{Y})={Piece}";
     }
 
     object IDeepCloneable.DeepClone()
