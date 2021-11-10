@@ -1,4 +1,6 @@
-﻿using Gomoku.Logic.AI;
+﻿using System;
+
+using Gomoku.Logic.AI;
 
 namespace Gomoku.Logic
 {
@@ -9,7 +11,7 @@ namespace Gomoku.Logic
   {
     public Player(string name, Piece piece, GomokuAIBase ai, bool isAuto = false)
     {
-      Name = name;
+      SetName(name);
       Piece = piece;
       AI = ai;
       IsAuto = isAuto;
@@ -28,11 +30,26 @@ namespace Gomoku.Logic
     /// <summary>
     /// Name of player.
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; private set; }
 
     /// <summary>
     /// The piece that this player will have
     /// </summary>
     public Piece Piece { get; }
+
+    public void SetName(string name)
+    {
+      if (string.IsNullOrWhiteSpace(name))
+      {
+        throw new ArgumentException($"{nameof(name)} must not be null or empty.");
+      }
+
+      Name = name;
+    }
+
+    public override string ToString()
+    {
+      return $"{nameof(Name)}={Name}, {nameof(Piece)}={Piece}, {nameof(IsAuto)}={IsAuto}, {nameof(AI)}={AI}";
+    }
   }
 }
