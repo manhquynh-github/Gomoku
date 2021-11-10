@@ -27,7 +27,7 @@ namespace Gomoku.WindowsGUI
         new List<Player>()
         {
           new Player("Player 1", new Piece(Pieces.X), new GomokuAIv1(), false),
-          new Player("Player 2", new Piece(Pieces.O), new GomokuAIAbpMinimax (), true),
+          new Player("Player 2", new Piece(Pieces.O), new GomokuAIv1(), true),
         })
     {
     }
@@ -155,8 +155,7 @@ namespace Gomoku.WindowsGUI
     {
       if (Game.IsOver)
       {
-        CleanAnalyze();
-        Game.Restart();
+        RestartButton_Click(null, null);
       }
 
       foreach (Player player in Game.Manager.Players)
@@ -166,7 +165,9 @@ namespace Gomoku.WindowsGUI
 
       UseAIToggleButton.IsChecked = true;
       UseAIToggleButton.IsEnabled = false;
-      CleanAnalyze();
+      AnalyzeButton.IsEnabled = false;
+      RestartButton.IsEnabled = false;
+      UndoButton.IsEnabled = false;
 
       await RunAI();
     }
@@ -175,6 +176,9 @@ namespace Gomoku.WindowsGUI
     {
       UseAIToggleButton.IsChecked = false;
       UseAIToggleButton.IsEnabled = true;
+      AnalyzeButton.IsEnabled = true;
+      RestartButton.IsEnabled = true;
+      UndoButton.IsEnabled = true;
       Game.Manager.Players.First().IsAuto = false;
     }
 
@@ -235,7 +239,10 @@ namespace Gomoku.WindowsGUI
 
     private void MessageGrid_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      ((Grid)sender).Visibility = Visibility.Collapsed;
+      if (MessageGrid.Visibility != Visibility.Collapsed)
+      {
+        MessageGrid.Visibility = Visibility.Collapsed;
+      }
     }
 
     private void RestartButton_Click(object sender, RoutedEventArgs e)
@@ -247,7 +254,7 @@ namespace Gomoku.WindowsGUI
       }
 
       Game.Restart();
-
+      MessageGrid_PreviewMouseDown(null, null);
       DemoToggleButton.IsChecked = false;
     }
 
