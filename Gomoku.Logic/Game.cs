@@ -13,9 +13,7 @@ namespace Gomoku.Logic
   public class Game : IDeepCloneable<Game>, IShallowCloneable<Game>
   {
     public static readonly int WINPIECES = 5;
-
     private readonly Stack<Tile> _history;
-    private readonly List<Player> _players;
 
     public Game(int width, int height, IEnumerable<Player> players)
     {
@@ -27,8 +25,7 @@ namespace Gomoku.Logic
 
       Board = new Board(width, height);
       MaxMove = width * height;
-      _players = new List<Player>(players);
-      Turn = 0;
+      Manager = new PlayerManager(players);
       _history = new Stack<Tile>();
       IsOver = false;
       ShiftPlayersOnGameOver = true;
@@ -43,8 +40,7 @@ namespace Gomoku.Logic
 
       Board = g.Board.DeepClone();
       MaxMove = g.MaxMove;
-      _players = new List<Player>(g._players);
-      Turn = g.Turn;
+      Manager = g.Manager.DeepClone();
       _history = new Stack<Tile>(g._history.Reverse());
       IsOver = g.IsOver;
       ShiftPlayersOnGameOver = g.ShiftPlayersOnGameOver;
@@ -68,8 +64,6 @@ namespace Gomoku.Logic
     public event EventHandler<GameOverEventArgs> GameOver;
 
     public Board Board { get; }
-
-    public Player CurrentPlayer => _players[Turn];
     public IReadOnlyList<Tile> History => _history.ToArray();
     public bool IsOver { get; private set; }
     public bool IsTie => _history.Count == MaxMove;
@@ -79,16 +73,12 @@ namespace Gomoku.Logic
     /// </summary>
     public Tile LastMove => _history.Count == 0 ? null : _history.Peek();
 
+    public PlayerManager Manager { get; }
+
     /// <summary>
     /// Max number of moves the <see cref="Game"/> can make.
     /// </summary>
     public int MaxMove { get; }
-
-    public Player NextPlayer => _players[NextTurn];
-    public int NextTurn => (Turn + 1 + _players.Count) % _players.Count;
-    public IReadOnlyList<Player> Players => _players.AsReadOnly();
-    public Player PreviousPlayer => _players[PreviousTurn];
-    public int PreviousTurn => (Turn - 1 + _players.Count) % _players.Count;
 
     /// <summary>
     /// Shift the players' orders when the <see cref="Game"/> is over. For
@@ -96,8 +86,6 @@ namespace Gomoku.Logic
     /// <see cref="Player"/> in the next <see cref="Game"/>.
     /// </summary>
     public bool ShiftPlayersOnGameOver { get; set; }
-
-    public int Turn { get; set; }
 
     /// <summary>
     /// Checks if <see cref="Game"/> is over at position <paramref name="x"/>,
@@ -113,6 +101,12 @@ namespace Gomoku.Logic
     /// <exception cref="ArgumentException"></exception>
     public bool CheckGameOver(int x, int y, out IEnumerable<Tile> winningTiles)
     {
+      if (IsOver || IsTie)
+      {
+        winningTiles = new Tile[0];
+        return true;
+      }
+
       if (x < 0 || x > Board.Width)
       {
         throw new ArgumentException("Value is out of range", nameof(x));
@@ -173,40 +167,6 @@ namespace Gomoku.Logic
       return new Game(this);
     }
 
-    /// <summary>
-    /// Gets the <paramref name="player"/>'s turn.
-    /// </summary>
-    /// <param name="player">a <see cref="Player"/></param>
-    /// <returns>
-    /// an <see cref="int"/> that represents the <paramref name="player"/>'s turn
-    /// </returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    public int GetPlayersTurn(Player player)
-    {
-      if (player is null)
-      {
-        throw new ArgumentNullException(nameof(player));
-      }
-
-      return _players.FindIndex(p => p == player);
-    }
-
-    /// <summary>
-    /// Checks if the <see cref="CurrentPlayer"/> is <paramref name="player"/>
-    /// </summary>
-    /// <param name="player">a <see cref="Player"/></param>
-    /// <returns>a <see cref="bool"/></returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    public bool IsPlayersTurn(Player player)
-    {
-      if (player is null)
-      {
-        throw new ArgumentNullException(nameof(player));
-      }
-
-      return CurrentPlayer == player;
-    }
-
     public void Play(IPositional positional)
     {
       Play(positional.X, positional.Y);
@@ -246,40 +206,28 @@ namespace Gomoku.Logic
         return;
       }
 
-      Player oldPlayer = CurrentPlayer;
-      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Turn, oldPlayer, LastMove));
+      Player oldPlayer = Manager.CurrentPlayer;
+      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Manager.Turn.Current, oldPlayer, LastMove));
 
       tile.Piece = oldPlayer.Piece;
       _history.Push(tile);
 
       // Check for game over
-      if (IsTie)
+      if (CheckGameOver(x, y, out IEnumerable<Tile> winningLine))
       {
         IsOver = true;
-        GameOver?.Invoke(this, new GameOverEventArgs(true, Turn, null, new List<Tile>()));
+        GameOver?.Invoke(this, new GameOverEventArgs(true, Manager.Turn.Current, oldPlayer, winningLine));
 
         if (ShiftPlayersOnGameOver)
         {
-          ShiftPlayers();
+          Manager.Turn.ShiftStartForwards();
         }
       }
-      else if (CheckGameOver(x, y, out IEnumerable<Tile> winningLine))
-      {
-        IsOver = true;
-        GameOver?.Invoke(this, new GameOverEventArgs(true, Turn, oldPlayer, winningLine));
 
-        if (ShiftPlayersOnGameOver)
-        {
-          ShiftPlayers();
-        }
-      }
-      else
-      {
-        // Increment turn
-        Turn = NextTurn;
-      }
+      // Increment turn
+      Manager.Turn.MoveNext();
 
-      BoardChanged?.Invoke(this, new BoardChangedEventArgs(Turn, CurrentPlayer, tile));
+      BoardChanged?.Invoke(this, new BoardChangedEventArgs(Manager.Turn.Current, Manager.CurrentPlayer, tile));
     }
 
     /// <summary>
@@ -287,18 +235,18 @@ namespace Gomoku.Logic
     /// </summary>
     public void Restart()
     {
-      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Turn, CurrentPlayer, LastMove));
+      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Manager.Turn.Current, Manager.CurrentPlayer, LastMove));
 
       foreach (Tile tile in _history)
       {
         tile.Piece = new Piece(Pieces.None);
       }
 
-      Turn = 0;
+      Manager.Turn.Reset();
       _history.Clear();
       IsOver = false;
 
-      BoardChanged?.Invoke(this, new BoardChangedEventArgs(Turn, CurrentPlayer, null));
+      BoardChanged?.Invoke(this, new BoardChangedEventArgs(Manager.Turn.Current, Manager.CurrentPlayer, null));
     }
 
     public Game ShallowClone()
@@ -317,16 +265,17 @@ namespace Gomoku.Logic
       }
 
       Tile tile = _history.Pop();
-      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Turn, CurrentPlayer, tile));
+      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Manager.Turn.Current, Manager.CurrentPlayer, tile));
 
       tile.Piece = new Piece(Pieces.None);
-      Turn = (Turn - 1 + _players.Count) % _players.Count;
+      Manager.Turn.MoveBack();
       if (IsOver)
       {
         IsOver = false;
+        Manager.Turn.ShiftStartBackwards();
       }
 
-      BoardChanged?.Invoke(this, new BoardChangedEventArgs(Turn, CurrentPlayer, LastMove));
+      BoardChanged?.Invoke(this, new BoardChangedEventArgs(Manager.Turn.Current, Manager.CurrentPlayer, LastMove));
     }
 
     object IDeepCloneable.DeepClone()
@@ -337,19 +286,6 @@ namespace Gomoku.Logic
     object IShallowCloneable.ShallowClone()
     {
       return ShallowClone();
-    }
-
-    private void ShiftPlayers()
-    {
-      if (_players is null
-        || !_players.Any())
-      {
-        throw new InvalidOperationException("Player list is null or empty");
-      }
-
-      Player last = _players[^1];
-      _players.RemoveAt(_players.Count - 1);
-      _players.Insert(0, last);
     }
   }
 }

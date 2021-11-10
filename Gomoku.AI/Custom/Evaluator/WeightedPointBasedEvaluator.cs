@@ -97,7 +97,7 @@ namespace Gomoku.AI.Custom.Evaluator
         }
       }
 
-      if (piece != game.CurrentPlayer.Piece)
+      if (piece != game.Manager.CurrentPlayer.Piece)
       {
         point = -point;
       }

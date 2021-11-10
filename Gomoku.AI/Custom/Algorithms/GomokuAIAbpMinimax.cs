@@ -45,7 +45,7 @@ namespace Gomoku.AI.Custom.Algorithms
       }
 
       // Get hold of who player this analysis should be done for
-      Player forPlayer = clonedGame.CurrentPlayer;
+      Player forPlayer = clonedGame.Manager.CurrentPlayer;
 
       // Generate nodes for all possible moves
       var possiblePositions = CandidateSearcher.Search(clonedGame).ToList();
@@ -103,12 +103,6 @@ namespace Gomoku.AI.Custom.Algorithms
     private double EvaluateGame(Game game, IPositional positional, Player forPlayer, Player againstPlayer)
     {
       var value = TileEvaluator.Evaluate(game, positional, againstPlayer.Piece);
-
-      if (againstPlayer != forPlayer)
-      {
-        value = -value;
-      }
-
       return value;
     }
 
@@ -122,11 +116,16 @@ namespace Gomoku.AI.Custom.Algorithms
       bool isMaximizing = true)
     {
       // If is leaf node or game is over, evaluate it
-      if (depth == 0 || game.IsOver)
+      if (depth == 0)
       {
         // The leaf node is effectively created by the previous player so it
         // makes sense to evaluate it for the previous player
-        return EvaluateGame(game, positional, forPlayer, game.PreviousPlayer);
+        return EvaluateGame(game, positional, forPlayer, game.Manager.PreviousPlayer);
+      }
+
+      if (game.IsOver)
+      {
+        return EvaluateGame(game, positional, forPlayer, game.Manager.CurrentPlayer);
       }
 
       // Get all the playable tiles

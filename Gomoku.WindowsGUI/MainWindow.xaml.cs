@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
+using Gomoku.AI.Common.Algorithms;
 using Gomoku.AI.Custom.Algorithms;
 using Gomoku.Logic;
 using Gomoku.Logic.AI;
@@ -26,7 +27,7 @@ namespace Gomoku.WindowsGUI
         new List<Player>()
         {
           new Player("Player 1", new Piece(Pieces.X), new GomokuAIv1(), false),
-          new Player("Player 2", new Piece(Pieces.O), new GomokuAIv1(), true),
+          new Player("Player 2", new Piece(Pieces.O), new GomokuAIAbpMinimax (), true),
         })
     {
     }
@@ -46,7 +47,7 @@ namespace Gomoku.WindowsGUI
 
     private async Task<IPositional> AIPlayAsync()
     {
-      Player player = Game.CurrentPlayer;
+      Player player = Game.Manager.CurrentPlayer;
 
       if (player is null)
       {
@@ -158,7 +159,7 @@ namespace Gomoku.WindowsGUI
         Game.Restart();
       }
 
-      foreach (Player player in Game.Players)
+      foreach (Player player in Game.Manager.Players)
       {
         player.IsAuto = true;
       }
@@ -174,7 +175,7 @@ namespace Gomoku.WindowsGUI
     {
       UseAIToggleButton.IsChecked = false;
       UseAIToggleButton.IsEnabled = true;
-      Game.Players.First().IsAuto = false;
+      Game.Manager.Players.First().IsAuto = false;
     }
 
     private void InitializeBoard(int width, int height)
@@ -300,7 +301,7 @@ namespace Gomoku.WindowsGUI
       // AI
       if (!Game.IsOver
         && DemoToggleButton.IsChecked == false
-        && Game.CurrentPlayer.IsAuto
+        && Game.Manager.CurrentPlayer.IsAuto
         && UseAIToggleButton.IsChecked == true)
       {
         await RunAI();

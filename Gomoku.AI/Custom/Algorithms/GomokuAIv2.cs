@@ -93,8 +93,8 @@ namespace Gomoku.AI.Custom.Algorithms
       }
 
       // Get current player to determine which side to search for
-      Player player = game.CurrentPlayer;
-      var playerCount = game.Players.Count;
+      Player player = game.Manager.CurrentPlayer;
+      var playerCount = game.Manager.Players.Length;
 
       var maxPoint = double.MinValue;
       var candidateNodes = new List<AINode>();

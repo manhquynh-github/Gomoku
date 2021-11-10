@@ -120,8 +120,8 @@ namespace Gomoku.AI.Custom.Algorithms
       IEnumerable<IPositional> playableTiles = CandidateSearcher.Search(game);
 
       // Get current player to determine which side to search for
-      Player player = game.CurrentPlayer;
-      var playerCount = game.Players.Count;
+      Player player = game.Manager.CurrentPlayer;
+      var playerCount = game.Manager.Players.Length;
 
       // Populate corresponding NTrees with each playable tile found.
       var nTrees = new List<NTree<AINode>>();
