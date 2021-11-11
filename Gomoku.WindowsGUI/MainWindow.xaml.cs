@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,14 +22,12 @@ namespace Gomoku.WindowsGUI
   /// </summary>
   public partial class MainWindow : Window
   {
-    private readonly List<IPositional> _choices;
-
     public MainWindow() :
       this(15, 15,
         new List<Player>()
         {
           new Player("Player 1", new Piece(Pieces.X), new GomokuAIv1(), false),
-          new Player("Player 2", new Piece(Pieces.O), new GomokuAIv1(), true),
+          new Player("Player 2", new Piece(Pieces.O), new GomokuAIAbpMinimax(), true),
         })
     {
     }
@@ -37,15 +37,16 @@ namespace Gomoku.WindowsGUI
       InitializeComponent();
 
       Game = new Game(boardWidth, boardHeight, players);
-      BoardVM = new BoardVM(Game.Board);
-      _choices = new List<IPositional>();
+      BoardVM = new BoardVM(Game);
       InitializeBoard(boardWidth, boardHeight);
+      Game.BoardChanged += Board_BoardChangedAsync;
+      Game.GameOver += Board_GameOver;
     }
 
     public BoardVM BoardVM { get; }
     public Game Game { get; }
 
-    private async Task<IPositional> AIPlayAsync()
+    private async Task<IPositional> AIPlayAsync(bool showAnalysis = false)
     {
       Player player = Game.Manager.CurrentPlayer;
 
@@ -70,8 +71,12 @@ namespace Gomoku.WindowsGUI
         await Task.Delay((int)delay);
       }
 
-      _choices.Clear();
-      _choices.AddRange(result.PossibleChoices);
+      if (showAnalysis)
+      {
+        BoardVM.ClearHighlightedTiles();
+        BoardVM.Highlight(result.PossibleChoices);
+        BoardVM.Highlight(Game.LastMove);
+      }
 
       BoardBorder.IsEnabled = true;
 
@@ -85,38 +90,18 @@ namespace Gomoku.WindowsGUI
         return;
       }
 
-      IPositional selectedTile = await AIPlayAsync();
-      CleanAnalyze();
-      foreach (Tile tile in _choices)
-      {
-        BoardVM[tile.X, tile.Y].IsHighlighted = true;
-      }
-      BoardVM[selectedTile.X, selectedTile.Y].IsSelected = true;
+      IPositional selectedTile = await AIPlayAsync(showAnalysis: true);
+      BoardVM.Select(selectedTile);
     }
 
     private async void Board_BoardChangedAsync(object sender, BoardChangedEventArgs e)
     {
-      Tile tile = e.Tile;
-
-      if (!(tile is null))
-      {
-        BoardVM.Set(tile.X, tile.Y, tile.Piece);
-      }
-
       // AI
-      if (!Game.IsOver && e.Player.IsAuto && UseAIToggleButton.IsChecked == true)
+      if (!Game.IsOver
+          && Game.Manager.CurrentPlayer.IsAuto
+          && UseAIToggleButton.IsChecked == true)
       {
         await RunAI();
-      }
-    }
-
-    private void Board_BoardChanging(object sender, BoardChangingEventArgs e)
-    {
-      Tile tile = e.Tile;
-
-      if (!(tile is null))
-      {
-        BoardVM[tile.X, tile.Y].IsHighlighted = false;
       }
     }
 
@@ -131,24 +116,7 @@ namespace Gomoku.WindowsGUI
         ShowMessage($"{e.Winner.Name} wins!");
       }
 
-      foreach (Tile tile in e.WinningTiles)
-      {
-        BoardVM[tile.X, tile.Y].IsHighlighted = true;
-        _choices.Add(tile);
-      }
-
       DemoToggleButton.IsChecked = false;
-    }
-
-    private void CleanAnalyze()
-    {
-      if (!(_choices is null) && _choices.Count > 0)
-      {
-        foreach (Tile tile in _choices)
-        {
-          BoardVM[tile.X, tile.Y].IsHighlighted = false;
-        }
-      }
     }
 
     private async void DemoToggleButton_Checked(object sender, RoutedEventArgs e)
@@ -184,41 +152,79 @@ namespace Gomoku.WindowsGUI
 
     private void InitializeBoard(int width, int height)
     {
+      // Gets horizontal stack style resource
       var widthStackPanelStyle = Resources["WidthStackPanelStyle"] as Style;
+
+      // Gets clickable tile style resource
       var tileStyle = Resources["TileButtonStyle"] as Style;
+
+      // Gets non-clickable tile style resource
       var coorTileStlye = Resources["CoordinateTileButtonStyle"] as Style;
 
+      // Creates first row (coordinates row that has alphabetic characters)
       var columnStackPanel = new StackPanel
       {
         Style = widthStackPanelStyle
       };
-      for (var j = -1; j < width; j++)
+
+      // Add blank tile (top-left tile)
+      var blankTile = new Button
       {
-        var tileButton = new Button
+        Style = coorTileStlye,
+        Content = ' ',
+      };
+      columnStackPanel.Children.Add(blankTile);
+
+      // Add the rest of coordinate tiles with names
+      for (var j = 0; j < width; j++)
+      {
+        var coordinateButton = new Button
         {
           Style = coorTileStlye,
-          Content = j == -1
-            ? ' '
-            : (char)(j + char.Parse("a")),
+#if DEBUG
+
+          // If in debug mode, keep original index
+          Content = j,
+#else
+
+          // Otherwise, use alphabetic characters
+          Content = (char)(j + 'a'),
+#endif
         };
-        columnStackPanel.Children.Add(tileButton);
+        columnStackPanel.Children.Add(coordinateButton);
       }
+
+      // Add first line to the vertical stack
       HeightStackPanel.Children.Add(columnStackPanel);
 
+      // Add the rest of rows
       for (var i = 0; i < height; i++)
       {
+        // Creates new horizontal stack representing a row
         var widthStackPanel = new StackPanel
         {
           Style = widthStackPanelStyle
         };
 
-        var rowButton = new Button
+        // Add coordinate button (left-most column)
+        var coordinateButton = new Button
         {
           Style = coorTileStlye,
-          Content = i + 1
-        };
-        widthStackPanel.Children.Add(rowButton);
+#if DEBUG
 
+          // If in debug mode, keep original index
+          Content = i
+#else
+
+          // Otherwise, make one-based index
+          Content = i + 1
+#endif
+        };
+
+        // Add the coordinate button to the horizontal stack
+        widthStackPanel.Children.Add(coordinateButton);
+
+        // Add the rest of clickable buttons to the stack
         for (var j = 0; j < width; j++)
         {
           var tileButton = new Button
@@ -229,12 +235,9 @@ namespace Gomoku.WindowsGUI
           widthStackPanel.Children.Add(tileButton);
         }
 
+        // Add the horizontal stack to the vertical stack
         HeightStackPanel.Children.Add(widthStackPanel);
       }
-
-      Game.BoardChanging += Board_BoardChanging;
-      Game.BoardChanged += Board_BoardChangedAsync;
-      Game.GameOver += Board_GameOver;
     }
 
     private void MessageGrid_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -247,12 +250,6 @@ namespace Gomoku.WindowsGUI
 
     private void RestartButton_Click(object sender, RoutedEventArgs e)
     {
-      CleanAnalyze();
-      foreach (Tile tile in Game.History)
-      {
-        BoardVM.Clear(tile.X, tile.Y);
-      }
-
       Game.Restart();
       MessageGrid_PreviewMouseDown(null, null);
       DemoToggleButton.IsChecked = false;
@@ -265,8 +262,6 @@ namespace Gomoku.WindowsGUI
       {
         return;
       }
-
-      CleanAnalyze();
       Game.Play(tile.X, tile.Y);
     }
 
@@ -287,19 +282,12 @@ namespace Gomoku.WindowsGUI
         && !(button.DataContext is null))
       {
         var tileVM = button.DataContext as TileVM;
-        CleanAnalyze();
         Game.Play(tileVM.Tile.X, tileVM.Tile.Y);
       }
     }
 
     private void UndoButton_Click(object sender, RoutedEventArgs e)
     {
-      CleanAnalyze();
-      if (Game.LastMove != null)
-      {
-        BoardVM.Clear(Game.LastMove.X, Game.LastMove.Y);
-      }
-
       Game.Undo();
     }
 

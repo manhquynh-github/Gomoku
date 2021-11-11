@@ -39,17 +39,22 @@ namespace Gomoku.Logic
       SecondLine = secondLine;
 
       Lines = ImmutableArray.Create(firstLine, secondLine);
+      BlankTilesCount = firstLine.BlankTiles.Length + secondLine.BlankTiles.Length;
+      BlockTilesCount = firstLine.BlockTiles.Length + secondLine.BlockTiles.Length;
+      SameTileCount = firstLine.SameTiles.Length + secondLine.SameTiles.Length;
+      TilesCount = firstLine.Tiles.Length + secondLine.Tiles.Length;
+      IsChained = firstLine.IsChained && secondLine.IsChained;
     }
 
     /// <summary>
-    /// Number of <see cref="BlankTiles"/>. (without iterating)
+    /// Gets total number of the two <see cref="DirectionalLine.BlankTiles"/>.
     /// </summary>
-    public int BlankTilesCount => Lines.Sum(l => l.BlankTiles.Length);
+    public int BlankTilesCount { get; }
 
     /// <summary>
-    /// Number of <see cref="BlockTiles"/>. (without iterating)
+    /// Gets total number of the two <see cref="DirectionalLine.BlockTiles"/>.
     /// </summary>
-    public int BlockTilesCount => Lines.Sum(l => l.BlockTiles.Length);
+    public int BlockTilesCount { get; }
 
     /// <summary>
     /// The first <see cref="DirectionalLine"/> where <see cref="Directions"/>
@@ -57,6 +62,11 @@ namespace Gomoku.Logic
     /// <see cref="Directions.UpLeft"/>, or <see cref="Directions.UpRight"/>.
     /// </summary>
     public DirectionalLine FirstLine { get; }
+
+    /// <summary>
+    /// Determines whether all <see cref="Lines"/> are <see cref="DirectionalLine.IsChained"/>.
+    /// </summary>
+    public bool IsChained { get; }
 
     /// <summary>
     /// Contains <see cref="FirstLine"/> and <see cref="SecondLine"/>.
@@ -74,9 +84,9 @@ namespace Gomoku.Logic
     public Piece Piece { get; }
 
     /// <summary>
-    /// Number of <see cref="SameTiles"/>. (without iterating)
+    /// Gets total number of the two <see cref="DirectionalLine.SameTiles"/>.
     /// </summary>
-    public int SameTileCount => Lines.Sum(l => l.SameTiles.Length);
+    public int SameTileCount { get; }
 
     /// <summary>
     /// The first <see cref="DirectionalLine"/> where <see cref="Directions"/>
@@ -86,42 +96,17 @@ namespace Gomoku.Logic
     public DirectionalLine SecondLine { get; }
 
     /// <summary>
-    /// Number of <see cref="Tiles"/>. (without iterating)
+    /// Gets total number of the two <see cref="DirectionalLine.Tiles"/>.
     /// </summary>
-    public int TilesCount => Lines.Sum(l => l.Tiles.Length);
-
-    /// <summary>
-    /// All <see cref="DirectionalLine.BlankTiles"/> from <see cref="Lines"/>.
-    /// </summary>
-    public IEnumerable<Tile> BlankTiles => Lines.SelectMany(l => l.BlankTiles);
-
-    /// <summary>
-    /// All <see cref="DirectionalLine.BlockTiles"/> from <see cref="Lines"/>.
-    /// </summary>
-    public IEnumerable<Tile> BlockTiles => Lines.SelectMany(l => l.BlockTiles);
-
-    /// <summary>
-    /// Determines whether all <see cref="Lines"/> are <see cref="DirectionalLine.IsChained"/>.
-    /// </summary>
-    public bool IsChained => Lines.All(l => l.IsChained);
-
-    /// <summary>
-    /// All <see cref="DirectionalLine.SameTiles"/> from <see cref="Lines"/>.
-    /// </summary>
-    public IEnumerable<Tile> SameTiles => Lines.SelectMany(l => l.SameTiles);
-
-    /// <summary>
-    /// All <see cref="DirectionalLine.Tiles"/> from <see cref="Lines"/>.
-    /// </summary>
-    public IEnumerable<Tile> Tiles => Lines.SelectMany(l => l.Tiles);
+    public int TilesCount { get; }
 
     /// <summary>
     /// Creates a new <see cref="OrientedlLine"/> by traversing the
     /// <paramref name="board"/> starting at position <paramref name="x"/>,
     /// <paramref name="y"/> towards two symmetrical <see cref="Directions"/>
     /// depending on the <paramref name="orientation"/> where
-    /// <paramref name="piece"/> will determine <see cref="SameTiles"/> until
-    /// <paramref name="maxTile"/> is reached, or a different
+    /// <paramref name="piece"/> will determine <see cref="GetSameTiles()"/>
+    /// until <paramref name="maxTile"/> is reached, or a different
     /// <see cref="Logic.Piece"/> than <paramref name="piece"/> is encountered,
     /// or more than <paramref name="blankTolerance"/> number of
     /// <see cref="Pieces.None"/> tiles are encountered.
@@ -130,7 +115,7 @@ namespace Gomoku.Logic
     /// <param name="x">the starting <see cref="Tile.X"/></param>
     /// <param name="y">the starting <see cref="Tile.Y"/></param>
     /// <param name="piece">
-    /// the <see cref="Logic.Piece"/> that will determine <see cref="SameTiles"/>
+    /// the <see cref="Logic.Piece"/> that will determine <see cref="GetSameTiles()"/>
     /// </param>
     /// <param name="orientation">the <see cref="Orientations"/> to traverse</param>
     /// <param name="maxTile">the max number of <see cref="Tile"/> to traverse</param>
@@ -186,6 +171,38 @@ namespace Gomoku.Logic
           DirectionalLine.FromBoard(board, x, y, type, Directions.DownLeft, maxTile, blankTolerance)),
         _ => throw new InvalidOperationException("Unexpected value"),
       };
+    }
+
+    /// <summary>
+    /// All <see cref="DirectionalLine.BlankTiles"/> from <see cref="Lines"/>.
+    /// </summary>
+    public IEnumerable<Tile> GetBlankTiles()
+    {
+      return Lines.SelectMany(l => l.BlankTiles);
+    }
+
+    /// <summary>
+    /// All <see cref="DirectionalLine.BlockTiles"/> from <see cref="Lines"/>.
+    /// </summary>
+    public IEnumerable<Tile> GetBlockTiles()
+    {
+      return Lines.SelectMany(l => l.BlockTiles);
+    }
+
+    /// <summary>
+    /// All <see cref="DirectionalLine.SameTiles"/> from <see cref="Lines"/>.
+    /// </summary>
+    public IEnumerable<Tile> GetSameTiles()
+    {
+      return Lines.SelectMany(l => l.SameTiles);
+    }
+
+    /// <summary>
+    /// All <see cref="DirectionalLine.Tiles"/> from <see cref="Lines"/>.
+    /// </summary>
+    public IEnumerable<Tile> GetTiles()
+    {
+      return Lines.SelectMany(l => l.Tiles);
     }
 
     public string ToString(bool includesSelf)

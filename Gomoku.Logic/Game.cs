@@ -63,16 +63,40 @@ namespace Gomoku.Logic
     /// </summary>
     public event EventHandler<GameOverEventArgs> GameOver;
 
+    /// <summary>
+    /// Gets the <see cref="Logic.Board"/> of this <see cref="Game"/>.
+    /// </summary>
     public Board Board { get; }
+
+    /// <summary>
+    /// Checks if the <see cref="Game"/> is undoable.
+    /// </summary>
+    public bool CanUndo => _history.Count > 0;
+
+    /// <summary>
+    /// Gets the history of the game, last-in-first-out.
+    /// </summary>
     public IReadOnlyList<Tile> History => _history.ToArray();
+
+    /// <summary>
+    /// Checks if the game is over.
+    /// </summary>
     public bool IsOver { get; private set; }
+
+    /// <summary>
+    /// Checks if the game is tie.
+    /// </summary>
     public bool IsTie => _history.Count == MaxMove;
 
     /// <summary>
-    /// The last <see cref="Tile"/> that was put on the <see cref="Board"/> chronologically.
+    /// Gets the last <see cref="Tile"/> that was put on the <see cref="Board"/>
+    /// chronologically. Returns <see cref="null"/> if no history.
     /// </summary>
     public Tile LastMove => _history.Count == 0 ? null : _history.Peek();
 
+    /// <summary>
+    /// Gets the <see cref="PlayerManager"/> of this <see cref="Game"/>.
+    /// </summary>
     public PlayerManager Manager { get; }
 
     /// <summary>
@@ -99,7 +123,7 @@ namespace Gomoku.Logic
     /// </param>
     /// <returns>a <see cref="bool"/></returns>
     /// <exception cref="ArgumentException"></exception>
-    public bool CheckGameOver(int x, int y, out IEnumerable<Tile> winningTiles)
+    public bool CheckGameOver(int x, int y, out IList<Tile> winningTiles)
     {
       if (IsOver || IsTie)
       {
@@ -119,7 +143,7 @@ namespace Gomoku.Logic
 
       if (_history.Count < 9)
       {
-        winningTiles = Enumerable.Empty<Tile>();
+        winningTiles = new Tile[0];
         return false;
       }
 
@@ -150,7 +174,7 @@ namespace Gomoku.Logic
             && line.SameTileCount + 1 == WINPIECES
             && line.BlockTilesCount < 2)
           {
-            var result = line.Tiles.ToList();
+            var result = line.GetSameTiles().ToList();
             result.Add(tile);
             winningTiles = result;
             return true;
@@ -158,7 +182,7 @@ namespace Gomoku.Logic
         }
       }
 
-      winningTiles = Enumerable.Empty<Tile>();
+      winningTiles = new Tile[0];
       return false;
     }
 
@@ -207,16 +231,20 @@ namespace Gomoku.Logic
       }
 
       Player oldPlayer = Manager.CurrentPlayer;
-      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Manager.Turn.Current, oldPlayer, LastMove));
-
       tile.Piece = oldPlayer.Piece;
+      Tile previousTile = LastMove;
       _history.Push(tile);
 
+      BoardChanging?.Invoke(
+        this,
+        new BoardChangingEventArgs(
+          new Tile[] { tile },
+          new Tile[0]));
+
       // Check for game over
-      if (CheckGameOver(x, y, out IEnumerable<Tile> winningLine))
+      if (CheckGameOver(x, y, out IList<Tile> winningLine))
       {
         IsOver = true;
-        GameOver?.Invoke(this, new GameOverEventArgs(true, Manager.Turn.Current, oldPlayer, winningLine));
 
         if (ShiftPlayersOnGameOver)
         {
@@ -227,7 +255,21 @@ namespace Gomoku.Logic
       // Increment turn
       Manager.Turn.MoveNext();
 
-      BoardChanged?.Invoke(this, new BoardChangedEventArgs(Manager.Turn.Current, Manager.CurrentPlayer, tile));
+      BoardChanged?.Invoke(
+        this,
+        new BoardChangedEventArgs(
+          new Tile[] { tile },
+          new Tile[0]));
+
+      if (IsOver)
+      {
+        GameOver?.Invoke(
+        this,
+        new GameOverEventArgs(
+          Manager.Turn.Current,
+          oldPlayer,
+          winningLine));
+      }
     }
 
     /// <summary>
@@ -235,7 +277,12 @@ namespace Gomoku.Logic
     /// </summary>
     public void Restart()
     {
-      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Manager.Turn.Current, Manager.CurrentPlayer, LastMove));
+      Tile[] history = _history.ToArray();
+      BoardChanging?.Invoke(
+        this,
+        new BoardChangingEventArgs(
+          new Tile[0],
+          history));
 
       foreach (Tile tile in _history)
       {
@@ -246,7 +293,11 @@ namespace Gomoku.Logic
       _history.Clear();
       IsOver = false;
 
-      BoardChanged?.Invoke(this, new BoardChangedEventArgs(Manager.Turn.Current, Manager.CurrentPlayer, null));
+      BoardChanged?.Invoke(
+        this,
+        new BoardChangedEventArgs(
+          new Tile[0],
+          history));
     }
 
     public Game ShallowClone()
@@ -259,15 +310,19 @@ namespace Gomoku.Logic
     /// </summary>
     public void Undo()
     {
-      if (_history.Count == 0)
+      if (!CanUndo)
       {
         return;
       }
 
-      Tile tile = _history.Pop();
-      BoardChanging?.Invoke(this, new BoardChangingEventArgs(Manager.Turn.Current, Manager.CurrentPlayer, tile));
+      Tile removedTile = _history.Pop();
+      BoardChanging?.Invoke(
+        this,
+        new BoardChangingEventArgs(
+          new Tile[0],
+          new Tile[] { removedTile }));
 
-      tile.Piece = new Piece(Pieces.None);
+      removedTile.Piece = new Piece(Pieces.None);
       Manager.Turn.MoveBack();
       if (IsOver)
       {
@@ -275,7 +330,11 @@ namespace Gomoku.Logic
         Manager.Turn.ShiftStartBackwards();
       }
 
-      BoardChanged?.Invoke(this, new BoardChangedEventArgs(Manager.Turn.Current, Manager.CurrentPlayer, LastMove));
+      BoardChanged?.Invoke(
+        this,
+        new BoardChangedEventArgs(
+          new Tile[0],
+          new Tile[] { removedTile }));
     }
 
     object IDeepCloneable.DeepClone()

@@ -1,16 +1,22 @@
-﻿namespace Gomoku.Logic
-{
-  public class BoardChangingEventArgs
-  {
-    public readonly Player Player;
-    public readonly Tile Tile;
-    public readonly int Turn;
+﻿using System;
+using System.Collections.Generic;
 
-    public BoardChangingEventArgs(int turn, Player player, Tile tile)
+namespace Gomoku.Logic
+{
+  /// <summary>
+  /// Represents the objects related to <see cref="Game.BoardChanging"/> event.
+  /// </summary>
+  public class BoardChangingEventArgs : EventArgs
+  {
+    public BoardChangingEventArgs(
+      IList<Tile> willBeAddedTiles,
+      IList<Tile> willBeRemovedTiles)
     {
-      Turn = turn;
-      Player = player;
-      Tile = tile;
+      WillBeAddedTiles = willBeAddedTiles ?? throw new ArgumentNullException(nameof(willBeAddedTiles));
+      WillBeRemovedTiles = willBeRemovedTiles ?? throw new ArgumentNullException(nameof(willBeRemovedTiles));
     }
+
+    public IList<Tile> WillBeAddedTiles { get; }
+    public IList<Tile> WillBeRemovedTiles { get; }
   }
 }

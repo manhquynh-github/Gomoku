@@ -40,7 +40,7 @@ namespace Gomoku.AI.Custom.CandidateSearcher
               orientation,
               maxTile: maxTile,
               blankTolerance: blankTolerance)
-            .SameTiles)
+            .GetSameTiles())
           {
             playableTiles.Add(t);
           }
