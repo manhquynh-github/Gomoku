@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +7,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-using Gomoku.AI.Common.Algorithms;
 using Gomoku.AI.Custom.Algorithms;
 using Gomoku.Logic;
 using Gomoku.Logic.AI;
