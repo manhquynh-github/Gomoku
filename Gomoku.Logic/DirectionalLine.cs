@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace Gomoku.Logic
 {
   /// <summary>
-  /// Defines group of <see cref="Tile"/> that is collected by traversing from
-  /// one <see cref="Tile"/> on a <see cref="Board"/> towards a
-  /// <see cref="Directions"/> until it reaches two <see cref="Tile"/> of
-  /// <see cref="Pieces.None"/> or a <see cref="Tile"/> with a different <see cref="Piece"/>.
+  /// Represents a directional group of <see cref="Tile"/> s that are adjacent
+  /// to each other.
   /// </summary>
   public class DirectionalLine
   {
@@ -85,27 +81,33 @@ namespace Gomoku.Logic
     public Tile[] Tiles { get; }
 
     /// <summary>
-    /// Creates a new <see cref="DirectionalLine"/> by traversing the
+    /// Creates an <see cref="DirectionalLine"/> by traversing the
     /// <paramref name="board"/> starting at position <paramref name="x"/>,
-    /// <paramref name="y"/> towards <paramref name="direction"/> where
-    /// <paramref name="piece"/> will determine <see cref="SameTiles"/> until
-    /// <paramref name="maxTile"/> is reached, or a different
-    /// <see cref="Logic.Piece"/> than <paramref name="piece"/> is encountered,
-    /// or more than <paramref name="blankTolerance"/> number of
-    /// <see cref="Pieces.None"/> tiles are encountered.
+    /// <paramref name="y"/> towards two symmetrical <see cref="Directions"/>
+    /// (depending on the <paramref name="orientation"/>) where
+    /// <paramref name="piece"/> will determine the <see cref="Tile"/> this line
+    /// is for. The iteration will stop if (1) <paramref name="maxTile"/> is
+    /// reached, or (2) a <see cref="Logic.Piece"/> other than
+    /// <paramref name="piece"/> is encountered, or (3) the
+    /// <paramref name="blankTolerance"/> number of <see cref="Pieces.None"/>
+    /// tiles are encountered. The starting position itself is not included in
+    /// the traversal.
     /// </summary>
-    /// <param name="board">the <see cref="Board"/> to be used</param>
+    /// <param name="board">the <see cref="Board"/> to search</param>
     /// <param name="x">the starting <see cref="Tile.X"/></param>
     /// <param name="y">the starting <see cref="Tile.Y"/></param>
     /// <param name="piece">
-    /// the <see cref="Logic.Piece"/> that will determine <see cref="SameTiles"/>
+    /// the <see cref="Logic.Piece"/> that will determine <see cref="GetSameTiles()"/>
     /// </param>
-    /// <param name="direction">the <see cref="Directions"/> to traverse</param>
+    /// <param name="orientation">the <see cref="Orientations"/> to traverse</param>
     /// <param name="maxTile">the max number of <see cref="Tile"/> to traverse</param>
     /// <param name="blankTolerance">
     /// the max number of <see cref="Pieces.None"/> tiles before the traversing stops
     /// </param>
     /// <returns>a <see cref="DirectionalLine"/></returns>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     public static DirectionalLine FromBoard(
       Board board,
       int x,
@@ -122,12 +124,22 @@ namespace Gomoku.Logic
 
       if (x < 0 || x > board.Width)
       {
-        throw new ArgumentException("Value is out of range", nameof(x));
+        throw new ArgumentOutOfRangeException(nameof(x));
       }
 
       if (y < 0 || y > board.Height)
       {
-        throw new ArgumentException("Value is out of range", nameof(y));
+        throw new ArgumentOutOfRangeException(nameof(y));
+      }
+
+      if (maxTile < 0)
+      {
+        throw new ArgumentException(nameof(maxTile));
+      }
+
+      if (blankTolerance < 0)
+      {
+        throw new ArgumentException(nameof(blankTolerance));
       }
 
       var tiles = new Queue<Tile>();

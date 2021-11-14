@@ -1,17 +1,45 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Runtime.Serialization;
-using System.Text;
 
 using Gomoku.Logic;
 
 namespace Gomoku.AI.Custom.Evaluator
 {
+  /// <summary>
+  /// Evaluates a <see cref="Game"/>'s state by using weighted scoring
+  /// mechanism, allowing higher scores for states that are likely to result in
+  /// a win.
+  /// </summary>
   public class WeightedPointBasedEvaluator : ITileEvaluator
   {
+    /// <summary>
+    /// Evaluates a <paramref name="game"/>'s state at
+    /// <paramref name="positional"/> for <paramref name="piece"/>.
+    /// </summary>
+    /// <param name="game">the <see cref="Game"/> to be evaluated.</param>
+    /// <param name="positional">the <see cref="IPositional"/> to evaluate.</param>
+    /// <param name="piece">the <see cref="Piece"/> to evaluate for.</param>
+    /// <returns>
+    /// A non-negative number representing the probability of winning the game
+    /// at <paramref name="positional"/>. The only negative number
+    /// <see cref="double.MinValue"/> is returned when the
+    /// <paramref name="game"/> is lost but the winner is not
+    /// <paramref name="piece"/>. If the <paramref name="piece"/> wins the
+    /// <paramref name="game"/>, returns <see cref="double.MaxValue"/>
+    /// </returns>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
     public double Evaluate(Game game, IPositional positional, Piece piece)
     {
+      if (game is null)
+      {
+        throw new ArgumentNullException(nameof(game));
+      }
+
+      if (positional is null)
+      {
+        throw new ArgumentNullException(nameof(positional));
+      }
+
       if (piece == Pieces.None)
       {
         throw new ArgumentException($"{nameof(piece)} must not be {Pieces.None}");

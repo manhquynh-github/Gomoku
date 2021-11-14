@@ -6,11 +6,8 @@ using System.Linq;
 namespace Gomoku.Logic
 {
   /// <summary>
-  /// Defines group of <see cref="Tile"/> that is collected by traversing from
-  /// one <see cref="Tile"/> on a <see cref="Board"/> towards two
-  /// <see cref="Directions"/> respective to an <see cref="Orientations"/> until
-  /// they reaches two <see cref="Tile"/> of <see cref="Pieces.None"/> or a
-  /// <see cref="Tile"/> with a different <see cref="Piece"/>.
+  /// Represents a oriented group of <see cref="Tile"/> s that are adjacent to
+  /// each other on a <see cref="Orientations"/>.
   /// </summary>
   public class OrientedlLine
   {
@@ -101,15 +98,9 @@ namespace Gomoku.Logic
     public int TilesCount { get; }
 
     /// <summary>
-    /// Creates a new <see cref="OrientedlLine"/> by traversing the
-    /// <paramref name="board"/> starting at position <paramref name="x"/>,
-    /// <paramref name="y"/> towards two symmetrical <see cref="Directions"/>
-    /// depending on the <paramref name="orientation"/> where
-    /// <paramref name="piece"/> will determine <see cref="GetSameTiles()"/>
-    /// until <paramref name="maxTile"/> is reached, or a different
-    /// <see cref="Logic.Piece"/> than <paramref name="piece"/> is encountered,
-    /// or more than <paramref name="blankTolerance"/> number of
-    /// <see cref="Pieces.None"/> tiles are encountered.
+    /// Creates an <see cref="OrientedlLine"/> by combining two symmetrical
+    /// <see cref="DirectionalLine"/> s related to the
+    /// <paramref name="orientation"/>. For more information, see <see cref="DirectionalLine.FromBoard(Board, int, int, Piece, Directions, int, int)"/>.
     /// </summary>
     /// <param name="board">the <see cref="Board"/> to be used</param>
     /// <param name="x">the starting <see cref="Tile.X"/></param>
@@ -145,6 +136,16 @@ namespace Gomoku.Logic
       if (y < 0 || y > board.Height)
       {
         throw new ArgumentException("Value is out of range", nameof(y));
+      }
+
+      if (maxTile < 0)
+      {
+        throw new ArgumentException(nameof(maxTile));
+      }
+
+      if (blankTolerance < 0)
+      {
+        throw new ArgumentException(nameof(blankTolerance));
       }
 
       return orientation switch

@@ -131,7 +131,10 @@ namespace Gomoku.Logic
     /// Iterates through the <see cref="Board"/> starting at position
     /// <paramref name="x"/>, <paramref name="y"/> towards
     /// <paramref name="direction"/> until <paramref name="predicate"/> returns
-    /// <see cref="false"/> or the iteration goes out of <see cref="Width"/> or <see cref="Height"/>.
+    /// <see cref="false"/> or the iterating position goes out of
+    /// <see cref="Width"/>, <see cref="Height"/>'s limit.
+    /// <paramref name="iterateSelf"/> indicates if the starting tile itself
+    /// should be iterated. <paramref name="y"/> itself is not iterated.
     /// </summary>
     /// <param name="x">the starting <see cref="Tile.X"/></param>
     /// <param name="y">the starting <see cref="Tile.Y"/></param>
@@ -139,22 +142,27 @@ namespace Gomoku.Logic
     /// <param name="predicate">
     /// the <see cref="Predicate{T}"/> that determines whether to stop iterating
     /// </param>
+    /// <param name="iterateSelf">
+    /// determines if the starting position should be iterated.
+    /// </param>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     public void IterateTiles(
       int x,
       int y,
       Directions direction,
-      Predicate<Tile> predicate)
+      Predicate<Tile> predicate,
+      bool iterateSelf = false)
     {
       if (x < 0 || x > Width)
       {
-        throw new ArgumentException("Value is out of range", nameof(x));
+        throw new ArgumentOutOfRangeException(nameof(x));
       }
 
       if (y < 0 || y > Height)
       {
-        throw new ArgumentException("Value is out of range", nameof(y));
+        throw new ArgumentOutOfRangeException(nameof(y));
       }
 
       if (predicate is null)
@@ -162,10 +170,12 @@ namespace Gomoku.Logic
         throw new ArgumentNullException(nameof(predicate));
       }
 
+      var startingOffset = iterateSelf ? 0 : 1;
+
       switch (direction)
       {
         case Directions.Left:
-          for (int i = x - 1, j = y;
+          for (int i = x - startingOffset, j = y;
               i >= 0 && predicate(_tiles[i, j]);
               i--)
           {
@@ -174,7 +184,7 @@ namespace Gomoku.Logic
           break;
 
         case Directions.Right:
-          for (int i = x + 1, j = y;
+          for (int i = x + startingOffset, j = y;
               i < Width && predicate(_tiles[i, j]);
               i++)
           {
@@ -183,7 +193,7 @@ namespace Gomoku.Logic
           break;
 
         case Directions.Up:
-          for (int i = x, j = y - 1;
+          for (int i = x, j = y - startingOffset;
               j >= 0 && predicate(_tiles[i, j]);
               j--)
           {
@@ -192,7 +202,7 @@ namespace Gomoku.Logic
           break;
 
         case Directions.Down:
-          for (int i = x, j = y + 1;
+          for (int i = x, j = y + startingOffset;
               j < Height && predicate(_tiles[i, j]);
               j++)
           {
@@ -201,7 +211,7 @@ namespace Gomoku.Logic
           break;
 
         case Directions.UpLeft:
-          for (int i = x - 1, j = y - 1;
+          for (int i = x - startingOffset, j = y - startingOffset;
               i >= 0 && j >= 0 && predicate(_tiles[i, j]);
               i--, j--)
           {
@@ -210,7 +220,7 @@ namespace Gomoku.Logic
           break;
 
         case Directions.DownRight:
-          for (int i = x + 1, j = y + 1;
+          for (int i = x + startingOffset, j = y + startingOffset;
               i < Width && j < Height && predicate(_tiles[i, j]);
               i++, j++)
           {
@@ -220,7 +230,7 @@ namespace Gomoku.Logic
           break;
 
         case Directions.UpRight:
-          for (int i = x + 1, j = y - 1;
+          for (int i = x + startingOffset, j = y - startingOffset;
               i < Width && j >= 0 && predicate(_tiles[i, j]);
               i++, j--)
           {
@@ -229,7 +239,7 @@ namespace Gomoku.Logic
           break;
 
         case Directions.DownLeft:
-          for (int i = x - 1, j = y + 1;
+          for (int i = x - startingOffset, j = y + startingOffset;
               i >= 0 && j < Height && predicate(_tiles[i, j]);
               i--, j++)
           {
